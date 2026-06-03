@@ -25,7 +25,7 @@ async function main() {
 
     const port =
       typeof config.port === 'number' ? config.port : Number(config.port);
-    const host = (config.ip_address as string) || 'localhost';
+    const host = (config.ip_address as string) || '0.0.0.0';
 
     server = app.listen(port, host, () => {
       console.log(`Server is running at http://${host}:${port}`);
