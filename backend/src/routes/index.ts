@@ -5,6 +5,7 @@ import { AdminRoutes } from '../app/modules/admin/admin.route';
 import { MediaRoutes } from '../app/modules/media/media.route';
 import { SermonSeriesRoutes } from '../app/modules/sermonSeries/sermonSeries.route';
 import { SermonRoutes } from '../app/modules/sermons/sermon.route';
+import { BibleRoutes } from '../app/modules/bible/bible.route';
 
 const router = express.Router();
 
@@ -32,6 +33,10 @@ const apiRoutes = [
   {
     path: '/sermons',
     route: SermonRoutes,
+  },
+  {
+    path: '/bible',
+    route: BibleRoutes,
   },
 ];
 

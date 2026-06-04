@@ -30,4 +30,5 @@ export default {
     email: process.env.SUPER_ADMIN_EMAIL,
     password: process.env.SUPER_ADMIN_PASSWORD,
   },
+  youversion_api_key: process.env.YOUVERSION_API_KEY,
 };

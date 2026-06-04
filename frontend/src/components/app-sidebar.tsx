@@ -14,7 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, Settings2Icon, CommandIcon, ImageIcon } from "lucide-react"
+import { LayoutDashboardIcon, Settings2Icon, CommandIcon, ImageIcon, BookIcon } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 const data = {
@@ -52,6 +52,13 @@ const data = {
       url: "/sermons",
       icon: (
         <CommandIcon /> // You can use a better icon if you want, like MicIcon or HeadphonesIcon
+      ),
+    },
+    {
+      title: "Bible",
+      url: "/bible",
+      icon: (
+        <BookIcon />
       ),
     },
   ],
