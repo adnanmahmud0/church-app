@@ -41,12 +41,8 @@ const updateProfileToDB = async (
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
 
-  //unlink file here
-  if (payload.image) {
-    if (isExistUser.image) {
-      unlinkFile(isExistUser.image);
-    }
-  }
+  // Removed unlinkFile because images are now managed by Media Gallery and shared.
+
 
   const updateDoc = await User.findOneAndUpdate({ _id: id }, payload, {
     new: true,

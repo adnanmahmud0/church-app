@@ -38,6 +38,8 @@ const auth =
           }
 
           next();
+        } else {
+          throw new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid token format');
         }
       } catch (error) {
         next(error);

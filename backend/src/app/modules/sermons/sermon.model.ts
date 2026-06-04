@@ -1,0 +1,49 @@
+import { model, Schema } from 'mongoose';
+import { ISermon, SermonModel } from './sermon.interface';
+
+const sermonSchema = new Schema<ISermon, SermonModel>(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    speaker: {
+      type: String,
+      required: true,
+    },
+    series: {
+      type: Schema.Types.ObjectId,
+      ref: 'SermonSeries',
+    },
+    date: {
+      type: Date,
+      required: true,
+    },
+    duration_seconds: {
+      type: Number,
+    },
+    audio_url: { type: String },
+    video_url: { type: String },
+    thumbnail_url: {
+      type: String,
+    },
+    key_scripture: {
+      type: String,
+    },
+    description: {
+      type: String,
+    },
+    tags: {
+      type: [String],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+    },
+  }
+);
+
+export const Sermon = model<ISermon, SermonModel>('Sermon', sermonSchema);
