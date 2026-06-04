@@ -241,7 +241,7 @@ export default function SermonsPage() {
               <Input placeholder="Search sermons..." className="pl-8" value={sermonSearch} onChange={(e) => setSermonSearch(e.target.value)} />
             </div>
             <Button onClick={() => {
-              setSermonFormData({ title: "", speaker: "", series: "", date: new Date().toISOString().split('T')[0], duration_seconds: 0, audio_url: "", thumbnail_url: "", key_scripture: "", description: "", tags: "" });
+              setSermonFormData({ title: "", speaker: "", series: "", date: new Date().toISOString().split('T')[0], duration_seconds: 0, audio_url: "", video_url: "", thumbnail_url: "", key_scripture: "", description: "", tags: "" });
               setIsSermonAddOpen(true);
             }}>
               <PlusIcon className="mr-2 h-4 w-4" /> Add Sermon
