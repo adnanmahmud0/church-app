@@ -14,7 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, Settings2Icon, CommandIcon, ImageIcon, BookIcon } from "lucide-react"
+import { LayoutDashboardIcon, Settings2Icon, CommandIcon, ImageIcon, BookIcon, HeartIcon, BookOpen, Calendar, Gift, UsersIcon, TvIcon } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 const data = {
@@ -59,6 +59,48 @@ const data = {
       url: "/bible",
       icon: (
         <BookIcon />
+      ),
+    },
+    {
+      title: "Prayer",
+      url: "/prayer",
+      icon: (
+        <HeartIcon />
+      ),
+    },
+    {
+      title: "Give",
+      url: "/giving",
+      icon: (
+        <HeartIcon />
+      ),
+    },
+    {
+      title: "Devotionals",
+      url: "/devotionals",
+      icon: (
+        <BookIcon />
+      ),
+    },
+    {
+      title: "Events",
+      url: "/events",
+      icon: (
+        <Calendar />
+      ),
+    },
+    {
+      title: "Community",
+      url: "/community",
+      icon: (
+        <UsersIcon />
+      ),
+    },
+    {
+      title: "Watch Live",
+      url: "/watch-live",
+      icon: (
+        <TvIcon />
       ),
     },
   ],

@@ -1,0 +1,142 @@
+import { StatusCodes } from 'http-status-codes';
+import { JwtPayload } from 'jsonwebtoken';
+import ApiError from '../../../errors/ApiError';
+import { IPrayerRequest } from './prayer.interface';
+import { PrayerInteraction, PrayerRequest } from './prayer.model';
+
+const createRequest = async (
+  payload: Partial<IPrayerRequest>,
+  user?: JwtPayload
+) => {
+  if (user) {
+    payload.author_user_id = user.id;
+  }
+  
+  const prayer = await PrayerRequest.create(payload);
+  return prayer;
+};
+
+const getRequests = async (
+  page: number = 1,
+  limit: number = 10
+) => {
+  const skip = (page - 1) * limit;
+
+  const [data, total] = await Promise.all([
+    PrayerRequest.find({ status: 'active' })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    PrayerRequest.countDocuments({ status: 'active' }),
+  ]);
+
+  const totalPage = Math.ceil(total / limit);
+
+  return {
+    meta: { page, limit, totalPage, total },
+    data,
+  };
+};
+
+const getMyRequests = async (user: JwtPayload) => {
+  const data = await PrayerRequest.find({ author_user_id: user.id }).sort({ createdAt: -1 }).lean();
+  return data;
+};
+
+const getSingleRequest = async (id: string) => {
+  const data = await PrayerRequest.findById(id).lean();
+  if (!data) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Prayer request not found');
+  }
+  return data;
+};
+
+const prayForRequest = async (
+  id: string,
+  user?: JwtPayload,
+  deviceFingerprint?: string
+) => {
+  const prayer = await PrayerRequest.findById(id);
+  if (!prayer) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Prayer request not found');
+  }
+
+  // Deduplication check
+  const query: any = { prayer_request_id: id };
+  if (user) {
+    query.user_id = user.id;
+  } else if (deviceFingerprint) {
+    query.device_fingerprint = deviceFingerprint;
+  } else {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Must provide authentication or device fingerprint');
+  }
+
+  const existingInteraction = await PrayerInteraction.findOne(query);
+
+  if (!existingInteraction) {
+    await PrayerInteraction.create(query);
+    prayer.pray_count += 1;
+    await prayer.save();
+  }
+
+  return prayer;
+};
+
+const updateRequest = async (
+  id: string,
+  user: JwtPayload,
+  payload: Partial<IPrayerRequest>
+) => {
+  const prayer = await PrayerRequest.findById(id);
+  if (!prayer) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Prayer request not found');
+  }
+
+  if (prayer.author_user_id?.toString() !== user.id) {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'You can only update your own prayer requests');
+  }
+
+  const updated = await PrayerRequest.findByIdAndUpdate(id, payload, { new: true });
+  return updated;
+};
+
+const deleteRequest = async (id: string, user: JwtPayload) => {
+  const prayer = await PrayerRequest.findById(id);
+  if (!prayer) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Prayer request not found');
+  }
+
+  if (prayer.author_user_id?.toString() !== user.id && user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'You can only delete your own prayer requests');
+  }
+
+  // Soft delete by archiving
+  const archived = await PrayerRequest.findByIdAndUpdate(id, { status: 'archived' }, { new: true });
+  return archived;
+};
+
+const getStats = async () => {
+  const [totalRequests, activeRequests, totalPrays] = await Promise.all([
+    PrayerRequest.countDocuments(),
+    PrayerRequest.countDocuments({ status: 'active' }),
+    PrayerInteraction.countDocuments(),
+  ]);
+
+  return {
+    totalRequests,
+    activeRequests,
+    totalPrays,
+  };
+};
+
+export const PrayerService = {
+  createRequest,
+  getRequests,
+  getMyRequests,
+  getSingleRequest,
+  prayForRequest,
+  updateRequest,
+  deleteRequest,
+  getStats,
+};

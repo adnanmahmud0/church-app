@@ -1,14 +1,17 @@
-# Bible Module API
+# Bible API Documentation (Mobile App)
 
-The Bible Reader module acts as a proxy for the YouVersion Platform API, providing caching, content sanitization, and structured endpoints for the church mobile app.
-
-## Authentication Note
-The mobile app does **NOT** need the YouVersion API key. The backend safely stores the key and attaches it to proxy requests. Use the standard Church App authentication headers for these endpoints.
+This document outlines the REST API endpoints available for the Church App's native Bible Reader module.
 
 ## Base URL
-Placeholder: `https://your-api-domain.com/api/bible`
+All endpoints are relative to the main API base URL:
+`https://<server-domain>/api/v1/bible`
+
+## Authentication
+Use the standard Church App authentication headers (e.g., Bearer token) for these endpoints. No third-party API keys are required on the client side.
 
 ## Supported Translation IDs
+Use the following IDs when requesting specific translations via the `version` query parameter.
+
 | Version | ID |
 |---------|----|
 | KJV | 1 |
@@ -17,35 +20,15 @@ Placeholder: `https://your-api-domain.com/api/bible`
 | NIV | 111 |
 | MSG | 97 |
 
-## General Notes
-- **HTML Sanitization**: All verse text returned from these endpoints has HTML tags (like `<b>`, `<i>`, etc.) stripped for easy display in native components.
-- **Rate Limiting**: Our backend caches requests. Books and Chapters are cached for 24 hours. Verses are cached for 1 hour.
-
-## Error Response Format
-If a request fails, the API returns a JSON error response:
-```json
-{
-  "success": false,
-  "message": "Error description here",
-  "statusCode": 400
-}
-```
+> **Note**: If `version` is omitted in any request, the API will default to `1` (KJV).
 
 ---
 
-## Endpoints
-
-### 1. Get Supported Versions
-Returns the static list of supported Bible versions available in the app.
+## 1. Get Supported Versions
+Returns a list of all active Bible versions supported by the church app.
 
 **Request**
 `GET /versions`
-
-**Example Request**
-```javascript
-fetch('https://your-api-domain.com/api/bible/versions')
-  .then(res => res.json())
-```
 
 **Example Response**
 ```json
@@ -54,26 +37,26 @@ fetch('https://your-api-domain.com/api/bible/versions')
   "statusCode": 200,
   "message": "Versions retrieved successfully",
   "data": [
-    { "id": 1, "name": "King James Version", "abbreviation": "KJV", "isActive": true }
+    { 
+      "id": 1, 
+      "name": "King James Version", 
+      "abbreviation": "KJV", 
+      "isActive": true 
+    }
   ]
 }
 ```
 
-### 2. Get Books
-Returns a list of all books for a specific version ID.
+---
+
+## 2. Get Books
+Returns a list of all Old and New Testament books for a given version.
 
 **Request**
-`GET /books`
+`GET /books?version={versionId}`
 
 **Query Parameters**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| version | number | No | The ID of the Bible version (default: 1) |
-
-**Example Request**
-```javascript
-fetch('https://your-api-domain.com/api/bible/books?version=1')
-```
+- `version` (optional, number): The translation ID.
 
 **Example Response**
 ```json
@@ -93,21 +76,16 @@ fetch('https://your-api-domain.com/api/bible/books?version=1')
 }
 ```
 
-### 3. Get Chapters
+---
+
+## 3. Get Chapters
 Returns a list of chapters for a specific book.
 
 **Request**
-`GET /books/:bookId/chapters`
+`GET /books/:bookId/chapters?version={versionId}`
 
-**Query Parameters**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| version | number | No | The ID of the Bible version (default: 1) |
-
-**Example Request**
-```javascript
-fetch('https://your-api-domain.com/api/bible/books/GEN/chapters?version=1')
-```
+**Path Parameters**
+- `bookId` (required, string): The 3-letter book ID (e.g., `GEN`).
 
 **Example Response**
 ```json
@@ -122,21 +100,17 @@ fetch('https://your-api-domain.com/api/bible/books/GEN/chapters?version=1')
 }
 ```
 
-### 4. Get Verses
-Returns all verses for a specific chapter in a book.
+---
+
+## 4. Get Verses
+Returns the plain text verses for a specific chapter, ready to be rendered in native UI text components.
 
 **Request**
-`GET /books/:bookId/chapters/:chapter`
+`GET /books/:bookId/chapters/:chapter/verses?version={versionId}`
 
-**Query Parameters**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| version | number | No | The ID of the Bible version (default: 1) |
-
-**Example Request**
-```javascript
-fetch('https://your-api-domain.com/api/bible/books/GEN/chapters/1?version=1')
-```
+**Path Parameters**
+- `bookId` (required, string): The 3-letter book ID (e.g., `GEN`).
+- `chapter` (required, string/number): The chapter number (e.g., `1`).
 
 **Example Response**
 ```json
@@ -152,28 +126,27 @@ fetch('https://your-api-domain.com/api/bible/books/GEN/chapters/1?version=1')
       {
         "verse_number": "1",
         "text": "In the beginning God created the heaven and the earth."
+      },
+      {
+        "verse_number": "2",
+        "text": "And the earth was without form, and void; and darkness was upon the face of the deep..."
       }
     ]
   }
 }
 ```
 
-### 5. Search Bible
-Searches the Bible content across YouVersion.
+---
+
+## 5. Search Bible
+Searches the text of the Bible for a specific keyword or phrase.
 
 **Request**
-`GET /search`
+`GET /search?q={query}&version={versionId}`
 
 **Query Parameters**
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| q | string | Yes | The search query (e.g., "love") |
-| version | number | No | The ID of the Bible version (default: 1) |
-
-**Example Request**
-```javascript
-fetch('https://your-api-domain.com/api/bible/search?q=love&version=1')
-```
+- `q` (required, string): The search query (e.g., "love").
+- `version` (optional, number): The translation ID.
 
 **Example Response**
 ```json
