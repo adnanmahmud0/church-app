@@ -14,7 +14,22 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, Settings2Icon, CommandIcon, ImageIcon, BookIcon, HeartIcon, BookOpen, Calendar, Gift, UsersIcon, TvIcon } from "lucide-react"
+import { 
+  LayoutDashboard, 
+  Shield, 
+  Film, 
+  Mic, 
+  Gift, 
+  HandHeart, 
+  Users, 
+  CalendarDays, 
+  BookOpen, 
+  Book, 
+  Tv, 
+  Landmark,
+  Settings2,
+  User
+} from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 const data = {
@@ -28,90 +43,75 @@ const data = {
     {
       title: "Dashboard",
       url: "/",
-      icon: (
-        <LayoutDashboardIcon />
-      ),
+      icon: <LayoutDashboard />,
     },
     {
       title: "Admin Management",
       url: "/admin",
-      icon: (
-        <CommandIcon />
-      ),
+      icon: <Shield />,
       roles: ["SUPER_ADMIN"],
     },
     {
       title: "Media",
       url: "/media",
-      icon: (
-        <ImageIcon />
-      ),
+      icon: <Film />,
+    },
+    {
+      title: "User",
+      url: "/users",
+      icon: <User />,
     },
     {
       title: "Sermons",
       url: "/sermons",
-      icon: (
-        <CommandIcon /> // You can use a better icon if you want, like MicIcon or HeadphonesIcon
-      ),
+      icon: <Mic />,
     },
     {
-      title: "Bible",
-      url: "/bible",
-      icon: (
-        <BookIcon />
-      ),
+      title: "Gives",
+      url: "/giving",
+      icon: <Gift />,
     },
     {
       title: "Prayer",
       url: "/prayer",
-      icon: (
-        <HeartIcon />
-      ),
-    },
-    {
-      title: "Give",
-      url: "/giving",
-      icon: (
-        <HeartIcon />
-      ),
-    },
-    {
-      title: "Devotionals",
-      url: "/devotionals",
-      icon: (
-        <BookIcon />
-      ),
-    },
-    {
-      title: "Events",
-      url: "/events",
-      icon: (
-        <Calendar />
-      ),
+      icon: <HandHeart />,
     },
     {
       title: "Community",
       url: "/community",
-      icon: (
-        <UsersIcon />
-      ),
+      icon: <Users />,
+    },
+    {
+      title: "Event",
+      url: "/events",
+      icon: <CalendarDays />,
+    },
+    {
+      title: "Devotionals",
+      url: "/devotionals",
+      icon: <BookOpen />,
+    },
+    {
+      title: "Bible",
+      url: "/bible",
+      icon: <Book />,
     },
     {
       title: "Watch Live",
       url: "/watch-live",
-      icon: (
-        <TvIcon />
-      ),
+      icon: <Tv />,
+    },
+    {
+      title: "History and core Values",
+      url: "/history",
+      icon: <Landmark />,
     },
   ],
   navSecondary: [
     {
       title: "Settings",
       url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
+      icon: <Settings2 />,
     },
   ],
 }

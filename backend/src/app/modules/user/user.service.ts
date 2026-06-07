@@ -51,8 +51,14 @@ const updateProfileToDB = async (
   return updateDoc;
 };
 
+const getAllUsersFromDB = async (): Promise<IUser[]> => {
+  const users = await User.find({ role: USER_ROLES.USER }).sort({ createdAt: -1 });
+  return users;
+};
+
 export const UserService = {
   createUserToDB,
   getUserProfileFromDB,
   updateProfileToDB,
+  getAllUsersFromDB,
 };

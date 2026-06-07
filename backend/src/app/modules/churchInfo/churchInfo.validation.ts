@@ -1,0 +1,13 @@
+import { z } from 'zod';
+
+const updateChurchInfoZodSchema = z.object({
+  body: z.object({
+    content: z.string({
+      required_error: 'Content is required',
+    }).min(1, 'Content cannot be empty'),
+  }),
+});
+
+export const ChurchInfoValidation = {
+  updateChurchInfoZodSchema,
+};

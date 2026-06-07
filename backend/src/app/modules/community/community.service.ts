@@ -72,12 +72,7 @@ const updateGroup = async (id: string, payload: Partial<ICommunityGroup>) => {
 };
 
 const deleteGroup = async (id: string) => {
-  // Soft delete by default as requested by standard patterns
-  const result = await CommunityGroup.findByIdAndUpdate(
-    id,
-    { isActive: false },
-    { new: true }
-  );
+  const result = await CommunityGroup.findByIdAndDelete(id);
   return result;
 };
 
