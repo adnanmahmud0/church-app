@@ -21,6 +21,11 @@ router
       }
       return UserController.updateProfile(req, res, next);
     }
+  )
+  .put(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER),
+    validateRequest(UserValidation.updateUserZodSchema),
+    UserController.updateProfileJson
   );
 
 router
@@ -35,3 +40,24 @@ router
   );
 
 export const UserRoutes = router;
+
+router
+  .route('/profile/favorite-sermons')
+  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.getFavoriteSermons);
+
+router
+  .route('/profile/favorite-sermons/:sermonId')
+  .post(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.toggleFavoriteSermon);
+
+router
+  .route('/giving/summary')
+  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.getUserGivingSummary);
+
+router
+  .route('/giving/history')
+  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.getUserGivingHistory);
+
+router
+  .route('/account')
+  .delete(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.deleteAccount);
+

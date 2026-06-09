@@ -87,10 +87,20 @@ const deleteSermon = async (id: string) => {
   return result;
 };
 
+const getLatestSermons = async (limit: number = 3) => {
+  const result = await Sermon.find({})
+    .populate('series', 'id name')
+    .sort({ date: -1 })
+    .limit(limit);
+  
+  return result;
+};
+
 export const SermonService = {
   createSermon,
   getAllSermons,
   getSermonById,
   updateSermon,
   deleteSermon,
+  getLatestSermons,
 };

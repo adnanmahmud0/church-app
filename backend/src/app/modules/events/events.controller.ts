@@ -20,6 +20,20 @@ const getUpcomingEvents = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getLatestEvents = catchAsync(async (req: Request, res: Response) => {
+  const limit = req.query.limit ? parseInt(req.query.limit as string) : 3;
+  const userId = req.user?.id || (req.query.userId as string);
+  
+  const result = await EventsService.getLatestEvents(limit, userId);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Latest events retrieved successfully',
+    data: result,
+  });
+});
+
 const getPastEvents = catchAsync(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 20;
@@ -173,6 +187,7 @@ const getStats = catchAsync(async (req: Request, res: Response) => {
 
 export const EventsController = {
   getUpcomingEvents,
+  getLatestEvents,
   getPastEvents,
   getAdminEvents,
   getEventById,

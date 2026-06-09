@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { USER_ROLES } from '../../../enums/user';
 
 export type IUser = {
@@ -9,6 +9,7 @@ export type IUser = {
   image?: string;
   status: 'active' | 'delete';
   verified: boolean;
+  favoriteSermons?: Types.ObjectId[];
   authentication?: {
     isResetPassword: boolean;
     oneTimeCode: number;

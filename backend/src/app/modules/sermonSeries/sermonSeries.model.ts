@@ -7,12 +7,6 @@ const sermonSeriesSchema = new Schema<ISermonSeries, SermonSeriesModel>(
       type: String,
       required: true,
     },
-    description: {
-      type: String,
-    },
-    cover_image_url: {
-      type: String,
-    },
   },
   {
     timestamps: true,

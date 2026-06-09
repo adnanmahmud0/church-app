@@ -42,6 +42,12 @@ const userSchema = new Schema<IUser, UserModal>(
       type: Boolean,
       default: false,
     },
+    favoriteSermons: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Sermon',
+      },
+    ],
     authentication: {
       type: {
         isResetPassword: {

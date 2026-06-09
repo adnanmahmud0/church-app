@@ -161,6 +161,113 @@ const getSummary = async () => {
   };
 };
 
+const getProfileGivingSummary = async (userId: string) => {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+  const [yearTxns, allTxns] = await Promise.all([
+    GivingTransaction.find({ userId, createdAt: { $gte: startOfYear } }).sort({ createdAt: -1 }).lean(),
+    GivingTransaction.find({ userId }).sort({ createdAt: -1 }).lean(),
+  ]);
+
+  const totalThisYear = yearTxns.reduce((sum, t) => sum + t.amount, 0);
+  const totalAllTime = allTxns.reduce((sum, t) => sum + t.amount, 0);
+
+  const lastGift = allTxns.length > 0 ? {
+    amount: allTxns[0].amount,
+    currency: allTxns[0].currency,
+    date: new Date(allTxns[0].createdAt as any).toISOString().split('T')[0],
+    date_display: new Date(allTxns[0].createdAt as any).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+  } : null;
+
+  // Calculate giving streak
+  let streak = 0;
+  if (allTxns.length > 0) {
+    const today = new Date();
+    // Normalize to start of current week (Monday)
+    const currentDay = today.getDay() || 7; // 1-7 (Mon-Sun)
+    const startOfCurrentWeek = new Date(today);
+    startOfCurrentWeek.setDate(today.getDate() - currentDay + 1);
+    startOfCurrentWeek.setHours(0, 0, 0, 0);
+
+    let checkWeekStart = new Date(startOfCurrentWeek);
+    
+    // Create a Set of week timestamps where the user donated
+    const donationWeeks = new Set(allTxns.map(t => {
+      const d = new Date(t.createdAt as any);
+      const day = d.getDay() || 7;
+      const weekStart = new Date(d);
+      weekStart.setDate(d.getDate() - day + 1);
+      weekStart.setHours(0, 0, 0, 0);
+      return weekStart.getTime();
+    }));
+
+    // First, check if they donated this week or last week to start the streak
+    const lastWeekStart = new Date(startOfCurrentWeek);
+    lastWeekStart.setDate(startOfCurrentWeek.getDate() - 7);
+    
+    if (donationWeeks.has(startOfCurrentWeek.getTime()) || donationWeeks.has(lastWeekStart.getTime())) {
+      let currentCheckTime = donationWeeks.has(startOfCurrentWeek.getTime()) ? startOfCurrentWeek.getTime() : lastWeekStart.getTime();
+      
+      while (donationWeeks.has(currentCheckTime)) {
+        streak++;
+        const nextCheck = new Date(currentCheckTime);
+        nextCheck.setDate(nextCheck.getDate() - 7);
+        currentCheckTime = nextCheck.getTime();
+      }
+    }
+  }
+
+  return {
+    total_given_this_year: totalThisYear,
+    currency: allTxns.length > 0 ? allTxns[0].currency : 'GBP',
+    year: now.getFullYear(),
+    last_gift: lastGift,
+    giving_streak_weeks: streak,
+    total_given_all_time: totalAllTime,
+    total_donations_count: allTxns.length,
+  };
+};
+
+const getUserGivingHistory = async (userId: string, page: number = 1, limit: number = 20, year?: number) => {
+  const skip = (page - 1) * limit;
+  const query: any = { userId };
+  
+  if (year) {
+    const start = new Date(year, 0, 1);
+    const end = new Date(year, 11, 31, 23, 59, 59, 999);
+    query.createdAt = { $gte: start, $lte: end };
+  }
+
+  const [transactions, total] = await Promise.all([
+    GivingTransaction.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    GivingTransaction.countDocuments(query),
+  ]);
+
+  const mappedData = transactions.map((t: any) => ({
+    id: t._id,
+    amount: t.amount,
+    currency: t.currency,
+    donated_at: t.createdAt.toISOString(),
+    date_display: new Date(t.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+  }));
+
+  return {
+    data: mappedData,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit),
+      has_next_page: page * limit < total,
+    }
+  };
+};
+
 export const GivingService = {
   getFunds,
   createFund,
@@ -171,4 +278,6 @@ export const GivingService = {
   recordTransaction,
   getHistory,
   getSummary,
+  getProfileGivingSummary,
+  getUserGivingHistory,
 };

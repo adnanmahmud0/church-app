@@ -31,7 +31,6 @@ const getUserProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-//update profile
 const updateProfile = catchAsync(
   async (req: Request, res: Response, _next: NextFunction) => {
     const user = req.user;
@@ -52,6 +51,21 @@ const updateProfile = catchAsync(
   }
 );
 
+const updateProfileJson = catchAsync(
+  async (req: Request, res: Response, _next: NextFunction) => {
+    const user = req.user;
+    const result = await UserService.updateProfileToDB(user, req.body);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Profile updated successfully',
+      data: result,
+    });
+  }
+);
+
+
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const result = await UserService.getAllUsersFromDB();
 
@@ -63,4 +77,71 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const UserController = { createUser, getUserProfile, updateProfile, getAllUsers };
+const toggleFavoriteSermon = catchAsync(async (req: Request, res: Response) => {
+  const { sermonId } = req.params;
+  const user = req.user;
+  const result = await UserService.toggleFavoriteSermonToDB(user, sermonId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Favorite sermon toggled successfully',
+    data: result,
+  });
+});
+
+const getFavoriteSermons = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const limit = req.query.limit ? Number(req.query.limit) : undefined;
+  const result = await UserService.getFavoriteSermonsFromDB(user, limit);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Favorite sermons retrieved successfully',
+    data: result,
+  });
+});
+
+const getUserGivingSummary = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await UserService.getUserGivingSummaryFromDB(user);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Giving summary retrieved successfully',
+    data: result,
+  });
+});
+
+const getUserGivingHistory = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const limit = req.query.limit ? Number(req.query.limit) : 20;
+  const year = req.query.year ? Number(req.query.year) : undefined;
+
+  const result = await UserService.getUserGivingHistoryFromDB(user, page, limit, year);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Giving history retrieved successfully',
+    data: result.data,
+    pagination: result.pagination as any,
+  });
+});
+
+const deleteAccount = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  await UserService.deleteAccountFromDB(user);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Account deleted successfully',
+    data: null,
+  });
+});
+
+export const UserController = { createUser, getUserProfile, updateProfile, updateProfileJson, getAllUsers, toggleFavoriteSermon, getFavoriteSermons, getUserGivingSummary, getUserGivingHistory, deleteAccount };

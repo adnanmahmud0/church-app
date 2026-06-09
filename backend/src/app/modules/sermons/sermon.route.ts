@@ -6,6 +6,7 @@ import { SermonController } from './sermon.controller';
 const router = express.Router();
 
 router.get('/', SermonController.getAllSermons);
+router.get('/latest', SermonController.getLatestSermons);
 router.get('/:id', SermonController.getSermonById);
 
 // Admin only routes

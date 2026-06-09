@@ -283,12 +283,19 @@ const changePasswordToDB = async (
   debug('auth.change_password.updated');
 };
 
+const logoutUserFromDB = async () => {
+  // Stateless JWT logic implies no action is needed here unless we want to blacklist tokens.
+  // We'll just return a success payload.
+  return { message: "Logged out successfully" };
+};
+
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
   forgetPasswordToDB,
   resetPasswordToDB,
   changePasswordToDB,
+  logoutUserFromDB,
   resendVerifyEmailToDB: async (email: string) => {
     const isExistUser = await User.findOne({ email });
     if (!isExistUser) {

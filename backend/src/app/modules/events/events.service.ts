@@ -86,6 +86,24 @@ const getEvents = async (page: number = 1, limit: number = 20, isPast: boolean =
   };
 };
 
+const getLatestEvents = async (limit: number = 3, currentUserId?: string) => {
+  const now = new Date();
+  const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+  const events = await Event.find({ isDraft: false, date: { $gte: startOfToday } })
+    .populate('categoryId')
+    .sort({ date: 1 })
+    .limit(limit)
+    .lean();
+
+  if (!events.length) return [];
+
+  const eventIds = events.map(e => e._id);
+  const rsvps = await EventRSVP.find({ eventId: { $in: eventIds } }).lean();
+
+  return events.map(e => mapEvent(e, currentUserId, rsvps));
+};
+
 const getEventById = async (id: string, currentUserId?: string) => {
   const event = await Event.findById(id).populate('categoryId').lean();
   if (!event) throw new ApiError(StatusCodes.NOT_FOUND, 'Event not found');
@@ -228,6 +246,7 @@ const getStats = async () => {
 
 export const EventsService = {
   getEvents,
+  getLatestEvents,
   getEventById,
   rsvpEvent,
   cancelRsvp,

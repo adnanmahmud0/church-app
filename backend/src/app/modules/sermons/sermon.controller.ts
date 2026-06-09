@@ -66,10 +66,23 @@ const deleteSermon = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getLatestSermons = catchAsync(async (req: Request, res: Response) => {
+  const limit = req.query.limit ? Number(req.query.limit) : 3;
+  const result = await SermonService.getLatestSermons(limit);
+  
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Latest sermons retrieved successfully',
+    data: result,
+  });
+});
+
 export const SermonController = {
   createSermon,
   getAllSermons,
   getSermonById,
   updateSermon,
   deleteSermon,
+  getLatestSermons,
 };

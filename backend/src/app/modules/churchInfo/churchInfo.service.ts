@@ -13,6 +13,10 @@ const defaultChurchInfo: Partial<IChurchInfo> = {
 <li><strong>Innovation:</strong> We continuously seek new ways to improve and provide the best experience.</li>
 <li><strong>Excellence:</strong> We set high standards for ourselves and are committed to achieving them.</li>
 </ul>`,
+  contact_address: "71 Stoneyburn Street, Stoneyburn, EH47 8JT",
+  contact_email: "info@example.com",
+  contact_phone: "+44 123 456 7890",
+  sunday_service_time: "10:00 AM - 12:30 PM",
   updated_by: "System Initializer"
 };
 

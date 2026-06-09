@@ -98,7 +98,33 @@ List published sermons with optional search and series filter.
 |---|---|---|
 | 500 | Server Error | Show "Something went wrong. Please try again." |
 
-### 4.2 GET /api/v1/sermons/:id
+### 4.2 GET /api/v1/sermons/latest
+Get the most recently added sermons (used for the home page).
+
+**Query Parameters:**
+| Name | Type | Required | Description |
+|---|---|---|---|
+| limit | number | No | Number of latest sermons to retrieve (default: 3). |
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Latest sermons retrieved successfully",
+  "data": [
+    {
+      "id": "60d5ecb8b392d7001f3e3a41",
+      "title": "Faith in the Valley",
+      "speaker": "Pastor John Doe",
+      "date": "2025-05-04T10:00:00.000Z",
+      "duration_seconds": 2520
+    }
+  ]
+}
+```
+
+### 4.3 GET /api/v1/sermons/:id
 Get full detail of a single sermon by ID.
 
 **Success Response (200 OK):**
@@ -132,7 +158,7 @@ Get full detail of a single sermon by ID.
 | 404 | Not Found | Show "Sermon not found" with a back button. |
 | 500 | Server Error | Show "Something went wrong. Please try again." |
 
-### 4.3 GET /api/v1/sermon-series
+### 4.4 GET /api/v1/sermon-series
 Get all active sermon series (used to populate filter tabs).
 
 **Success Response (200 OK):**
@@ -144,9 +170,48 @@ Get all active sermon series (used to populate filter tabs).
   "data": [
     {
       "id": "60d5ecb8b392d7001f3e3a55",
-      "name": "Mountain Moving Faith",
-      "description": "A 4-part series on building resilient faith.",
-      "cover_image_url": "http://localhost:5000/image/series_cover.jpg"
+      "name": "Mountain Moving Faith"
+    }
+  ]
+}
+```
+
+### 4.5 POST /api/v1/user/profile/favorite-sermons/:sermonId
+Toggle a sermon as a favorite for the currently authenticated user. Requires authentication token.
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Favorite sermon toggled successfully",
+  "data": {
+    "id": "userId123",
+    "name": "John Doe",
+    "favoriteSermons": ["60d5ecb8b392d7001f3e3a41"]
+  }
+}
+```
+
+### 4.6 GET /api/v1/user/profile/favorite-sermons
+Retrieve the list of favorite sermons for the authenticated user.
+
+**Query Parameters:**
+| Name | Type | Required | Description |
+|---|---|---|---|
+| limit | number | No | Number of favorite sermons to retrieve (e.g. 3 for profile page). |
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Favorite sermons retrieved successfully",
+  "data": [
+    {
+      "id": "60d5ecb8b392d7001f3e3a41",
+      "title": "Faith in the Valley",
+      "speaker": "Pastor John Doe"
     }
   ]
 }
@@ -197,9 +262,7 @@ Get all active sermon series (used to populate filter tabs).
 ```json
 {
   "id": "60d5ecb8b392d7001f3e3a55",
-  "name": "Mountain Moving Faith",
-  "description": "A 4-part series on building resilient faith.",
-  "cover_image_url": "http://localhost:5000/image/series_cover.jpg"
+  "name": "Mountain Moving Faith"
 }
 ```
 

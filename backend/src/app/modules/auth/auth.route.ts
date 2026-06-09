@@ -50,4 +50,11 @@ router.post(
   AuthController.changePassword
 );
 
+router.post(
+  '/logout',
+  auth(USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.SUPER_ADMIN),
+  AuthController.logoutUser
+);
+
+
 export const AuthRoutes = router;

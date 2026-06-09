@@ -22,6 +22,7 @@ router.delete('/:id', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN), EventsCont
 
 // Public Routes
 router.get('/categories', EventsController.getCategories);
+router.get('/latest', optionalAuth, EventsController.getLatestEvents);
 router.get('/', optionalAuth, EventsController.getUpcomingEvents);
 router.get('/history', optionalAuth, EventsController.getPastEvents);
 router.get('/:id', optionalAuth, EventsController.getEventById);

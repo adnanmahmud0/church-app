@@ -11,7 +11,50 @@ The Events module lets church members browse upcoming events, filter by category
 
 ---
 
-## 1. Get Upcoming Events
+## 1. Get Latest Events
+Retrieves a list of the most imminent upcoming events (date >= today), sorted by date ascending. Primarily intended for the home page.
+
+**Endpoint**: `GET /latest`
+
+**Query Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `limit` | number | No | Number of events to return (default: 3) |
+
+**Example Request**:
+```
+GET /api/v1/events/latest?limit=3
+```
+
+**Example Response**:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Latest events retrieved successfully",
+  "data": [
+    {
+      "id": "uuid",
+      "title": "Women's Bible Study",
+      "category": "study",
+      "categoryLabel": "STUDY",
+      "categoryColor": "#f97316",
+      "date": "May 8, 2025",
+      "dateISO": "2025-05-08",
+      "time": "10:00 AM",
+      "location": "Room 204",
+      "description": "Join us as we dive deep into the Word of God...",
+      "attendingCount": 29,
+      "hasRsvp": false,
+      "isPast": false
+    }
+  ]
+}
+```
+
+---
+
+## 2. Get Upcoming Events
 Retrieves a paginated list of upcoming events (date >= today), sorted by date ascending.
 
 **Endpoint**: `GET /`
@@ -60,7 +103,7 @@ GET /api/v1/events?category=worship&page=1&limit=20
 
 ---
 
-## 2. Get Past Events (History)
+## 3. Get Past Events (History)
 Retrieves a paginated list of past events (date < today), sorted by date descending. 
 
 **Endpoint**: `GET /history`
@@ -69,7 +112,7 @@ Retrieves a paginated list of past events (date < today), sorted by date descend
 
 ---
 
-## 3. Get Event Details
+## 4. Get Event Details
 Retrieves full details of a specific event.
 
 **Endpoint**: `GET /:id`
@@ -102,7 +145,7 @@ Retrieves full details of a specific event.
 
 ---
 
-## 4. RSVP for an Event
+## 5. RSVP for an Event
 Marks the authenticated user as attending the event.
 
 **Endpoint**: `POST /:id/rsvp`
@@ -133,7 +176,7 @@ Marks the authenticated user as attending the event.
 
 ---
 
-## 5. Cancel RSVP
+## 6. Cancel RSVP
 Removes the authenticated user's RSVP for the event.
 
 **Endpoint**: `DELETE /:id/rsvp`
@@ -162,7 +205,7 @@ Removes the authenticated user's RSVP for the event.
 
 ---
 
-## 6. Get Categories
+## 7. Get Categories
 Retrieves the list of active event categories (useful for building filter tabs). Includes an "All" category by default.
 
 **Endpoint**: `GET /categories`

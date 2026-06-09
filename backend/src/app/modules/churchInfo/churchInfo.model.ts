@@ -8,6 +8,22 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
       required: true,
       trim: true,
     },
+    contact_address: {
+      type: String,
+      trim: true,
+    },
+    contact_email: {
+      type: String,
+      trim: true,
+    },
+    contact_phone: {
+      type: String,
+      trim: true,
+    },
+    sunday_service_time: {
+      type: String,
+      trim: true,
+    },
     updated_at: {
       type: Date,
       default: Date.now,
