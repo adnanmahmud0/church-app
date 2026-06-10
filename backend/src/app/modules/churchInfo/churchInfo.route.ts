@@ -10,6 +10,7 @@ const router = express.Router();
 // Public routes
 router.get('/', ChurchInfoController.getChurchInfo);
 router.get('/contact-and-mission', ChurchInfoController.getContactAndMission);
+router.get('/service-info', ChurchInfoController.getServiceInfo);
 
 router.get(
   '/admin',

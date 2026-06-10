@@ -56,9 +56,25 @@ const getContactAndMission = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getServiceInfo = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChurchInfoService.getChurchInfo();
+  
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Service information retrieved successfully',
+    data: {
+      serviceName: "Sunday Worship",
+      timeString: `Sunday • ${result.sunday_service_time || "10:00 AM - 12:30 PM"}`,
+      rawTime: result.sunday_service_time || "10:00 AM - 12:30 PM"
+    },
+  });
+});
+
 export const ChurchInfoController = {
   getChurchInfo,
   getAdminChurchInfo,
   updateChurchInfo,
   getContactAndMission,
+  getServiceInfo,
 };
