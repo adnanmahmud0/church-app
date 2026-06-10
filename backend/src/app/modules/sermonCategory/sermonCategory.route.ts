@@ -1,30 +1,30 @@
 import express from 'express';
 import auth from '../../middlewares/auth';
 import { USER_ROLES } from '../../../enums/user';
-import { SermonSeriesController } from './sermonSeries.controller';
+import { SermonCategoryController } from './sermonCategory.controller';
 
 const router = express.Router();
 
-router.get('/', SermonSeriesController.getAllSermonSeries);
-router.get('/:id', SermonSeriesController.getSermonSeriesById);
+router.get('/', SermonCategoryController.getAllSermonCategory);
+router.get('/:id', SermonCategoryController.getSermonCategoryById);
 
 // Admin only routes
 router.post(
   '/',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-  SermonSeriesController.createSermonSeries
+  SermonCategoryController.createSermonCategory
 );
 
 router.patch(
   '/:id',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-  SermonSeriesController.updateSermonSeries
+  SermonCategoryController.updateSermonCategory
 );
 
 router.delete(
   '/:id',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-  SermonSeriesController.deleteSermonSeries
+  SermonCategoryController.deleteSermonCategory
 );
 
-export const SermonSeriesRoutes = router;
+export const SermonCategoryRoutes = router;

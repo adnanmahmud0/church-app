@@ -140,7 +140,7 @@ export default function SermonDetailPage() {
               <div className="flex flex-col space-y-1">
                 <span className="text-sm text-muted-foreground flex items-center"><BookOpenIcon className="mr-2 h-4 w-4" /> Series</span>
                 <span className="font-medium text-base">
-                  {sermon.series ? sermon.series.name : "Standalone"}
+                  {sermon.category ? sermon.category.name : "Standalone"}
                 </span>
               </div>
               

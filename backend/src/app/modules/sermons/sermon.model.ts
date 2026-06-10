@@ -11,9 +11,9 @@ const sermonSchema = new Schema<ISermon, SermonModel>(
       type: String,
       required: true,
     },
-    series: {
+    category: {
       type: Schema.Types.ObjectId,
-      ref: 'SermonSeries',
+      ref: 'SermonCategory',
     },
     date: {
       type: Date,

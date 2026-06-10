@@ -15,22 +15,22 @@ import { SermonMobilePreview } from "@/components/sermon-mobile-preview";
 export default function AddSermonPage() {
   const router = useRouter();
   const [sermonFormData, setSermonFormData] = useState({
-    title: "", speaker: "", series: "", date: new Date().toISOString().split('T')[0],
+    title: "", speaker: "", category: "", date: new Date().toISOString().split('T')[0],
     duration_seconds: 0, video_url: "", thumbnail_url: "", key_scripture: "", description: "", tags: "",
   });
-  const [seriesList, setSeriesList] = useState<{ _id: string; name: string }[]>([]);
+  const [categoryList, setCategoryList] = useState<{ _id: string; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [mediaPickerTarget, setMediaPickerTarget] = useState<{ field: string, type: "image" | "video" } | null>(null);
 
   useEffect(() => {
-    fetchSeriesList();
+    fetchCategoryList();
   }, []);
 
-  const fetchSeriesList = async () => {
+  const fetchCategoryList = async () => {
     try {
-      const res = await apiFetch('/sermon-series');
-      if (res.data) setSeriesList(res.data);
+      const res = await apiFetch('/sermon-category');
+      if (res.data) setCategoryList(res.data);
     } catch (err: any) {
       toast.error(err.message || 'Failed to load sermon series');
     }
@@ -75,10 +75,10 @@ export default function AddSermonPage() {
           <form onSubmit={handleSermonAddSubmit} className="space-y-4">
             <div className="grid gap-2"><Label htmlFor="title">Title *</Label><Input id="title" required value={sermonFormData.title} onChange={(e) => setSermonFormData({...sermonFormData, title: e.target.value})} /></div>
             <div className="grid gap-2"><Label htmlFor="speaker">Speaker *</Label><Input id="speaker" required value={sermonFormData.speaker} onChange={(e) => setSermonFormData({...sermonFormData, speaker: e.target.value})} /></div>
-            <div className="grid gap-2"><Label htmlFor="series">Series</Label>
-              <select id="series" className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50" value={sermonFormData.series} onChange={(e) => setSermonFormData({...sermonFormData, series: e.target.value})}>
-                <option value="">No Series</option>
-                {seriesList.map(s => (<option key={s._id} value={s._id}>{s.name}</option>))}
+            <div className="grid gap-2"><Label htmlFor="series">Category</Label>
+              <select id="series" className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50" value={sermonFormData.category} onChange={(e) => setSermonFormData({...sermonFormData, category: e.target.value})}>
+                <option value="">No Category</option>
+                {categoryList.map(s => (<option key={s._id} value={s._id}>{s.name}</option>))}
               </select>
             </div>
             <div className="grid gap-2"><Label htmlFor="date">Date *</Label><Input id="date" type="date" required value={sermonFormData.date} onChange={(e) => setSermonFormData({...sermonFormData, date: e.target.value})} /></div>

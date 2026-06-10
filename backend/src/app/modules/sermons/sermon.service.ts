@@ -11,10 +11,10 @@ const createSermon = async (payload: ISermon) => {
 };
 
 const getAllSermons = async (
-  filters: { search?: string; series_id?: string },
+  filters: { search?: string; category_id?: string },
   paginationOptions: IPaginationOptions
 ) => {
-  const { search, series_id } = filters;
+  const { search, category_id } = filters;
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
 
@@ -31,15 +31,15 @@ const getAllSermons = async (
     });
   }
 
-  if (series_id) {
-    andConditions.push({ series: series_id });
+  if (category_id) {
+    andConditions.push({ category: category_id });
   }
 
   const whereConditions =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
   const result = await Sermon.find(whereConditions)
-    .populate('series', 'id name')
+    .populate('category', 'id name')
     .sort({ [sortBy]: sortOrder })
     .skip(skip)
     .limit(limit);
@@ -60,7 +60,7 @@ const getAllSermons = async (
 };
 
 const getSermonById = async (id: string) => {
-  const result = await Sermon.findById(id).populate('series', 'id name');
+  const result = await Sermon.findById(id).populate('category', 'id name');
   if (!result) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Sermon not found!');
   }
@@ -89,7 +89,7 @@ const deleteSermon = async (id: string) => {
 
 const getLatestSermons = async (limit: number = 3) => {
   const result = await Sermon.find({})
-    .populate('series', 'id name')
+    .populate('category', 'id name')
     .sort({ date: -1 })
     .limit(limit);
   

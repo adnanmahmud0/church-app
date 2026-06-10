@@ -1,10 +1,10 @@
 import { Model, Types } from 'mongoose';
-import { ISermonSeries } from '../sermonSeries/sermonSeries.interface';
+import { ISermonCategory } from '../sermonCategory/sermonCategory.interface';
 
 export type ISermon = {
   title: string;
   speaker: string;
-  series?: Types.ObjectId | ISermonSeries;
+  category?: Types.ObjectId | ISermonCategory;
   date: Date;
   duration_seconds?: number;
   video_url?: string;

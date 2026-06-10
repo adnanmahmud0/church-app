@@ -4,7 +4,7 @@ import { UserRoutes } from '../app/modules/user/user.route';
 import { AdminRoutes } from '../app/modules/admin/admin.route';
 
 import { MediaRoutes } from '../app/modules/media/media.route';
-import { SermonSeriesRoutes } from '../app/modules/sermonSeries/sermonSeries.route';
+import { SermonCategoryRoutes } from '../app/modules/sermonCategory/sermonCategory.route';
 import { SermonRoutes } from '../app/modules/sermons/sermon.route';
 import { BibleRoutes } from '../app/modules/bible/bible.route';
 import { PrayerRoutes } from '../app/modules/prayer/prayer.route';
@@ -35,8 +35,8 @@ const apiRoutes = [
     route: MediaRoutes,
   },
   {
-    path: '/sermon-series',
-    route: SermonSeriesRoutes,
+    path: '/sermon-category',
+    route: SermonCategoryRoutes,
   },
   {
     path: '/sermons',

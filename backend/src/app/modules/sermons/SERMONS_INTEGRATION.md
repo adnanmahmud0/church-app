@@ -3,7 +3,7 @@
 ## 1. Overview
 The Sermons feature allows users to browse, search, filter, and listen to published church sermons. 
 It consists of two main screens:
-- **Sermons List**: A browsable list of all sermons, featuring a search bar and a series filter tab.
+- **Sermons List**: A browsable list of all sermons, featuring a search bar and a category filter tab.
 - **Sermon Detail**: A dedicated screen for a single sermon that includes an audio player, key scripture, tags, and a share button.
 
 All Sermons endpoints are **public** and do not require any authentication.
@@ -50,7 +50,7 @@ Authorization: Bearer <token>
 ## 4. API Endpoints — Full Reference
 
 ### 4.1 GET /api/v1/sermons
-List published sermons with optional search and series filter.
+List published sermons with optional search and category filter.
 
 **Query Parameters:**
 | Name | Type | Required | Description |
@@ -159,7 +159,7 @@ Get full detail of a single sermon by ID.
 | 500 | Server Error | Show "Something went wrong. Please try again." |
 
 ### 4.4 GET /api/v1/sermon-series
-Get all active sermon series (used to populate filter tabs).
+Get all active sermon category (used to populate filter tabs).
 
 **Success Response (200 OK):**
 ```json
@@ -258,7 +258,7 @@ Retrieve the list of favorite sermons for the authenticated user.
 }
 ```
 
-### 5.3 Sermon Series
+### 5.3 Sermon Category
 ```json
 {
   "id": "60d5ecb8b392d7001f3e3a55",
@@ -297,7 +297,7 @@ Retrieve the list of favorite sermons for the authenticated user.
 4. Call `GET /api/v1/sermons?search=<query>&page=1`.
 5. Replace current list with results (do not append).
 
-**Series Filter:**
+**Category Filter:**
 6. On tab press, call `GET /api/v1/sermons?series_id=<id>&page=1`.
 7. "All" tab clears the `series_id` param.
 8. Reset page to 1 on every filter change.
@@ -311,7 +311,7 @@ Retrieve the list of favorite sermons for the authenticated user.
 **Display:**
 13. Duration: `Math.ceil(duration_seconds / 60) + " min"`
 14. Date: format as "May 4, 2025"
-15. Series name: uppercase, gold/yellow color
+15. Category name: uppercase, gold/yellow color
 16. If `thumbnail_url` is null, show default blue gradient placeholder with play icon.
 
 ### 6.2 Sermon Detail Screen
@@ -417,7 +417,7 @@ export default SermonService;
 |---|---|
 | Background | #0D1B4B (dark navy) |
 | Card background | slightly lighter navy |
-| Series name text | Gold / #FFD700 |
+| Category name text | Gold / #FFD700 |
 | Sermon title | White |
 | Speaker name | Blue accent |
 | Date / secondary text | Light gray |
@@ -430,12 +430,12 @@ export default SermonService;
 
 ### 8.2 Sermon Card Layout
 - **Left**: 64×64 rounded square, blue gradient bg, yellow play icon centered.
-- **Right column**: series name (small caps, gold) → title (bold white) → speaker (gray) → bottom row: date (left) + duration (right, gold).
+- **Right column**: Category name (small caps, gold) → title (bold white) → speaker (gray) → bottom row: date (left) + duration (right, gold).
 
 ### 8.3 Sermon Detail Layout
 Top to bottom order:
 1. Nav bar (back arrow, "Sermon" title, bookmark icon)
-2. Header area (purple/blue gradient, mic icon, series badge)
+2. Header area (purple/blue gradient, mic icon, category badge)
 3. Sermon title + speaker name + date/duration row
 4. Audio player card
 5. Key scripture card
@@ -451,7 +451,7 @@ Top to bottom order:
 | Loading list | Skeleton cards (3–4 placeholder rows) |
 | Loading detail | Full screen spinner or skeleton |
 | Empty search result | "No sermons found" with search icon |
-| Empty series filter | "No sermons in this series yet" |
+| Empty category filter | "No sermons in this category yet" |
 | API error (network) | "Could not load sermons. Tap to retry." |
 | API error (500) | "Something went wrong. Please try again." |
 | Sermon not found (404) | "Sermon not found" with back button |
@@ -472,9 +472,9 @@ Top to bottom order:
 
 **Sermons List**
 - [ ] Sermon list loads on screen mount
-- [ ] Series filter tabs populated from API
+- [ ] Category filter tabs populated from API
 - [ ] "All" tab shows all sermons
-- [ ] Series tab filters correctly
+- [ ] category tab filters correctly
 - [ ] Search input debounced (300ms)
 - [ ] Search filters by title, speaker, and tags
 - [ ] Pagination works (load more on scroll)

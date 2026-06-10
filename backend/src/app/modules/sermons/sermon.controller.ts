@@ -16,7 +16,7 @@ const createSermon = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllSermons = catchAsync(async (req: Request, res: Response) => {
-  const filters = pick(req.query, ['search', 'series_id']);
+  const filters = pick(req.query, ['search', 'category_id']);
   const paginationOptions = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
   
   const result = await SermonService.getAllSermons(filters, paginationOptions);
