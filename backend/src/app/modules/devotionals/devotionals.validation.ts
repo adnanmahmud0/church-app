@@ -22,14 +22,10 @@ const updateDevotionalZodSchema = z.object({
   }),
 });
 
-const markAsReadZodSchema = z.object({
-  body: z.object({
-    userId: z.string({ required_error: 'User ID is required' }),
-  }),
-});
+
 
 export const DevotionalsValidation = {
   createDevotionalZodSchema,
   updateDevotionalZodSchema,
-  markAsReadZodSchema,
+
 };

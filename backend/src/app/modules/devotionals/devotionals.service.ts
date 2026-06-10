@@ -98,7 +98,10 @@ const getDevotionalById = async (id: string) => {
 
 const markAsRead = async (devotionalId: string, userId: string) => {
   const existing = await DevotionalRead.findOne({ devotionalId, userId });
-  if (existing) return { isRead: true, readAt: existing.readAt };
+  if (existing) {
+    await DevotionalRead.deleteOne({ _id: existing._id });
+    return { isRead: false, readAt: null };
+  }
 
   const read = await DevotionalRead.create({ devotionalId, userId });
   return { isRead: true, readAt: read.readAt };

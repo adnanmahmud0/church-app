@@ -43,13 +43,12 @@ const getDevotionalById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const markAsRead = catchAsync(async (req: Request, res: Response) => {
-  // If we have an authenticated user, prefer that. Otherwise fallback to body.userId
-  const userId = req.user?.id || req.body.userId;
+  const userId = req.user?.id;
   if (!userId) {
     return sendResponse(res, {
       success: false,
-      statusCode: StatusCodes.BAD_REQUEST,
-      message: 'userId is required',
+      statusCode: StatusCodes.UNAUTHORIZED,
+      message: 'User is not authenticated',
       data: null,
     });
   }
@@ -59,7 +58,7 @@ const markAsRead = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: 'Marked as read successfully',
+    message: result.isRead ? 'Marked as read successfully' : 'Marked as unread successfully',
     data: result,
   });
 });

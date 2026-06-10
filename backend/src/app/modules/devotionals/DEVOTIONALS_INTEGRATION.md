@@ -137,13 +137,14 @@ Retrieve the read status for a specific user.
 Get full detail of a single devotional by ID.
 
 ### 4.5 POST /api/v1/devotionals/:id/read
-Mark a devotional as read for a specific user.
+Toggles the read status of a devotional for the authenticated user. If already read, it marks it unread. If unread, it marks it as read.
+
+**Headers:**
+- `Authorization`: Bearer <user_token>
 
 **Request Body:**
 ```json
-{
-  "userId": "user_id_123" // Only required if the user is not authenticated via Token
-}
+{}
 ```
 
 **Success Response (200 OK):**
@@ -153,9 +154,7 @@ Mark a devotional as read for a specific user.
   "statusCode": 200,
   "message": "Marked as read successfully",
   "data": {
-    "id": "60d5ecb8b392d7001f3e3a42",
-    "devotionalId": "60d5ecb8b392d7001f3e3a41",
-    "userId": "user_id_123",
+    "isRead": true,
     "readAt": "2025-05-04T12:00:00.000Z"
   }
 }

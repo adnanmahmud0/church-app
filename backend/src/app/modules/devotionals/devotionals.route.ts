@@ -15,8 +15,7 @@ router.get('/read-status', optionalAuth, DevotionalsController.getReadStatus);
 router.get('/:id', optionalAuth, DevotionalsController.getDevotionalById);
 router.post(
   '/:id/read',
-  validateRequest(DevotionalsValidation.markAsReadZodSchema),
-  optionalAuth,
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   DevotionalsController.markAsRead
 );
 
