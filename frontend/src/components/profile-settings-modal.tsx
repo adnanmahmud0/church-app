@@ -34,9 +34,9 @@ interface ProfileSettingsModalProps {
 export function ProfileSettingsModal({ open, onOpenChange, user }: ProfileSettingsModalProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
-    avatar: user.avatar,
+    name: user.name || "",
+    email: user.email || "",
+    avatar: user.avatar || "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
@@ -168,7 +168,7 @@ export function ProfileSettingsModal({ open, onOpenChange, user }: ProfileSettin
               >
                 <Avatar className="h-24 w-24">
                   <AvatarImage src={formData.avatar?.startsWith('http') ? formData.avatar : `http://localhost:5000${formData.avatar}`} alt={formData.name} />
-                  <AvatarFallback className="text-2xl">{formData.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className="text-2xl">{(formData.name || "U").substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <CameraIcon className="text-white w-8 h-8" />
