@@ -7,10 +7,9 @@ import { USER_ROLES } from '../../../enums/user';
 
 const router = express.Router();
 
-router.get(
-  '/',
-  ChurchInfoController.getChurchInfo
-);
+// Public routes
+router.get('/', ChurchInfoController.getChurchInfo);
+router.get('/contact-and-mission', ChurchInfoController.getContactAndMission);
 
 router.get(
   '/admin',

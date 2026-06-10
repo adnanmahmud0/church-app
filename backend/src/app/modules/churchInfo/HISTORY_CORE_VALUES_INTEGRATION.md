@@ -56,6 +56,35 @@
 
 ---
 
+### GET /api/v1/church-info/contact-and-mission
+
+**Description:** Returns the contact information and short mission quote specifically for the "More" page.
+
+**Authentication:** None required.
+
+**Request:**
+- Method: GET
+- URL: `<BASE_URL>/api/v1/church-info/contact-and-mission`
+- Headers: `Content-Type: application/json`
+
+**Success Response — 200 OK:**
+```json
+{
+  "statusCode": 200,
+  "success": true,
+  "message": "Contact info and mission retrieved successfully",
+  "data": {
+    "address": "71 Stoneyburn Street, Stoneyburn, EH47 8JT",
+    "sunday_service": "10:00 AM - 12:30 PM",
+    "email": "info@piwcstoneyburn.org",
+    "website": "www.piwcstoneyburn.org",
+    "our_mission": "\"To make heaven, to take as many people as possible with us, and to have a positive impact on society.\""
+  }
+}
+```
+
+---
+
 ## 4. Dart Model Classes
 
 Provide complete, copy-pasteable Dart model classes:

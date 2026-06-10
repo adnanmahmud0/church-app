@@ -20,7 +20,15 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
       type: String,
       trim: true,
     },
+    contact_website: {
+      type: String,
+      trim: true,
+    },
     sunday_service_time: {
+      type: String,
+      trim: true,
+    },
+    our_mission_quote: {
       type: String,
       trim: true,
     },

@@ -14,9 +14,11 @@ const defaultChurchInfo: Partial<IChurchInfo> = {
 <li><strong>Excellence:</strong> We set high standards for ourselves and are committed to achieving them.</li>
 </ul>`,
   contact_address: "71 Stoneyburn Street, Stoneyburn, EH47 8JT",
-  contact_email: "info@example.com",
+  contact_email: "info@piwcstoneyburn.org",
   contact_phone: "+44 123 456 7890",
+  contact_website: "www.piwcstoneyburn.org",
   sunday_service_time: "10:00 AM - 12:30 PM",
+  our_mission_quote: "\"To make heaven, to take as many people as possible with us, and to have a positive impact on society.\"",
   updated_by: "System Initializer"
 };
 

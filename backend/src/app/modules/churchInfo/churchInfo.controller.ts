@@ -28,7 +28,25 @@ const updateChurchInfo = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getContactAndMission = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChurchInfoService.getChurchInfo();
+  
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Contact info and mission retrieved successfully',
+    data: {
+      address: result.contact_address,
+      sunday_service: result.sunday_service_time,
+      email: result.contact_email,
+      website: result.contact_website,
+      our_mission: result.our_mission_quote
+    },
+  });
+});
+
 export const ChurchInfoController = {
   getChurchInfo,
   updateChurchInfo,
+  getContactAndMission,
 };
