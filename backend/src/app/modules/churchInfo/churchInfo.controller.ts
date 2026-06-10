@@ -54,6 +54,8 @@ const getContactAndMission = catchAsync(async (req: Request, res: Response) => {
       our_mission: result.our_mission_quote
     },
   });
+});
+
 export const ChurchInfoController = {
   getChurchInfo,
   getAdminChurchInfo,
