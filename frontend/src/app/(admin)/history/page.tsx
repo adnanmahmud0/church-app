@@ -78,9 +78,11 @@ export default function HistoryPage() {
     }
   };
 
-  const handleContentChange = (value: string) => {
+  const handleContentChange = (value: string, delta: any, source: string) => {
     setContent(value);
-    setIsDirty(true);
+    if (source === 'user') {
+      setIsDirty(true);
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
