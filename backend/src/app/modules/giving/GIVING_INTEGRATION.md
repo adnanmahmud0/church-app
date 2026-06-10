@@ -184,6 +184,32 @@ Retrieve the total amount the authenticated user has given in the current calend
 }
 ```
 
+### 4.6 GET /api/v1/giving/profile-summary
+Retrieve the user's overall giving summary, including their last gift details and current giving streak. (Requires Authentication)
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Profile giving summary retrieved successfully",
+  "data": {
+    "total_given_this_year": 1500.00,
+    "currency": "GBP",
+    "year": 2025,
+    "last_gift": {
+      "amount": 100,
+      "currency": "GBP",
+      "date": "2025-05-04",
+      "date_display": "May 4, 2025"
+    },
+    "giving_streak_weeks": 3,
+    "total_given_all_time": 4500.00,
+    "total_donations_count": 45
+  }
+}
+```
+
 ---
 
 ## 5. Admin API Endpoints
@@ -229,5 +255,6 @@ Update the church's bank details.
 - [ ] Record successful donations/transactions by calling `POST /api/v1/giving/record`.
 
 **Giving History / Profile Integration:**
-- [ ] Fetch the user's historical donations using `GET /api/v1/giving/history?userId=<USER_ID>`.
+- [ ] Fetch the user's historical donations using `GET /api/v1/giving/history`.
 - [ ] Provide an option to filter history by year by adding the `&year=<YYYY>` query parameter.
+- [ ] Fetch user's giving streak and last gift using `GET /api/v1/giving/profile-summary`.

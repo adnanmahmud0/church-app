@@ -141,6 +141,27 @@ const getTotalThisYear = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getProfileGivingSummary = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.UNAUTHORIZED,
+      message: 'User is not authenticated',
+      data: null,
+    });
+  }
+
+  const result = await GivingService.getProfileGivingSummary(userId as string);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Profile giving summary retrieved successfully',
+    data: result,
+  });
+});
+
 export const GivingController = {
   getFunds,
   createFund,
@@ -152,4 +173,5 @@ export const GivingController = {
   getHistory,
   getSummary,
   getTotalThisYear,
+  getProfileGivingSummary,
 };
