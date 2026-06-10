@@ -36,7 +36,6 @@ const BankDetailsSchema = new Schema<IBankDetails>(
     accountName: { type: String, required: true },
     sortCode: { type: String, required: true },
     accountNumber: { type: String, required: true },
-    reference: { type: String, required: true },
     note: { type: String, required: true },
   },
   {

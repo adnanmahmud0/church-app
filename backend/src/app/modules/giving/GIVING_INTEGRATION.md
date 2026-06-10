@@ -56,7 +56,6 @@ The app should configure its HTTP client (e.g., Axios or fetch) to use this base
   "accountName": "Church Name Inc.",
   "sortCode": "12-34-56",
   "accountNumber": "12345678",
-  "reference": "Tithe",
   "note": "Please ensure you include your unique reference when making a transfer."
 }
 ```
@@ -102,7 +101,6 @@ Retrieve the church's bank details for direct transfer.
     "accountName": "Church Name Inc.",
     "sortCode": "12-34-56",
     "accountNumber": "12345678",
-    "reference": "Tithe",
     "note": "Please ensure you include your unique reference."
   }
 }
@@ -114,11 +112,10 @@ Record a successful transaction. Should be called after the payment processor co
 **Request Body:**
 ```json
 {
-  "userId": "user_id_123", // Optional
   "fundId": "60d5ecb8b392d7001f3e3a41",
   "amount": 100.00,
-  "currency": "GBP", // Defaults to GBP
-  "status": "completed", // Defaults to completed
+  "currency": "GBP",
+  "status": "completed",
   "reference": "TXN-12345"
 }
 ```
@@ -146,9 +143,8 @@ Retrieve a user's giving history.
 
 **Query Parameters:**
 | Name | Type | Required | Description |
-|---|---|---|---|
-| userId | string | Yes | The ID of the user whose history is being retrieved. |
-| year | string | No | Filter history by a specific year (e.g. "2025"). |
+| :--- | :--- | :--- | :--- |
+| `year` | `string` | No | Filter history by a specific year (e.g. "2025"). |
 
 **Success Response (200 OK):**
 ```json

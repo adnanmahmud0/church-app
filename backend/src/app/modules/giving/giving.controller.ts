@@ -74,6 +74,9 @@ const updateBankDetails = catchAsync(async (req: Request, res: Response) => {
 });
 
 const recordTransaction = catchAsync(async (req: Request, res: Response) => {
+  if (req.user) {
+    req.body.userId = req.user.id;
+  }
   const result = await GivingService.recordTransaction(req.body);
 
   sendResponse(res, {
@@ -85,12 +88,13 @@ const recordTransaction = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getHistory = catchAsync(async (req: Request, res: Response) => {
-  const { userId, year } = req.query;
+  const userId = req.user?.id;
+  const { year } = req.query;
   if (!userId) {
     return sendResponse(res, {
       success: false,
-      statusCode: StatusCodes.BAD_REQUEST,
-      message: 'userId is required',
+      statusCode: StatusCodes.UNAUTHORIZED,
+      message: 'User is not authenticated',
       data: null,
     });
   }

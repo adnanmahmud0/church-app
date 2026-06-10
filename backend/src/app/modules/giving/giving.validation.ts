@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 const recordTransactionZodSchema = z.object({
   body: z.object({
-    userId: z.string().optional(),
     fundId: z.string({ required_error: 'fundId is required' }),
     amount: z.number({ required_error: 'amount is required' }),
     currency: z.string().default('GBP'),
@@ -15,7 +14,6 @@ const updateBankDetailsZodSchema = z.object({
     accountName: z.string().optional(),
     sortCode: z.string().optional(),
     accountNumber: z.string().optional(),
-    reference: z.string().optional(),
     note: z.string().optional(),
   }),
 });

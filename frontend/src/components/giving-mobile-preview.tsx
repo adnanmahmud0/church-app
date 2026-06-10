@@ -169,7 +169,7 @@ export function GivingMobilePreview({ summary, funds, bankDetails }: GivingMobil
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-white/80">Reference</span>
-                  <span className="font-bold">{bankDetails?.reference || selectedFund}</span>
+                  <span className="font-bold">{selectedFund}</span>
                 </div>
               </div>
 

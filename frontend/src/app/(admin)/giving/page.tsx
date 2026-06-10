@@ -118,7 +118,6 @@ export default function GivingDashboard() {
       accountName: formData.get("accountName") as string,
       sortCode: formData.get("sortCode") as string,
       accountNumber: formData.get("accountNumber") as string,
-      reference: formData.get("reference") as string,
       note: formData.get("note") as string,
     }
 
@@ -271,10 +270,6 @@ export default function GivingDashboard() {
                   <Label htmlFor="accountNumber">Account No.</Label>
                   <Input id="accountNumber" name="accountNumber" defaultValue={bankDetails?.accountNumber} required />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reference">Default Reference</Label>
-                <Input id="reference" name="reference" defaultValue={bankDetails?.reference} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="note">Instructions Note</Label>

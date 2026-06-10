@@ -27,6 +27,5 @@ export interface IBankDetails {
   accountName: string;
   sortCode: string;
   accountNumber: string;
-  reference: string;
   note: string;
 }

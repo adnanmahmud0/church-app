@@ -24,7 +24,6 @@ const seedBankDetailsIfEmpty = async () => {
       accountName: 'PIWC Stoneyburn',
       sortCode: '80-22-60',
       accountNumber: '00000000',
-      reference: 'PIWC-GIFT',
       note: 'Please use your full name as the payment reference so we can acknowledge your gift.',
     });
   }

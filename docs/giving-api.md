@@ -69,9 +69,7 @@ Returns church bank transfer details shown after the "Donate" tap.
   "data": {
     "accountName": "PIWC Stoneyburn",
     "sortCode": "80-22-60",
-    "accountNumber": "00000000",
-    "reference": "PIWC-GIFT",
-    "note": "Please use your full name as the payment reference so we can acknowledge your gift."
+    "accountNumber": "00000000"
   }
 }
 ```
@@ -89,16 +87,13 @@ Records a giving transaction intent (called when user taps Donate).
 - `amount` (required, number): Amount to donate.
 - `currency` (optional, string): Currency code (default: "GBP").
 - `reference` (required, string): Reference string generated or typed by user.
-- `userId` (optional, string): ID of the logged-in user.
 
 **Example Request**
 ```json
 {
-  "userId": "60d5e2...",
   "fundId": "60d5ec4...",
   "amount": 20,
-  "currency": "GBP",
-  "reference": "PIWC-GIFT"
+  "currency": "GBP"
 }
 ```
 
@@ -122,10 +117,7 @@ Records a giving transaction intent (called when user taps Donate).
 Returns giving history for a specific user, optionally filtered by year.
 
 **Request**
-`GET /history?userId=xxx&year=2026`
-
 **Query Parameters**
-- `userId` (required, string): ID of the user.
 - `year` (optional, string): Four digit year to filter history (e.g. 2026).
 
 **Example Response (200 OK)**
