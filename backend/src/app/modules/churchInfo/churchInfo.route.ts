@@ -14,7 +14,7 @@ router.get('/contact-and-mission', ChurchInfoController.getContactAndMission);
 router.get(
   '/admin',
   auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-  ChurchInfoController.getChurchInfo
+  ChurchInfoController.getAdminChurchInfo
 );
 
 router.put(

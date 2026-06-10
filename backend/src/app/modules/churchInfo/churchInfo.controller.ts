@@ -14,6 +14,17 @@ const getChurchInfo = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAdminChurchInfo = catchAsync(async (req: Request, res: Response) => {
+  const result = await ChurchInfoService.getChurchInfo();
+  
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Church info retrieved successfully',
+    data: result,
+  });
+});
+
 const updateChurchInfo = catchAsync(async (req: Request, res: Response) => {
   // Try to use email if available, otherwise name, fallback to "Admin"
   const adminName = req.user?.email || req.user?.name || 'Admin';
@@ -47,6 +58,7 @@ const getContactAndMission = catchAsync(async (req: Request, res: Response) => {
 
 export const ChurchInfoController = {
   getChurchInfo,
+  getAdminChurchInfo,
   updateChurchInfo,
   getContactAndMission,
 };
