@@ -43,9 +43,7 @@
   "success": true,
   "message": "Church info retrieved successfully",
   "data": {
-    "content": "<h2>Our History</h2><p>Founded with a vision...</p><h2>Our Mission</h2><p>To empower...</p><h2>Core Values</h2><ul><li>...</li></ul>",
-    "updated_at": "2025-05-04T10:30:00.000Z",
-    "updated_by": "Admin"
+    "content": "<h2>Our History</h2><p>Founded with a vision...</p><h2>Our Mission</h2><p>To empower...</p><h2>Core Values</h2><ul><li>...</li></ul>"
   }
 }
 ```
@@ -85,17 +83,14 @@ class ChurchInfoResponse {
 
 class ChurchInfo {
   final String content;
-  final DateTime updatedAt;
 
   ChurchInfo({
     required this.content,
-    required this.updatedAt,
   });
 
   factory ChurchInfo.fromJson(Map<String, dynamic> json) {
     return ChurchInfo(
       content: json['content'] as String,
-      updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
 }

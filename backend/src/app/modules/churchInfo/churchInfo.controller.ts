@@ -10,7 +10,7 @@ const getChurchInfo = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     message: 'Church info retrieved successfully',
-    data: result,
+    data: { content: result.content },
   });
 });
 
