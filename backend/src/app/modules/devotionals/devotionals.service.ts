@@ -239,6 +239,7 @@ const getProfileDevotionalSummary = async (userId: string) => {
     return {
       total_devotionals_read: 0,
       devotionals_streak_days: 0,
+      weekly_progress: 0,
       last_read_date: null,
     };
   }
@@ -254,36 +255,46 @@ const getProfileDevotionalSummary = async (userId: string) => {
 
   let streak = 0;
   const today = new Date();
+  
+  // Calculate start of the current week (Sunday)
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  let weeklyProgress = 0;
+  for (const dateStr of readDates) {
+    const d = new Date(dateStr);
+    if (d >= startOfWeek) {
+      weeklyProgress++;
+    } else {
+      break; // Since readDates are sorted descending, once we go before start of week we can stop
+    }
+  }
+
   const todayStr = today.toISOString().split('T')[0];
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-  // If the user hasn't read today or yesterday, streak is 0
-  if (readDates[0] !== todayStr && readDates[0] !== yesterdayStr) {
-    return {
-      total_devotionals_read,
-      devotionals_streak_days: 0,
-      last_read_date,
-    };
-  }
-
-  // Start checking from the most recent read date
-  let checkDate = new Date(readDates[0]);
-  
-  for (let i = 0; i < readDates.length; i++) {
-    const dStr = checkDate.toISOString().split('T')[0];
-    if (readDates[i] === dStr) {
-      streak++;
-      checkDate.setDate(checkDate.getDate() - 1);
-    } else {
-      break;
+  // If the user read today or yesterday, they have an active streak
+  if (readDates[0] === todayStr || readDates[0] === yesterdayStr) {
+    let checkDate = new Date(readDates[0]);
+    
+    for (let i = 0; i < readDates.length; i++) {
+      const dStr = checkDate.toISOString().split('T')[0];
+      if (readDates[i] === dStr) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
     }
   }
 
   return {
     total_devotionals_read,
     devotionals_streak_days: streak,
+    weekly_progress: weeklyProgress,
     last_read_date,
   };
 };

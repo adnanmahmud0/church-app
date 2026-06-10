@@ -195,6 +195,7 @@ Retrieve the reading streak, total reads, and last read date for the authenticat
   "data": {
     "total_devotionals_read": 14,
     "devotionals_streak_days": 3,
+    "weekly_progress": 3,
     "last_read_date": "2025-05-04T12:00:00.000Z"
   }
 }
