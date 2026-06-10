@@ -120,6 +120,27 @@ const getSummary = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getTotalThisYear = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.UNAUTHORIZED,
+      message: 'User is not authenticated',
+      data: null,
+    });
+  }
+
+  const result = await GivingService.getTotalThisYear(userId as string);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Total giving this year retrieved successfully',
+    data: result,
+  });
+});
+
 export const GivingController = {
   getFunds,
   createFund,
@@ -130,4 +151,5 @@ export const GivingController = {
   recordTransaction,
   getHistory,
   getSummary,
+  getTotalThisYear,
 };

@@ -267,6 +267,14 @@ const getUserGivingHistory = async (userId: string, page: number = 1, limit: num
   };
 };
 
+const getTotalThisYear = async (userId: string) => {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const yearTxns = await GivingTransaction.find({ userId, createdAt: { $gte: startOfYear }, status: 'completed' }).lean();
+  const total = yearTxns.reduce((sum, t) => sum + t.amount, 0);
+  return { totalThisYear: total };
+};
+
 export const GivingService = {
   getFunds,
   createFund,
@@ -279,4 +287,5 @@ export const GivingService = {
   getSummary,
   getProfileGivingSummary,
   getUserGivingHistory,
+  getTotalThisYear,
 };

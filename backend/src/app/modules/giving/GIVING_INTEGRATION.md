@@ -139,12 +139,12 @@ Record a successful transaction. Should be called after the payment processor co
 ```
 
 ### 4.4 GET /api/v1/giving/history
-Retrieve a user's giving history.
+Retrieve a user's giving history. (Requires Authentication)
 
 **Query Parameters:**
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `year` | `string` | No | Filter history by a specific year (e.g. "2025"). |
+| year | string | No | Filter history by a specific year (e.g., "2024"). |
 
 **Success Response (200 OK):**
 ```json
@@ -152,18 +152,35 @@ Retrieve a user's giving history.
   "success": true,
   "statusCode": 200,
   "message": "Giving history retrieved successfully",
-  "data": [
-    {
-      "id": "60d5ecb8b392d7001f3e3a42",
-      "amount": 100.00,
-      "currency": "GBP",
-      "createdAt": "2025-05-04T10:00:00.000Z",
-      "fundId": {
-        "id": "60d5ecb8b392d7001f3e3a41",
-        "name": "General Tithe"
+  "data": {
+    "totalThisYear": 1500.00,
+    "currency": "GBP",
+    "transactions": [
+      {
+        "id": "60d5ecb8b392d7001f3e3a42",
+        "fund": "Tithe",
+        "amount": 100.00,
+        "currency": "GBP",
+        "status": "completed",
+        "date": "May 4, 2025"
       }
-    }
-  ]
+    ]
+  }
+}
+```
+
+### 4.5 GET /api/v1/giving/total-this-year
+Retrieve the total amount the authenticated user has given in the current calendar year. (Requires Authentication)
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Total giving this year retrieved successfully",
+  "data": {
+    "totalThisYear": 1500.00
+  }
 }
 ```
 

@@ -22,6 +22,12 @@ router.get(
   auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   GivingController.getHistory
 );
+router.get(
+  '/total-this-year',
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  GivingController.getTotalThisYear
+);
+
 
 // Admin / Dashboard routes
 router.get(
