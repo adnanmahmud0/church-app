@@ -233,7 +233,7 @@ export default function SermonsPage() {
                     <tr key={sermon.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                       <td className="p-4 align-middle font-medium">{sermon.title}</td>
                       <td className="p-4 align-middle">{sermon.speaker}</td>
-                      <td className="p-4 align-middle">{sermon.category?.name || "None"}</td>
+                      <td className="p-4 align-middle">{sermon.series?.name || "None"}</td>
                       <td className="p-4 align-middle">{new Date(sermon.date).toLocaleDateString()}</td>
                       <td className="p-4 align-middle text-right">
                         <DropdownMenu>
@@ -365,7 +365,7 @@ export default function SermonsPage() {
       <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
         <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
           <DialogTitle className="sr-only">Mobile App Preview</DialogTitle>
-          <SermonsListMobilePreview sermons={sermons} categoryList={categoryList} />
+          <SermonsListMobilePreview sermons={sermons} seriesList={categoryList} />
         </DialogContent>
       </Dialog>
     </div>
