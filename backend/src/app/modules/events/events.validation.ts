@@ -40,16 +40,12 @@ const updateEventZodSchema = z.object({
   }),
 });
 
-const rsvpZodSchema = z.object({
-  body: z.object({
-    userId: z.string({ required_error: 'User ID is required' }),
-  }),
-});
+
 
 export const EventsValidation = {
   createEventCategoryZodSchema,
   updateEventCategoryZodSchema,
   createEventZodSchema,
   updateEventZodSchema,
-  rsvpZodSchema,
+
 };

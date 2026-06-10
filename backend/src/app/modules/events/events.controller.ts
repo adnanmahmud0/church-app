@@ -84,23 +84,21 @@ const getEventById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const rsvpEvent = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.body.userId;
+  const userId = req.user?.id;
+  if (!userId) {
+    return sendResponse(res, {
+      statusCode: StatusCodes.UNAUTHORIZED,
+      success: false,
+      message: 'User is not authenticated',
+      data: null,
+    });
+  }
+  
   const result = await EventsService.rsvpEvent(req.params.id, userId);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: 'RSVP successful',
-    data: result,
-  });
-});
-
-const cancelRsvp = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.body.userId;
-  const result = await EventsService.cancelRsvp(req.params.id, userId);
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: 'RSVP cancelled',
+    message: result.hasRsvp ? 'RSVP successful' : 'RSVP cancelled',
     data: result,
   });
 });
@@ -192,7 +190,6 @@ export const EventsController = {
   getAdminEvents,
   getEventById,
   rsvpEvent,
-  cancelRsvp,
   createEvent,
   updateEvent,
   deleteEvent,

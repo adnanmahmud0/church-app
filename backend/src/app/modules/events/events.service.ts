@@ -116,23 +116,17 @@ const rsvpEvent = async (id: string, userId: string) => {
   const event = await Event.findById(id);
   if (!event) throw new ApiError(StatusCodes.NOT_FOUND, 'Event not found');
 
-  try {
+  const existingRsvp = await EventRSVP.findOne({ eventId: id, userId });
+
+  if (existingRsvp) {
+    await EventRSVP.deleteOne({ _id: existingRsvp._id });
+    const count = await EventRSVP.countDocuments({ eventId: id });
+    return { hasRsvp: false, attendingCount: count };
+  } else {
     await EventRSVP.create({ eventId: id, userId });
-  } catch (error: any) {
-    if (error.code === 11000) {
-      throw new ApiError(StatusCodes.CONFLICT, 'Already RSVPed');
-    }
-    throw error;
+    const count = await EventRSVP.countDocuments({ eventId: id });
+    return { hasRsvp: true, attendingCount: count };
   }
-
-  const count = await EventRSVP.countDocuments({ eventId: id });
-  return { hasRsvp: true, attendingCount: count };
-};
-
-const cancelRsvp = async (id: string, userId: string) => {
-  await EventRSVP.findOneAndDelete({ eventId: id, userId });
-  const count = await EventRSVP.countDocuments({ eventId: id });
-  return { hasRsvp: false, attendingCount: count };
 };
 
 // Admin operations
@@ -249,7 +243,6 @@ export const EventsService = {
   getLatestEvents,
   getEventById,
   rsvpEvent,
-  cancelRsvp,
   createEvent,
   updateEvent,
   deleteEvent,

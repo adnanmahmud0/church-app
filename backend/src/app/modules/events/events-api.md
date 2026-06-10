@@ -146,7 +146,7 @@ Retrieves full details of a specific event.
 ---
 
 ## 5. RSVP for an Event
-Marks the authenticated user as attending the event.
+Toggles the authenticated user's RSVP status for the event. If they are already attending, they will be removed. If they are not attending, they will be added.
 
 **Endpoint**: `POST /:id/rsvp`
 
@@ -155,9 +155,7 @@ Marks the authenticated user as attending the event.
 
 **Request Body**:
 ```json
-{
-  "userId": "uuid-string"
-}
+{}
 ```
 
 **Example Response**:

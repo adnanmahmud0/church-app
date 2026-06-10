@@ -28,7 +28,6 @@ router.get('/history', optionalAuth, EventsController.getPastEvents);
 router.get('/:id', optionalAuth, EventsController.getEventById);
 
 // Public Auth Routes
-router.post('/:id/rsvp', optionalAuth, validateRequest(EventsValidation.rsvpZodSchema), EventsController.rsvpEvent);
-router.delete('/:id/rsvp', optionalAuth, validateRequest(EventsValidation.rsvpZodSchema), EventsController.cancelRsvp);
+router.post('/:id/rsvp', auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN), EventsController.rsvpEvent);
 
 export const EventsRoutes = router;
