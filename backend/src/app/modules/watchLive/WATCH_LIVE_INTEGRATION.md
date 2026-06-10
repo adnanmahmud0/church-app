@@ -53,7 +53,7 @@ The app should configure its HTTP client (e.g., Axios or fetch) to use this base
 
 ## 4. Public API Endpoints (App Developer)
 
-### 4.1 GET /api/v1/watchLive/youtube/status
+### 4.1 GET /api/v1/watch-live/youtube/status
 Fetch the current live stream status (if the church is currently live or has an upcoming stream).
 
 **Success Response (200 OK):**
@@ -77,7 +77,7 @@ Fetch the current live stream status (if the church is currently live or has an 
 }
 ```
 
-### 4.2 GET /api/v1/watchLive/youtube/recent
+### 4.2 GET /api/v1/watch-live/youtube/recent
 Fetch a list of recent videos from the church's YouTube channel.
 
 **Query Parameters:**
@@ -106,7 +106,7 @@ Fetch a list of recent videos from the church's YouTube channel.
 }
 ```
 
-### 4.3 GET /api/v1/watchLive/youtube/channel
+### 4.3 GET /api/v1/watch-live/youtube/channel
 Fetch the YouTube channel's basic information (subscriber count, thumbnail).
 
 **Success Response (200 OK):**
@@ -125,7 +125,7 @@ Fetch the YouTube channel's basic information (subscriber count, thumbnail).
 }
 ```
 
-### 4.4 GET /api/v1/watchLive/platforms
+### 4.4 GET /api/v1/watch-live/platforms
 Fetch the active alternative streaming platforms (e.g., Facebook, Twitch, Web).
 
 **Success Response (200 OK):**
@@ -150,7 +150,7 @@ Fetch the active alternative streaming platforms (e.g., Facebook, Twitch, Web).
 }
 ```
 
-### 4.5 GET /api/v1/watchLive/service-info
+### 4.5 GET /api/v1/watch-live/service-info
 Fetch the basic church service information (schedule, time, address).
 
 **Success Response (200 OK):**
