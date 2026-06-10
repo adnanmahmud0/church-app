@@ -20,26 +20,6 @@
   const String API_BASE_URL = String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:5000');
   ```
 
-### 3.3 GET /api/v1/church-info/service-info
-**Description:** Retrieves the next service information specifically formatted for the UI (like the Next Service widget).
-**Authentication:** None required.
-**Headers:**
-- `Content-Type: application/json`
-
-**Success Response (200 OK)**
-```json
-{
-  "statusCode": 200,
-  "success": true,
-  "message": "Service information retrieved successfully",
-  "data": {
-    "serviceName": "Sunday Worship",
-    "timeString": "Sunday • 10:00 AM - 12:30 PM",
-    "rawTime": "10:00 AM - 12:30 PM"
-  }
-}
-```
-
 ---
 
 ## 3. API Reference
