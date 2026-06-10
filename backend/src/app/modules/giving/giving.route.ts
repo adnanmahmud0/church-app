@@ -13,7 +13,7 @@ router.get('/funds', optionalAuth, GivingController.getFunds);
 router.get('/bank-details', GivingController.getBankDetails);
 router.post(
   '/record',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  optionalAuth,
   validateRequest(GivingValidation.recordTransactionZodSchema),
   GivingController.recordTransaction
 );
