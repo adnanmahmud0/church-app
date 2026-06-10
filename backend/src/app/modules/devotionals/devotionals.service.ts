@@ -232,6 +232,62 @@ const getStats = async () => {
   };
 };
 
+const getProfileDevotionalSummary = async (userId: string) => {
+  const reads = await DevotionalRead.find({ userId }).sort({ readAt: -1 }).lean();
+  
+  if (!reads.length) {
+    return {
+      total_devotionals_read: 0,
+      devotionals_streak_days: 0,
+      last_read_date: null,
+    };
+  }
+
+  const total_devotionals_read = reads.length;
+  const last_read_date = reads[0].readAt;
+
+  // Extract unique local dates (YYYY-MM-DD) from reads
+  const readDates = Array.from(new Set(reads.map(r => {
+    const d = new Date(r.readAt!);
+    return d.toISOString().split('T')[0];
+  }))).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+  let streak = 0;
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+  // If the user hasn't read today or yesterday, streak is 0
+  if (readDates[0] !== todayStr && readDates[0] !== yesterdayStr) {
+    return {
+      total_devotionals_read,
+      devotionals_streak_days: 0,
+      last_read_date,
+    };
+  }
+
+  // Start checking from the most recent read date
+  let checkDate = new Date(readDates[0]);
+  
+  for (let i = 0; i < readDates.length; i++) {
+    const dStr = checkDate.toISOString().split('T')[0];
+    if (readDates[i] === dStr) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+
+  return {
+    total_devotionals_read,
+    devotionals_streak_days: streak,
+    last_read_date,
+  };
+};
+
 export const DevotionalsService = {
   getDevotionals,
   getTodayDevotional,
@@ -242,4 +298,5 @@ export const DevotionalsService = {
   updateDevotional,
   deleteDevotional,
   getStats,
+  getProfileDevotionalSummary,
 };

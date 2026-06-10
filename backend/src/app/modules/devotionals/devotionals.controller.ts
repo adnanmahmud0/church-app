@@ -131,6 +131,27 @@ const getStats = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getProfileDevotionalSummary = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return sendResponse(res, {
+      success: false,
+      statusCode: StatusCodes.UNAUTHORIZED,
+      message: 'User is not authenticated',
+      data: null,
+    });
+  }
+
+  const result = await DevotionalsService.getProfileDevotionalSummary(userId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Profile devotional summary retrieved successfully',
+    data: result,
+  });
+});
+
 export const DevotionalsController = {
   getDevotionals,
   getTodayDevotional,
@@ -141,4 +162,5 @@ export const DevotionalsController = {
   updateDevotional,
   deleteDevotional,
   getStats,
+  getProfileDevotionalSummary,
 };

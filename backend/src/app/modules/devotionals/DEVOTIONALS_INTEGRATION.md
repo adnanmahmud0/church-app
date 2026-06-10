@@ -180,6 +180,26 @@ Toggles the read status of a devotional for the authenticated user. If already r
 }
 ```
 
+### 4.6 GET /api/v1/devotionals/profile-summary
+Retrieve the reading streak, total reads, and last read date for the authenticated user.
+
+**Headers:**
+- `Authorization`: Bearer <user_token>
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Profile devotional summary retrieved successfully",
+  "data": {
+    "total_devotionals_read": 14,
+    "devotionals_streak_days": 3,
+    "last_read_date": "2025-05-04T12:00:00.000Z"
+  }
+}
+```
+
 ---
 
 ## 5. Admin API Endpoints
