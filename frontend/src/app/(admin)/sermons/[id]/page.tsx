@@ -16,7 +16,6 @@ type Sermon = {
   series?: { _id: string; name: string };
   date: string;
   duration_seconds?: number;
-  audio_url?: string;
   video_url?: string;
   thumbnail_url?: string;
   key_scripture?: string;
@@ -118,25 +117,6 @@ export default function SermonDetailPage() {
             </div>
           )}
 
-          {sermon.audio_url ? (
-            <div className="bg-card border rounded-lg p-4 space-y-3">
-              <h3 className="font-semibold text-lg flex items-center">
-                <FileAudioIcon className="mr-2 h-5 w-5 text-primary" /> Audio Playback
-              </h3>
-              <audio 
-                controls 
-                className="w-full" 
-                src={`${BACKEND_URL}${sermon.audio_url}`} 
-                preload="metadata"
-              >
-                Your browser does not support the audio element.
-              </audio>
-            </div>
-          ) : (
-            <div className="bg-muted border rounded-lg p-6 text-center text-muted-foreground">
-              No Audio Uploaded
-            </div>
-          )}
         </div>
 
         {/* Right Column: Details */}
@@ -193,29 +173,5 @@ export default function SermonDetailPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-// Ensure icon is available for fallback, otherwise remove it or import it.
-function FileAudioIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M17.5 22h.5c.5 0 1-.2 1.4-.6.4-.4.6-.9.6-1.4V7.5L14.5 2H6c-.5 0-1 .2-1.4.6C4.2 3 4 3.5 4 4v3" />
-      <polyline points="14 2 14 8 20 8" />
-      <path d="M10 20v-1a2 2 0 1 1 4 0v1a1.5 1.5 0 1 1-3 0 1.5 1.5 0 1 1-3 0 1.5 1.5 0 1 1-3 0 1.5 1.5 0 1 1-3 0" />
-      <path d="M6 20v-1a2 2 0 1 0-4 0v1a1.5 1.5 0 1 0 3 0" />
-      <line x1="2" x2="10" y1="20" y2="20" />
-    </svg>
   );
 }

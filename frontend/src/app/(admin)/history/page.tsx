@@ -3,8 +3,11 @@
 import { useEffect, useState, FormEvent } from "react";
 import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, SmartphoneIcon } from "lucide-react";
 import dynamic from "next/dynamic";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { HistoryMobilePreview } from "@/components/history-mobile-preview";
 
 // Dynamically import ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import("react-quill-new"), {
@@ -26,6 +29,7 @@ export default function HistoryPage() {
   const [isDirty, setIsDirty] = useState(false);
 
   const [content, setContent] = useState("");
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
 
   useEffect(() => {
     fetchChurchInfo();
@@ -105,13 +109,18 @@ export default function HistoryPage() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">History & Core Values</h1>
-        {data && data.updated_at && (
-          <p className="text-sm text-zinc-500 mt-2">
-            Last updated: {new Date(data.updated_at).toLocaleString()} by <span className="font-medium">{data.updated_by}</span>
-          </p>
-        )}
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">History & Core Values</h1>
+          {data && data.updated_at && (
+            <p className="text-sm text-zinc-500 mt-2">
+              Last updated: {new Date(data.updated_at).toLocaleString()} by <span className="font-medium">{data.updated_by}</span>
+            </p>
+          )}
+        </div>
+        <Button variant="outline" size="icon" type="button" onClick={() => setIsMobilePreviewOpen(true)} title="View Mobile App Visualization" className="rounded-full shrink-0">
+          <SmartphoneIcon className="h-5 w-5" />
+        </Button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -140,6 +149,13 @@ export default function HistoryPage() {
           </button>
         </div>
       </form>
+
+      <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+        <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
+          <DialogTitle className="sr-only">Mobile App Preview</DialogTitle>
+          <HistoryMobilePreview content={content} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

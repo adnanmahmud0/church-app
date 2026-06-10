@@ -1,0 +1,150 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { MediaPicker } from "@/components/media-picker";
+import { apiFetch } from "@/lib/api";
+import { ArrowLeftIcon } from "lucide-react";
+import { SermonMobilePreview } from "@/components/sermon-mobile-preview";
+
+export default function EditSermonPage() {
+  const router = useRouter();
+  const params = useParams();
+  const [sermonFormData, setSermonFormData] = useState({
+    title: "", speaker: "", series: "", date: new Date().toISOString().split('T')[0],
+    duration_seconds: 0, video_url: "", thumbnail_url: "", key_scripture: "", description: "", tags: "",
+  });
+  const [seriesList, setSeriesList] = useState<{ _id: string; name: string }[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<{ field: string, type: "image" | "video" } | null>(null);
+
+  useEffect(() => {
+    fetchSeriesList();
+    if (params.id) {
+      fetchSermon(params.id as string);
+    }
+  }, [params.id]);
+
+  const fetchSeriesList = async () => {
+    try {
+      const res = await apiFetch('/sermon-series');
+      if (res.data) setSeriesList(res.data);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to load sermon series');
+    }
+  };
+
+  const fetchSermon = async (id: string) => {
+    try {
+      const res = await apiFetch(`/sermons/${id}`);
+      if (res.data) {
+        const sermon = res.data;
+        setSermonFormData({ 
+          title: sermon.title,
+          speaker: sermon.speaker,
+          series: sermon.series?._id || "",
+          date: new Date(sermon.date).toISOString().split('T')[0],
+          duration_seconds: sermon.duration_seconds || 0,
+          video_url: sermon.video_url || "",
+          thumbnail_url: sermon.thumbnail_url || "",
+          key_scripture: sermon.key_scripture || "",
+          description: sermon.description || "",
+          tags: sermon.tags ? sermon.tags.join(", ") : "",
+        });
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to load sermon');
+    }
+  };
+
+  const handleSermonEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!params.id) return;
+    setIsLoading(true);
+    try {
+      const payload = { ...sermonFormData, tags: sermonFormData.tags ? sermonFormData.tags.split(',').map(t => t.trim()) : [], duration_seconds: Number(sermonFormData.duration_seconds) };
+      await apiFetch(`/sermons/${params.id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+      toast.success("Sermon updated successfully");
+      router.push("/sermons");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update sermon");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMediaSelect = (url: string) => {
+    if (!mediaPickerTarget) return;
+    setSermonFormData(prev => ({ ...prev, [mediaPickerTarget.field]: url }));
+  };
+
+  const openMediaPicker = (field: string, type: "image" | "video") => {
+    setMediaPickerTarget({ field, type });
+    setIsMediaPickerOpen(true);
+  };
+
+  return (
+    <div className="flex-1 space-y-4 p-8 pt-6">
+      <div className="flex items-center space-x-4">
+        <Button variant="outline" size="icon" onClick={() => router.push("/sermons")}>
+          <ArrowLeftIcon className="h-4 w-4" />
+        </Button>
+        <h2 className="text-3xl font-bold tracking-tight">Edit Sermon</h2>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex-1 w-full max-w-2xl bg-card border rounded-lg p-6">
+          <form onSubmit={handleSermonEditSubmit} className="space-y-4">
+            <div className="grid gap-2"><Label htmlFor="edit-title">Title *</Label><Input id="edit-title" required value={sermonFormData.title} onChange={(e) => setSermonFormData({...sermonFormData, title: e.target.value})} /></div>
+            <div className="grid gap-2"><Label htmlFor="edit-speaker">Speaker *</Label><Input id="edit-speaker" required value={sermonFormData.speaker} onChange={(e) => setSermonFormData({...sermonFormData, speaker: e.target.value})} /></div>
+            <div className="grid gap-2"><Label htmlFor="edit-series">Series</Label>
+              <select id="edit-series" className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50" value={sermonFormData.series} onChange={(e) => setSermonFormData({...sermonFormData, series: e.target.value})}>
+                <option value="">No Series</option>
+                {seriesList.map(s => (<option key={s._id} value={s._id}>{s.name}</option>))}
+              </select>
+            </div>
+            <div className="grid gap-2"><Label htmlFor="edit-date">Date *</Label><Input id="edit-date" type="date" required value={sermonFormData.date} onChange={(e) => setSermonFormData({...sermonFormData, date: e.target.value})} /></div>
+            <div className="grid gap-2"><Label htmlFor="edit-duration_seconds">Duration (Seconds)</Label><Input id="edit-duration_seconds" type="number" value={sermonFormData.duration_seconds} onChange={(e) => setSermonFormData({...sermonFormData, duration_seconds: Number(e.target.value)})} /></div>
+            <div className="grid gap-2"><Label htmlFor="edit-video_url">Video URL</Label>
+              <div className="flex gap-2">
+                <Input id="edit-video_url" value={sermonFormData.video_url} onChange={(e) => setSermonFormData({...sermonFormData, video_url: e.target.value})} />
+                <Button type="button" variant="outline" onClick={() => openMediaPicker("video_url", "video")}>Select</Button>
+              </div>
+            </div>
+            <div className="grid gap-2"><Label htmlFor="edit-thumbnail_url">Thumbnail URL</Label>
+              <div className="flex gap-2">
+                <Input id="edit-thumbnail_url" value={sermonFormData.thumbnail_url} onChange={(e) => setSermonFormData({...sermonFormData, thumbnail_url: e.target.value})} />
+                <Button type="button" variant="outline" onClick={() => openMediaPicker("thumbnail_url", "image")}>Select</Button>
+              </div>
+            </div>
+            <div className="grid gap-2"><Label htmlFor="edit-key_scripture">Key Scripture</Label><Input id="edit-key_scripture" value={sermonFormData.key_scripture} onChange={(e) => setSermonFormData({...sermonFormData, key_scripture: e.target.value})} /></div>
+            <div className="grid gap-2"><Label htmlFor="edit-description">Description</Label><Textarea id="edit-description" value={sermonFormData.description} onChange={(e) => setSermonFormData({...sermonFormData, description: e.target.value})} /></div>
+            <div className="grid gap-2"><Label htmlFor="edit-tags">Tags (comma separated)</Label><Input id="edit-tags" value={sermonFormData.tags} onChange={(e) => setSermonFormData({...sermonFormData, tags: e.target.value})} /></div>
+            
+            <div className="flex justify-end pt-4 space-x-2">
+              <Button type="button" variant="outline" onClick={() => router.push("/sermons")}>Cancel</Button>
+              <Button type="submit" disabled={isLoading}>{isLoading ? "Saving..." : "Save changes"}</Button>
+            </div>
+          </form>
+        </div>
+
+        <div className="lg:w-[400px] flex justify-center lg:sticky lg:top-8">
+          <SermonMobilePreview data={sermonFormData} />
+        </div>
+      </div>
+
+      <MediaPicker 
+        open={isMediaPickerOpen} 
+        onOpenChange={setIsMediaPickerOpen}
+        onSelect={handleMediaSelect}
+        allowedTypes={mediaPickerTarget ? [mediaPickerTarget.type] : ["image", "video"]}
+      />
+    </div>
+  );
+}

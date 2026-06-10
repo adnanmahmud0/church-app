@@ -7,7 +7,6 @@ export type ISermon = {
   series?: Types.ObjectId | ISermonSeries;
   date: Date;
   duration_seconds?: number;
-  audio_url?: string;
   video_url?: string;
   thumbnail_url?: string;
   key_scripture?: string;

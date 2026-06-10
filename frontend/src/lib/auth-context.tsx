@@ -40,9 +40,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
           const res = await apiFetch("/user/profile"); // Assuming a /user/profile route exists
           if (res.data) {
+            const userData = res.data.user || res.data;
             setUser({
-              ...res.data,
-              avatar: res.data.image || "https://i.ibb.co/z5YHLV9/profile.png",
+              ...userData,
+              avatar: userData.image || userData.avatar || "https://i.ibb.co/z5YHLV9/profile.png",
             });
           }
         } catch (error) {
@@ -59,7 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     Cookies.set("refreshToken", refreshToken, { expires: 7 });
     setUser({
       ...userData,
-      avatar: userData.image || "https://i.ibb.co/z5YHLV9/profile.png",
+      avatar: userData.image || userData.avatar || "https://i.ibb.co/z5YHLV9/profile.png",
     });
     router.push("/"); // Redirect to the dashboard root after login
   };

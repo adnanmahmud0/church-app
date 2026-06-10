@@ -30,7 +30,8 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { apiFetch } from "@/lib/api"
 import { toast } from "sonner"
-import { HeartIcon, PencilIcon, TrashIcon, PlusIcon, LandmarkIcon } from "lucide-react"
+import { HeartIcon, PencilIcon, TrashIcon, PlusIcon, LandmarkIcon, SmartphoneIcon } from "lucide-react"
+import { GivingMobilePreview } from "@/components/giving-mobile-preview"
 
 export default function GivingDashboard() {
   const [summary, setSummary] = useState<any>(null)
@@ -41,6 +42,7 @@ export default function GivingDashboard() {
   // Modal states
   const [isFundModalOpen, setIsFundModalOpen] = useState(false)
   const [editingFund, setEditingFund] = useState<any>(null)
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -144,7 +146,12 @@ export default function GivingDashboard() {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Giving & Donations</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-3xl font-bold tracking-tight">Giving & Donations</h2>
+          <Button variant="outline" size="icon" onClick={() => setIsMobilePreviewOpen(true)} title="View Mobile App Visualization" className="rounded-full">
+            <SmartphoneIcon className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* STATS CARDS */}
@@ -275,27 +282,6 @@ export default function GivingDashboard() {
               </div>
               <Button type="submit" className="w-full">Save Changes</Button>
             </form>
-            
-            {/* Live Preview */}
-            <div className="mt-6 rounded-xl bg-green-500 p-6 text-white shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-20">
-                <LandmarkIcon size={64} />
-              </div>
-              <h3 className="font-bold mb-4 relative z-10">Bank Transfer Details</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm relative z-10">
-                <div className="opacity-80">Account Name</div>
-                <div className="font-medium text-right">{bankDetails?.accountName}</div>
-                <div className="opacity-80">Sort Code</div>
-                <div className="font-medium text-right">{bankDetails?.sortCode}</div>
-                <div className="opacity-80">Account No.</div>
-                <div className="font-medium text-right">{bankDetails?.accountNumber}</div>
-                <div className="opacity-80">Reference</div>
-                <div className="font-medium text-right">{bankDetails?.reference}</div>
-              </div>
-              <div className="mt-4 pt-4 border-t border-green-400 text-xs opacity-90 relative z-10">
-                {bankDetails?.note}
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -388,6 +374,13 @@ export default function GivingDashboard() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+        <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
+          <DialogTitle className="sr-only">Mobile App Preview</DialogTitle>
+          <GivingMobilePreview summary={summary} funds={funds} bankDetails={bankDetails} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

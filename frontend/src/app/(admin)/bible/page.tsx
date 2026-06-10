@@ -8,7 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "sonner"
-import { CopyIcon, RefreshCw, Trash2, BookIcon } from "lucide-react"
+import { CopyIcon, RefreshCw, Trash2, BookIcon, SmartphoneIcon } from "lucide-react"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { BibleMobilePreview } from "@/components/bible-mobile-preview"
 
 export default function BibleAdminPage() {
   const [loading, setLoading] = useState(true)
@@ -17,6 +19,7 @@ export default function BibleAdminPage() {
   const [cacheStats, setCacheStats] = useState<any>(null)
   const [testingConnection, setTestingConnection] = useState(false)
   const [clearingCache, setClearingCache] = useState(false)
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false)
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
 
@@ -126,7 +129,12 @@ export default function BibleAdminPage() {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Bible Module</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-3xl font-bold tracking-tight">Bible Module</h2>
+          <Button variant="outline" size="icon" onClick={() => setIsMobilePreviewOpen(true)} title="View Mobile App Visualization" className="rounded-full shrink-0">
+            <SmartphoneIcon className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -306,6 +314,13 @@ export default function BibleAdminPage() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+        <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
+          <DialogTitle className="sr-only">Bible App Preview</DialogTitle>
+          <BibleMobilePreview />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

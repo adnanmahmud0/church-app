@@ -19,14 +19,17 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { DevotionalsMobilePreview } from "@/components/devotionals-mobile-preview"
 import { apiFetch } from "@/lib/api"
 import { toast } from "sonner"
-import { BookIcon, PencilIcon, TrashIcon, PlusIcon, UsersIcon, BarChart3Icon, CalendarIcon } from "lucide-react"
+import { BookIcon, PencilIcon, TrashIcon, PlusIcon, UsersIcon, BarChart3Icon, CalendarIcon, SmartphoneIcon } from "lucide-react"
 
 export default function DevotionalsDashboard() {
   const [stats, setStats] = useState<any>(null)
   const [devotionals, setDevotionals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -67,7 +70,12 @@ export default function DevotionalsDashboard() {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Devotionals</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-3xl font-bold tracking-tight">Devotionals</h2>
+          <Button variant="outline" size="icon" onClick={() => setIsMobilePreviewOpen(true)} title="View Mobile App Visualization" className="rounded-full shrink-0">
+            <SmartphoneIcon className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* STATS CARDS */}
@@ -237,6 +245,13 @@ export default function DevotionalsDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+        <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
+          <DialogTitle className="sr-only">Mobile App Preview</DialogTitle>
+          <DevotionalsMobilePreview devotionals={devotionals} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

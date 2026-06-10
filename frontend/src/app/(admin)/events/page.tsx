@@ -4,7 +4,7 @@ import * as React from "react"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { format } from "date-fns"
-import { CalendarIcon, Loader2, Plus, Users, Clock, History, MoreHorizontal, Pencil, Trash, Tags } from "lucide-react"
+import { CalendarIcon, Loader2, Plus, Users, Clock, History, MoreHorizontal, Pencil, Trash, Tags, SmartphoneIcon } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { apiFetch } from "@/lib/api"
@@ -36,6 +36,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { EventsMobilePreview } from "@/components/events-mobile-preview"
 
 export default function EventsDashboard() {
   const router = useRouter()
@@ -45,6 +46,7 @@ export default function EventsDashboard() {
   
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming')
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false)
 
   // Categories Modal State
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -125,7 +127,12 @@ export default function EventsDashboard() {
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
-        <h2 className="text-3xl font-bold tracking-tight">Events Dashboard</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-3xl font-bold tracking-tight">Events Dashboard</h2>
+          <Button variant="outline" size="icon" onClick={() => setIsMobilePreviewOpen(true)} title="View Mobile App Visualization" className="rounded-full shrink-0">
+            <SmartphoneIcon className="h-5 w-5" />
+          </Button>
+        </div>
         <div className="flex items-center space-x-2">
           <Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
             <DialogTrigger asChild>
@@ -340,6 +347,13 @@ export default function EventsDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+        <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
+          <DialogTitle className="sr-only">Mobile App Preview</DialogTitle>
+          <EventsMobilePreview events={events} categories={categories} stats={stats} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

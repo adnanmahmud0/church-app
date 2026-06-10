@@ -22,7 +22,6 @@ const sermonSchema = new Schema<ISermon, SermonModel>(
     duration_seconds: {
       type: Number,
     },
-    audio_url: { type: String },
     video_url: { type: String },
     thumbnail_url: {
       type: String,

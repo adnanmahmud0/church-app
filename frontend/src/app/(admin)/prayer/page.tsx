@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { RefreshCw, Trash2, HeartIcon, ArchiveIcon, CheckCircleIcon } from "lucide-react"
+import { RefreshCw, Trash2, HeartIcon, ArchiveIcon, CheckCircleIcon, SmartphoneIcon } from "lucide-react"
+import { PrayerMobilePreview } from "@/components/prayer-mobile-preview"
 import { apiFetch } from "@/lib/api"
 
 export default function PrayerAdminPage() {
@@ -15,6 +17,7 @@ export default function PrayerAdminPage() {
   const [stats, setStats] = useState<any>(null)
   const [requests, setRequests] = useState<any[]>([])
   const [pagination, setPagination] = useState<any>(null)
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false)
   
   const fetchDashboardData = async () => {
     setLoading(true)
@@ -81,7 +84,12 @@ export default function PrayerAdminPage() {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Prayer Module</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-3xl font-bold tracking-tight">Prayer Module</h2>
+          <Button variant="outline" size="icon" onClick={() => setIsMobilePreviewOpen(true)} title="View Mobile App Visualization" className="rounded-full">
+            <SmartphoneIcon className="h-5 w-5" />
+          </Button>
+        </div>
         <Button onClick={fetchDashboardData} variant="outline">
           <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -192,6 +200,13 @@ export default function PrayerAdminPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+        <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
+          <DialogTitle className="sr-only">Mobile App Preview</DialogTitle>
+          <PrayerMobilePreview requests={requests} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

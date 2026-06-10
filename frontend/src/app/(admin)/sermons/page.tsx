@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { SearchIcon, PlusIcon, MoreHorizontalIcon, PencilIcon, TrashIcon, ImageIcon, EyeIcon } from "lucide-react";
+import { SearchIcon, PlusIcon, MoreHorizontalIcon, PencilIcon, TrashIcon, SmartphoneIcon, EyeIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SermonsListMobilePreview } from "@/components/sermons-list-mobile-preview";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MediaPicker } from "@/components/media-picker";
 import { apiFetch } from "@/lib/api";
 
-type SermonSeries = {
+export type SermonSeries = {
   _id: string;
   name: string;
   description?: string;
@@ -34,14 +35,13 @@ type SermonSeries = {
   sermonCount?: number;
 };
 
-type Sermon = {
+export type Sermon = {
   id: string;
   title: string;
   speaker: string;
   series?: { _id: string; name: string };
   date: string;
   duration_seconds?: number;
-  audio_url?: string;
   video_url?: string;
   thumbnail_url?: string;
   key_scripture?: string;
@@ -56,14 +56,9 @@ export default function SermonsPage() {
   // --- SERMONS STATE ---
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [sermonSearch, setSermonSearch] = useState("");
-  const [isSermonAddOpen, setIsSermonAddOpen] = useState(false);
-  const [isSermonEditOpen, setIsSermonEditOpen] = useState(false);
   const [isSermonDeleteOpen, setIsSermonDeleteOpen] = useState(false);
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
   const [selectedSermon, setSelectedSermon] = useState<Sermon | null>(null);
-  const [sermonFormData, setSermonFormData] = useState({
-    title: "", speaker: "", series: "", date: new Date().toISOString().split('T')[0],
-    duration_seconds: 0, audio_url: "", video_url: "", thumbnail_url: "", key_scripture: "", description: "", tags: "",
-  });
 
   // --- SERIES STATE ---
   const [seriesList, setSeriesList] = useState<SermonSeries[]>([]);
@@ -78,7 +73,7 @@ export default function SermonsPage() {
 
   // --- MEDIA PICKER STATE ---
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
-  const [mediaPickerTarget, setMediaPickerTarget] = useState<{ form: "sermon" | "series", field: string, type: "image" | "audio" | "video" } | null>(null);
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<{ form: "sermon" | "series", field: string, type: "image" | "video" } | null>(null);
 
   const fetchSermons = async () => {
     try {
@@ -111,38 +106,6 @@ export default function SermonsPage() {
   }, []);
 
   // --- SERMON HANDLERS ---
-  const handleSermonAddSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const payload = { ...sermonFormData, tags: sermonFormData.tags ? sermonFormData.tags.split(',').map(t => t.trim()) : [], duration_seconds: Number(sermonFormData.duration_seconds) };
-      await apiFetch('/sermons', { method: 'POST', body: JSON.stringify(payload) });
-      toast.success("Sermon created successfully");
-      setIsSermonAddOpen(false);
-      fetchSermons();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to create sermon");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSermonEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedSermon) return;
-    setIsLoading(true);
-    try {
-      const payload = { ...sermonFormData, tags: sermonFormData.tags ? sermonFormData.tags.split(',').map(t => t.trim()) : [], duration_seconds: Number(sermonFormData.duration_seconds) };
-      await apiFetch(`/sermons/${selectedSermon.id}`, { method: 'PATCH', body: JSON.stringify(payload) });
-      toast.success("Sermon updated successfully");
-      setIsSermonEditOpen(false);
-      fetchSermons();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update sermon");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSermonDelete = async () => {
     if (!selectedSermon) return;
@@ -210,13 +173,13 @@ export default function SermonsPage() {
     if (!mediaPickerTarget) return;
     
     if (mediaPickerTarget.form === "sermon") {
-      setSermonFormData(prev => ({ ...prev, [mediaPickerTarget.field]: url }));
+      // Logic for updating sermon form state would go here
     } else {
       setSeriesFormData(prev => ({ ...prev, [mediaPickerTarget.field]: url }));
     }
   };
 
-  const openMediaPicker = (form: "sermon" | "series", field: string, type: "image" | "audio" | "video") => {
+  const openMediaPicker = (form: "sermon" | "series", field: string, type: "image" | "video") => {
     setMediaPickerTarget({ form, field, type });
     setIsMediaPickerOpen(true);
   };
@@ -225,8 +188,13 @@ export default function SermonsPage() {
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Sermons Management</h2>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h2 className="text-3xl font-bold tracking-tight">Sermons Management</h2>
+          <Button variant="outline" size="icon" onClick={() => setIsMobilePreviewOpen(true)} title="View Mobile App Visualization" className="rounded-full">
+            <SmartphoneIcon className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -241,10 +209,7 @@ export default function SermonsPage() {
               <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search sermons..." className="pl-8" value={sermonSearch} onChange={(e) => setSermonSearch(e.target.value)} />
             </div>
-            <Button onClick={() => {
-              setSermonFormData({ title: "", speaker: "", series: "", date: new Date().toISOString().split('T')[0], duration_seconds: 0, audio_url: "", video_url: "", thumbnail_url: "", key_scripture: "", description: "", tags: "" });
-              setIsSermonAddOpen(true);
-            }}>
+            <Button onClick={() => router.push('/sermons/add')}>
               <PlusIcon className="mr-2 h-4 w-4" /> Add Sermon
             </Button>
           </div>
@@ -279,11 +244,9 @@ export default function SermonsPage() {
                             <DropdownMenuItem onClick={() => router.push(`/sermons/${sermon.id}`)}>
                               <EyeIcon className="mr-2 h-4 w-4" /> View
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                              setSelectedSermon(sermon);
-                              setSermonFormData({ ...sermon, date: new Date(sermon.date).toISOString().split('T')[0], tags: sermon.tags ? sermon.tags.join(", ") : "", series: sermon.series?._id || "", duration_seconds: sermon.duration_seconds || 0, audio_url: sermon.audio_url || "", video_url: sermon.video_url || "", thumbnail_url: sermon.thumbnail_url || "", key_scripture: sermon.key_scripture || "", description: sermon.description || "" });
-                              setIsSermonEditOpen(true);
-                            }}><PencilIcon className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push(`/sermons/${sermon.id}/edit`)}>
+                              <PencilIcon className="mr-2 h-4 w-4" /> Edit
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => { setSelectedSermon(sermon); setIsSermonDeleteOpen(true); }} className="text-red-600"><TrashIcon className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -352,99 +315,6 @@ export default function SermonsPage() {
       </Tabs>
 
       {/* SERMON MODALS */}
-      <Dialog open={isSermonAddOpen} onOpenChange={setIsSermonAddOpen}>
-        <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
-          <form onSubmit={handleSermonAddSubmit}>
-            <DialogHeader><DialogTitle>Add New Sermon</DialogTitle></DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2"><Label htmlFor="title">Title *</Label><Input id="title" required value={sermonFormData.title} onChange={(e) => setSermonFormData({...sermonFormData, title: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="speaker">Speaker *</Label><Input id="speaker" required value={sermonFormData.speaker} onChange={(e) => setSermonFormData({...sermonFormData, speaker: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="series">Series</Label>
-                <select id="series" className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50" value={sermonFormData.series} onChange={(e) => setSermonFormData({...sermonFormData, series: e.target.value})}>
-                  <option value="">No Series</option>
-                  {seriesList.map(s => (<option key={s._id} value={s._id}>{s.name}</option>))}
-                </select>
-              </div>
-              <div className="grid gap-2"><Label htmlFor="date">Date *</Label><Input id="date" type="date" required value={sermonFormData.date} onChange={(e) => setSermonFormData({...sermonFormData, date: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="duration_seconds">Duration (Seconds)</Label><Input id="duration_seconds" type="number" value={sermonFormData.duration_seconds} onChange={(e) => setSermonFormData({...sermonFormData, duration_seconds: Number(e.target.value)})} /></div>
-              <div className="grid gap-2"><Label htmlFor="audio_url">Audio URL</Label>
-                <div className="flex gap-2">
-                  <Input id="audio_url" disabled={!!sermonFormData.video_url} value={sermonFormData.audio_url} onChange={(e) => setSermonFormData({...sermonFormData, audio_url: e.target.value})} />
-                  <Button type="button" disabled={!!sermonFormData.video_url} variant="outline" onClick={() => openMediaPicker("sermon", "audio_url", "audio")}>Select</Button>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-center -my-2 relative z-10">
-                <span className="bg-background px-2 text-xs text-muted-foreground font-medium uppercase">OR</span>
-              </div>
-
-              <div className="grid gap-2"><Label htmlFor="video_url">Video URL</Label>
-                <div className="flex gap-2">
-                  <Input id="video_url" disabled={!!sermonFormData.audio_url} value={sermonFormData.video_url} onChange={(e) => setSermonFormData({...sermonFormData, video_url: e.target.value})} />
-                  <Button type="button" disabled={!!sermonFormData.audio_url} variant="outline" onClick={() => openMediaPicker("sermon", "video_url", "video")}>Select</Button>
-                </div>
-              </div>
-              <div className="grid gap-2"><Label htmlFor="thumbnail_url">Thumbnail URL</Label>
-                <div className="flex gap-2">
-                  <Input id="thumbnail_url" value={sermonFormData.thumbnail_url} onChange={(e) => setSermonFormData({...sermonFormData, thumbnail_url: e.target.value})} />
-                  <Button type="button" variant="outline" onClick={() => openMediaPicker("sermon", "thumbnail_url", "image")}>Select</Button>
-                </div>
-              </div>
-              <div className="grid gap-2"><Label htmlFor="key_scripture">Key Scripture</Label><Input id="key_scripture" value={sermonFormData.key_scripture} onChange={(e) => setSermonFormData({...sermonFormData, key_scripture: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="description">Description</Label><Textarea id="description" value={sermonFormData.description} onChange={(e) => setSermonFormData({...sermonFormData, description: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="tags">Tags (comma separated)</Label><Input id="tags" value={sermonFormData.tags} onChange={(e) => setSermonFormData({...sermonFormData, tags: e.target.value})} /></div>
-            </div>
-            <DialogFooter><Button type="button" variant="outline" onClick={() => setIsSermonAddOpen(false)}>Cancel</Button><Button type="submit" disabled={isLoading}>{isLoading ? "Saving..." : "Create Sermon"}</Button></DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isSermonEditOpen} onOpenChange={setIsSermonEditOpen}>
-        <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
-          <form onSubmit={handleSermonEditSubmit}>
-            <DialogHeader><DialogTitle>Edit Sermon</DialogTitle></DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2"><Label htmlFor="edit-title">Title *</Label><Input id="edit-title" required value={sermonFormData.title} onChange={(e) => setSermonFormData({...sermonFormData, title: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="edit-speaker">Speaker *</Label><Input id="edit-speaker" required value={sermonFormData.speaker} onChange={(e) => setSermonFormData({...sermonFormData, speaker: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="edit-series">Series</Label>
-                <select id="edit-series" className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50" value={sermonFormData.series} onChange={(e) => setSermonFormData({...sermonFormData, series: e.target.value})}>
-                  <option value="">No Series</option>
-                  {seriesList.map(s => (<option key={s._id} value={s._id}>{s.name}</option>))}
-                </select>
-              </div>
-              <div className="grid gap-2"><Label htmlFor="edit-date">Date *</Label><Input id="edit-date" type="date" required value={sermonFormData.date} onChange={(e) => setSermonFormData({...sermonFormData, date: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="edit-duration_seconds">Duration (Seconds)</Label><Input id="edit-duration_seconds" type="number" value={sermonFormData.duration_seconds} onChange={(e) => setSermonFormData({...sermonFormData, duration_seconds: Number(e.target.value)})} /></div>
-              <div className="grid gap-2"><Label htmlFor="edit-audio_url">Audio URL</Label>
-                <div className="flex gap-2">
-                  <Input id="edit-audio_url" disabled={!!sermonFormData.video_url} value={sermonFormData.audio_url} onChange={(e) => setSermonFormData({...sermonFormData, audio_url: e.target.value})} />
-                  <Button type="button" disabled={!!sermonFormData.video_url} variant="outline" onClick={() => openMediaPicker("sermon", "audio_url", "audio")}>Select</Button>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-center -my-2 relative z-10">
-                <span className="bg-background px-2 text-xs text-muted-foreground font-medium uppercase">OR</span>
-              </div>
-
-              <div className="grid gap-2"><Label htmlFor="edit-video_url">Video URL</Label>
-                <div className="flex gap-2">
-                  <Input id="edit-video_url" disabled={!!sermonFormData.audio_url} value={sermonFormData.video_url} onChange={(e) => setSermonFormData({...sermonFormData, video_url: e.target.value})} />
-                  <Button type="button" disabled={!!sermonFormData.audio_url} variant="outline" onClick={() => openMediaPicker("sermon", "video_url", "video")}>Select</Button>
-                </div>
-              </div>
-              <div className="grid gap-2"><Label htmlFor="edit-thumbnail_url">Thumbnail URL</Label>
-                <div className="flex gap-2">
-                  <Input id="edit-thumbnail_url" value={sermonFormData.thumbnail_url} onChange={(e) => setSermonFormData({...sermonFormData, thumbnail_url: e.target.value})} />
-                  <Button type="button" variant="outline" onClick={() => openMediaPicker("sermon", "thumbnail_url", "image")}>Select</Button>
-                </div>
-              </div>
-              <div className="grid gap-2"><Label htmlFor="edit-key_scripture">Key Scripture</Label><Input id="edit-key_scripture" value={sermonFormData.key_scripture} onChange={(e) => setSermonFormData({...sermonFormData, key_scripture: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="edit-description">Description</Label><Textarea id="edit-description" value={sermonFormData.description} onChange={(e) => setSermonFormData({...sermonFormData, description: e.target.value})} /></div>
-              <div className="grid gap-2"><Label htmlFor="edit-tags">Tags (comma separated)</Label><Input id="edit-tags" value={sermonFormData.tags} onChange={(e) => setSermonFormData({...sermonFormData, tags: e.target.value})} /></div>
-            </div>
-            <DialogFooter><Button type="button" variant="outline" onClick={() => setIsSermonEditOpen(false)}>Cancel</Button><Button type="submit" disabled={isLoading}>{isLoading ? "Saving..." : "Save changes"}</Button></DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={isSermonDeleteOpen} onOpenChange={setIsSermonDeleteOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -490,8 +360,14 @@ export default function SermonsPage() {
         open={isMediaPickerOpen} 
         onOpenChange={setIsMediaPickerOpen}
         onSelect={handleMediaSelect}
-        allowedTypes={mediaPickerTarget ? [mediaPickerTarget.type] : ["image", "audio", "video"]}
+        allowedTypes={mediaPickerTarget ? [mediaPickerTarget.type] : ["image", "video"]}
       />
+      <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+        <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
+          <DialogTitle className="sr-only">Mobile App Preview</DialogTitle>
+          <SermonsListMobilePreview sermons={sermons} seriesList={seriesList} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

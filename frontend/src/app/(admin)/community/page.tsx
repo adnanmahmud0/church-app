@@ -3,9 +3,9 @@
 import * as React from "react"
 import { apiFetch } from "@/lib/api"
 import { Button } from "@/components/ui/button"
-import { 
-  PlusIcon, 
-  GripVerticalIcon, 
+import {
+  PlusIcon,
+  GripVerticalIcon,
   MessageCircleIcon,
   GlobeIcon,
   MessageSquareIcon,
@@ -13,10 +13,13 @@ import {
   PencilIcon,
   TrashIcon,
   EyeOffIcon,
-  MoreVerticalIcon
+  MoreVerticalIcon,
+  SmartphoneIcon
 } from "lucide-react"
 import { toast } from "sonner"
 import { CommunityGroupModal } from "./components/CommunityGroupModal"
+import { CommunityMobilePreview } from "@/components/community-mobile-preview"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,12 +56,12 @@ const getPlatformIcon = (platform: string) => {
 }
 
 // Sortable Item Component
-function SortableGroupItem({ 
-  group, 
-  onEdit, 
-  onDelete 
-}: { 
-  group: any, 
+function SortableGroupItem({
+  group,
+  onEdit,
+  onDelete
+}: {
+  group: any,
   onEdit: (group: any) => void,
   onDelete: (id: string) => void
 }) {
@@ -81,9 +84,8 @@ function SortableGroupItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center justify-between p-4 bg-white rounded-lg border shadow-sm ${
-        isDragging ? "opacity-50 ring-2 ring-primary" : ""
-      } ${!group.isActive ? "bg-zinc-50" : ""}`}
+      className={`flex items-center justify-between p-4 bg-white rounded-lg border shadow-sm ${isDragging ? "opacity-50 ring-2 ring-primary" : ""
+        } ${!group.isActive ? "bg-zinc-50" : ""}`}
     >
       <div className="flex items-center gap-4 flex-1">
         <div
@@ -93,11 +95,11 @@ function SortableGroupItem({
         >
           <GripVerticalIcon className="size-5" />
         </div>
-        
+
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 border">
           {getPlatformIcon(group.platform)}
         </div>
-        
+
         <div className="flex flex-col flex-1">
           <div className="flex items-center gap-2">
             <h3 className={`font-medium ${!group.isActive ? "text-zinc-500" : "text-zinc-900"}`}>
@@ -117,7 +119,7 @@ function SortableGroupItem({
           </p>
         </div>
       </div>
-      
+
       <div className="flex items-center gap-2 ml-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -130,7 +132,7 @@ function SortableGroupItem({
               <PencilIcon className="size-4 mr-2" />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => onDelete(group.id)}
               className="text-red-600 focus:text-red-600 focus:bg-red-50"
             >
@@ -150,6 +152,7 @@ export default function CommunityPage() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [modalOpen, setModalOpen] = React.useState(false)
   const [selectedGroup, setSelectedGroup] = React.useState<any>(null)
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = React.useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -169,7 +172,7 @@ export default function CommunityPage() {
         apiFetch("/community"),
         apiFetch("/community/admin/stats")
       ])
-      
+
       if (groupsData?.success && statsData?.success) {
         setGroups(groupsData.data)
         setStats(statsData.data)
@@ -188,20 +191,20 @@ export default function CommunityPage() {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
-    
+
     if (over && active.id !== over.id) {
       setGroups((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id)
         const newIndex = items.findIndex((item) => item.id === over.id)
-        
+
         const newItems = arrayMove(items, oldIndex, newIndex)
-        
+
         // Prepare reorder payload (1-based index)
         const payload = newItems.map((item, index) => ({
           id: item.id,
           sortOrder: index + 1
         }))
-        
+
         // Save to backend silently
         apiFetch("/community/reorder", {
           method: "PATCH",
@@ -211,7 +214,7 @@ export default function CommunityPage() {
           toast.error("Failed to save new order")
           fetchData() // revert
         })
-        
+
         return newItems
       })
     }
@@ -219,12 +222,12 @@ export default function CommunityPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this group?")) return
-    
+
     try {
       const res = await apiFetch(`/community/${id}`, {
         method: "DELETE"
       })
-      
+
       if (res?.success) {
         toast.success("Group deleted")
         fetchData()
@@ -247,11 +250,16 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-[1200px] mx-auto w-full">
+    <div className="pt-6 md:pt-8 space-y-8 container mx-auto w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Community Directory</h1>
-          <p className="text-zinc-500 mt-1">Manage external church groups (WhatsApp, Facebook, etc.)</p>
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Community Directory</h1>
+            <p className="text-zinc-500 mt-1">Manage external church groups (WhatsApp, Facebook, etc.)</p>
+          </div>
+          <Button variant="outline" size="icon" onClick={() => setIsMobilePreviewOpen(true)} title="View Mobile App Visualization" className="rounded-full shrink-0">
+            <SmartphoneIcon className="h-5 w-5" />
+          </Button>
         </div>
         <Button onClick={openCreateModal} className="shrink-0 shadow-sm">
           <PlusIcon className="mr-2 h-4 w-4" />
@@ -291,7 +299,7 @@ export default function CommunityPage() {
           <h2 className="font-semibold text-zinc-900">Groups Directory</h2>
           <span className="text-xs text-zinc-500">Drag to reorder how they appear in the app</span>
         </div>
-        
+
         <div className="p-4">
           {isLoading ? (
             <div className="py-12 flex justify-center">
@@ -337,6 +345,13 @@ export default function CommunityPage() {
         group={selectedGroup}
         onSuccess={fetchData}
       />
+
+      <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+        <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
+          <DialogTitle className="sr-only">Mobile App Preview</DialogTitle>
+          <CommunityMobilePreview groups={groups} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
