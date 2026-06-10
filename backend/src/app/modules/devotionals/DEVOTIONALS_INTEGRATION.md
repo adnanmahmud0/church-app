@@ -75,7 +75,8 @@ Retrieve a paginated list of published devotionals.
         "id": "60d5ecb8b392d7001f3e3a41",
         "title": "Finding Peace in the Storm",
         "assignedDateString": "2025-05-04",
-        "isDraft": false
+        "isDraft": false,
+        "isRead": true
       }
     ],
     "meta": {
@@ -103,7 +104,8 @@ Retrieve the devotional assigned for today (based on `assignedDateString`).
     "scriptureRef": "Mark 4:39",
     "scriptureQuote": "...",
     "reflection": "...",
-    "prayer": "..."
+    "prayer": "...",
+    "isRead": false
   }
 }
 ```
@@ -135,6 +137,24 @@ Retrieve the read status for a specific user.
 
 ### 4.4 GET /api/v1/devotionals/:id
 Get full detail of a single devotional by ID.
+
+**Success Response (200 OK):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Devotional retrieved successfully",
+  "data": {
+    "id": "60d5ecb8b392d7001f3e3a41",
+    "title": "Finding Peace in the Storm",
+    "scriptureRef": "Mark 4:39",
+    "scriptureQuote": "...",
+    "reflection": "...",
+    "prayer": "...",
+    "isRead": false
+  }
+}
+```
 
 ### 4.5 POST /api/v1/devotionals/:id/read
 Toggles the read status of a devotional for the authenticated user. If already read, it marks it unread. If unread, it marks it as read.

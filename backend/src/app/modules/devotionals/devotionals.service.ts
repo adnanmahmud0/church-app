@@ -29,7 +29,7 @@ const mapDevotional = (d: any) => {
   };
 };
 
-const getDevotionals = async (page: number = 1, limit: number = 20, includeDrafts: boolean = false) => {
+const getDevotionals = async (page: number = 1, limit: number = 20, includeDrafts: boolean = false, userId?: string) => {
   const skip = (page - 1) * limit;
   const query = includeDrafts ? {} : { isDraft: false };
 
@@ -38,15 +38,24 @@ const getDevotionals = async (page: number = 1, limit: number = 20, includeDraft
     Devotional.countDocuments(query),
   ]);
 
+  let readIds: string[] = [];
+  if (userId) {
+    const reads = await DevotionalRead.find({ userId, devotionalId: { $in: devotionals.map(d => d._id) } }).select('devotionalId').lean();
+    readIds = reads.map(r => r.devotionalId.toString());
+  }
+
   return {
-    devotionals: devotionals.map(mapDevotional),
+    devotionals: devotionals.map(d => ({
+      ...mapDevotional(d),
+      isRead: readIds.includes(d._id.toString())
+    })),
     total,
     page,
     limit,
   };
 };
 
-const getTodayDevotional = async () => {
+const getTodayDevotional = async (userId?: string) => {
   const now = new Date();
   const todayStr = now.toISOString().split('T')[0];
 
@@ -87,13 +96,27 @@ const getTodayDevotional = async () => {
   }
 
   if (!devotional) throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to assign devotional");
-  return mapDevotional(devotional);
+  
+  let isRead = false;
+  if (userId) {
+    const existing = await DevotionalRead.findOne({ devotionalId: devotional._id, userId });
+    isRead = !!existing;
+  }
+
+  return { ...mapDevotional(devotional), isRead };
 };
 
-const getDevotionalById = async (id: string) => {
+const getDevotionalById = async (id: string, userId?: string) => {
   const devotional = await Devotional.findById(id).lean();
   if (!devotional) throw new ApiError(StatusCodes.NOT_FOUND, 'Devotional not found');
-  return mapDevotional(devotional);
+  
+  let isRead = false;
+  if (userId) {
+    const existing = await DevotionalRead.findOne({ devotionalId: devotional._id, userId });
+    isRead = !!existing;
+  }
+  
+  return { ...mapDevotional(devotional), isRead };
 };
 
 const markAsRead = async (devotionalId: string, userId: string) => {

@@ -9,8 +9,9 @@ const getDevotionals = catchAsync(async (req: Request, res: Response) => {
   const limit = Number(req.query.limit) || 20;
   const isAdmin = req.user && (req.user.role === 'ADMIN' || req.user.role === 'SUPER_ADMIN');
   const includeDrafts = isAdmin;
+  const userId = req.user?.id;
 
-  const result = await DevotionalsService.getDevotionals(page, limit, includeDrafts);
+  const result = await DevotionalsService.getDevotionals(page, limit, includeDrafts, userId);
 
   sendResponse(res, {
     success: true,
@@ -21,7 +22,8 @@ const getDevotionals = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getTodayDevotional = catchAsync(async (req: Request, res: Response) => {
-  const result = await DevotionalsService.getTodayDevotional();
+  const userId = req.user?.id;
+  const result = await DevotionalsService.getTodayDevotional(userId);
 
   sendResponse(res, {
     success: true,
@@ -32,7 +34,8 @@ const getTodayDevotional = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getDevotionalById = catchAsync(async (req: Request, res: Response) => {
-  const result = await DevotionalsService.getDevotionalById(req.params.id);
+  const userId = req.user?.id;
+  const result = await DevotionalsService.getDevotionalById(req.params.id, userId);
 
   sendResponse(res, {
     success: true,
