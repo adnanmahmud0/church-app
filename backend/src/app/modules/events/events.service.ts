@@ -35,12 +35,12 @@ const mapEvent = (e: any, currentUserId?: string, rsvps: any[] = []) => {
     dateISO: dateObj.toISOString().split('T')[0],
     time: e.time,
     location: e.location,
-    description: e.description,
-    isDraft: e.isDraft,
     attendingCount,
     hasRsvp,
     isPast,
-    createdAt: e.createdAt,
+    ...(e.description && { description: e.description }),
+    ...(e.isDraft !== undefined && { isDraft: e.isDraft }),
+    ...(e.createdAt && { createdAt: e.createdAt }),
   };
 };
 
@@ -65,13 +65,18 @@ const getEvents = async (page: number = 1, limit: number = 20, isPast: boolean =
     }
   }
 
+  let queryBuilder = Event.find(query)
+    .populate('categoryId')
+    .sort({ date: isPast ? -1 : 1 })
+    .skip(skip)
+    .limit(limit);
+
+  if (!includeDrafts) {
+    queryBuilder = queryBuilder.select('title categoryId date time location');
+  }
+
   const [events, total] = await Promise.all([
-    Event.find(query)
-      .populate('categoryId')
-      .sort({ date: isPast ? -1 : 1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
+    queryBuilder.lean(),
     Event.countDocuments(query),
   ]);
 
@@ -94,6 +99,7 @@ const getLatestEvents = async (limit: number = 3, currentUserId?: string) => {
     .populate('categoryId')
     .sort({ date: 1 })
     .limit(limit)
+    .select('title categoryId date time location')
     .lean();
 
   if (!events.length) return [];
