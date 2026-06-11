@@ -21,6 +21,10 @@ export function SermonsListMobilePreview({ sermons, seriesList }: SermonsListPre
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const filteredSermons = activeSeries === "All" 
+    ? sermons 
+    : sermons.filter(sermon => (sermon.category?.name || sermon.series?.name) === activeSeries);
+
   return (
     <>
     <style>{`
@@ -72,7 +76,7 @@ export function SermonsListMobilePreview({ sermons, seriesList }: SermonsListPre
 
         {/* Sermons List */}
         <div className="px-5 space-y-4 flex-1">
-          {sermons.slice(0, 5).map(sermon => (
+          {filteredSermons.slice(0, 5).map(sermon => (
             <div key={sermon.id} className="bg-[#131E44] border border-[#1e2a56] rounded-2xl p-4 flex gap-4 items-center">
               {/* Thumbnail */}
               <div className="w-[84px] h-[84px] rounded-xl overflow-hidden relative shrink-0 bg-gray-800">
@@ -89,7 +93,7 @@ export function SermonsListMobilePreview({ sermons, seriesList }: SermonsListPre
               {/* Info */}
               <div className="flex-1 min-w-0 flex flex-col justify-center py-1">
                 <p className="text-[#3b82f6] text-[10px] font-bold uppercase tracking-wider mb-1 truncate">
-                  {sermon.series?.name || "Standalone Message"}
+                  {sermon.category?.name || sermon.series?.name || "Standalone Message"}
                 </p>
                 <h3 className="font-bold text-white text-[15px] leading-tight mb-1 truncate">
                   {sermon.title}

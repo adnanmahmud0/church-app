@@ -39,7 +39,8 @@ export type Sermon = {
   id: string;
   title: string;
   speaker: string;
-  series?: { _id: string; name: string };
+  category?: { _id?: string; id?: string; name: string };
+  series?: { _id: string; name: string }; // Keep for backwards compatibility if needed
   date: string;
   duration_seconds?: number;
   video_url?: string;
@@ -233,7 +234,7 @@ export default function SermonsPage() {
                     <tr key={sermon.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                       <td className="p-4 align-middle font-medium">{sermon.title}</td>
                       <td className="p-4 align-middle">{sermon.speaker}</td>
-                      <td className="p-4 align-middle">{sermon.series?.name || "None"}</td>
+                      <td className="p-4 align-middle">{sermon.category?.name || sermon.series?.name || "None"}</td>
                       <td className="p-4 align-middle">{new Date(sermon.date).toLocaleDateString()}</td>
                       <td className="p-4 align-middle text-right">
                         <DropdownMenu>
