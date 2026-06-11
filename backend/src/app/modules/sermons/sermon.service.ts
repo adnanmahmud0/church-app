@@ -40,6 +40,7 @@ const getAllSermons = async (
 
   const result = await Sermon.find(whereConditions)
     .populate('category', 'id name')
+    .select('title speaker date duration_seconds thumbnail_url category')
     .sort({ [sortBy]: sortOrder })
     .skip(skip)
     .limit(limit);
@@ -60,7 +61,9 @@ const getAllSermons = async (
 };
 
 const getSermonById = async (id: string) => {
-  const result = await Sermon.findById(id).populate('category', 'id name');
+  const result = await Sermon.findById(id)
+    .populate('category', 'id name')
+    .select('title speaker video_url thumbnail_url description tags category date duration_seconds');
   if (!result) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Sermon not found!');
   }
@@ -90,6 +93,7 @@ const deleteSermon = async (id: string) => {
 const getLatestSermons = async (limit: number = 3) => {
   const result = await Sermon.find({})
     .populate('category', 'id name')
+    .select('title speaker date duration_seconds thumbnail_url category')
     .sort({ date: -1 })
     .limit(limit);
   

@@ -26,7 +26,9 @@ const getAllSermonCategory = async () => {
     },
     {
       $project: {
-        sermonsData: 0
+        _id: 0,
+        id: "$_id",
+        name: 1
       }
     },
     {
@@ -37,7 +39,7 @@ const getAllSermonCategory = async () => {
 };
 
 const getSermonCategoryById = async (id: string) => {
-  const result = await SermonCategory.findById(id);
+  const result = await SermonCategory.findById(id).select('_id name');
   if (!result) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Sermon Category not found!');
   }
