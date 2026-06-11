@@ -12,10 +12,11 @@ const getTransporter = async (): Promise<Transporter | null> => {
   const hasSmtpConfig =
     !!config.email.host && !!config.email.user && !!config.email.pass;
   if (hasSmtpConfig) {
+    const port = Number(config.email.port ?? 587);
     cachedTransporter = nodemailer.createTransport({
       host: config.email.host,
-      port: Number(config.email.port ?? 587),
-      secure: false,
+      port: port,
+      secure: port === 465,
       auth: {
         user: config.email.user,
         pass: config.email.pass,
