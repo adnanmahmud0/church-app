@@ -3,7 +3,7 @@ import ApiError from '../../../errors/ApiError';
 import { Devotional, DevotionalRead } from './devotionals.model';
 import { IDevotional } from './devotionals.interface';
 
-const calculateDayLabel = (dateStr: string | Date): string => {
+const calculateDayLabel = (dateStr: string | Date | undefined | null): string => {
   if (!dateStr) return '';
   const date = new Date(dateStr);
   const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
