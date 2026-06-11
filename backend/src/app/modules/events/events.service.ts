@@ -28,6 +28,7 @@ const mapEvent = (e: any, currentUserId?: string, rsvps: any[] = []) => {
   return {
     id: e._id,
     title: e.title,
+    categoryId: cat._id,
     category: cat.label?.toLowerCase() || 'other',
     categoryLabel: cat.label?.toUpperCase() || 'OTHER',
     categoryColor: cat.color || '#3b5bdb',
