@@ -159,13 +159,12 @@ const deleteEvent = async (id: string) => {
 // Categories
 const getCategories = async () => {
   const categories = await EventCategory.find().sort({ sortOrder: 1 }).lean();
-  const allCat = { id: 'all', label: 'All', color: null, sortOrder: -1 };
+  const allCat = { id: 'all', label: 'All', color: null };
   
   return [allCat, ...categories.map(c => ({
     id: c._id.toString(),
     label: c.label,
-    color: c.color,
-    sortOrder: c.sortOrder
+    color: c.color
   }))];
 };
 
