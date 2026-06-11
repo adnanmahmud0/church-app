@@ -2,7 +2,8 @@ import EventForm from "@/components/EventForm"
 
 async function getCategories() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/categories`, {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    const res = await fetch(`${baseUrl}/events/categories`, {
       cache: 'no-store'
     })
     if (!res.ok) return []
