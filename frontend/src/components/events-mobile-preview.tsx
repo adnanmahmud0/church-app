@@ -18,7 +18,8 @@ export function EventsMobilePreview({ events, categories, stats }: EventsMobileP
     // Basic status filter
     const isPast = event.isPast || new Date(event.date) < new Date();
     if (view === 'upcoming' && isPast) return false;
-    if (view === 'history' && !isPast) return false;
+    // History now means RSVP'd events (My Events), regardless of date
+    if (view === 'history' && !event.hasRsvp) return false;
 
     // Category filter
     if (activeCategory !== 'all') {

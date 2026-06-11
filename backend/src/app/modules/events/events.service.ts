@@ -45,7 +45,7 @@ const mapEvent = (e: any, currentUserId?: string, rsvps: any[] = []) => {
   };
 };
 
-const getEvents = async (page: number = 1, limit: number = 20, isPast: boolean = false, category?: string, currentUserId?: string, includeDrafts: boolean = false) => {
+const getEvents = async (page: number = 1, limit: number = 20, isPast: boolean | null = false, category?: string, currentUserId?: string, includeDrafts: boolean = false, onlyRsvpd: boolean = false) => {
   const skip = (page - 1) * limit;
   const now = new Date();
   const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -53,10 +53,21 @@ const getEvents = async (page: number = 1, limit: number = 20, isPast: boolean =
   let query: any = {};
   if (!includeDrafts) query.isDraft = false;
 
-  if (isPast) {
+  if (isPast === true) {
     query.date = { $lt: startOfToday };
-  } else {
+  } else if (isPast === false) {
     query.date = { $gte: startOfToday };
+  }
+
+  if (onlyRsvpd) {
+    if (currentUserId) {
+      const userRsvps = await EventRSVP.find({ userId: currentUserId }).lean();
+      const rsvpEventIds = userRsvps.map(r => r.eventId);
+      query._id = { $in: rsvpEventIds };
+    } else {
+      // If user isn't identified, they can't have any RSVPs
+      return { events: [], total: 0, page, limit };
+    }
   }
 
   if (category && category.toLowerCase() !== 'all') {

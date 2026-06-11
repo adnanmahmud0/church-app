@@ -40,7 +40,9 @@ const getPastEvents = catchAsync(async (req: Request, res: Response) => {
   const category = req.query.category as string;
   const userId = req.user?.id || (req.query.userId as string);
   
-  const result = await EventsService.getEvents(page, limit, true, category, userId, false);
+  // As per requirement, "History" now means events the user has RSVP'd to.
+  // We pass isPast = null (all dates) and onlyRsvpd = true.
+  const result = await EventsService.getEvents(page, limit, null, category, userId, false, true);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
