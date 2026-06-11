@@ -45,10 +45,27 @@ const getDevotionals = async (page: number = 1, limit: number = 20, includeDraft
   }
 
   return {
-    devotionals: devotionals.map(d => ({
-      ...mapDevotional(d),
-      isRead: readIds.includes(d._id.toString())
-    })),
+    devotionals: devotionals.map(d => {
+      const isRead = readIds.includes(d._id.toString());
+      if (includeDrafts) {
+        // Admin gets full data
+        return {
+          ...mapDevotional(d),
+          isRead
+        };
+      } else {
+        // Mobile user gets only required data for the list
+        return {
+          id: d._id,
+          title: d.title,
+          dayLabel: calculateDayLabel(d.assignedDateString),
+          date: d.assignedDateString ? new Date(d.assignedDateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unassigned',
+          scriptureRef: d.scriptureRef,
+          reflectionPreview: d.reflection ? d.reflection.substring(0, 100) + '...' : '',
+          isRead
+        };
+      }
+    }),
     total,
     page,
     limit,
