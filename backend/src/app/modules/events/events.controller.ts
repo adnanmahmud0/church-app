@@ -38,7 +38,7 @@ const getPastEvents = catchAsync(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 20;
   const category = req.query.category as string;
-  const userId = req.user?.id || (req.query.userId as string);
+  const userId = req.user?.id; // Authentication is required, so this will exist
   
   // As per requirement, "History" now means events the user has RSVP'd to.
   // We pass isPast = null (all dates) and onlyRsvpd = true.
