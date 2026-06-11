@@ -16,6 +16,14 @@ const createRequest = async (
   return prayer;
 };
 
+const mapPrayerRequest = (prayer: any) => ({
+  id: prayer._id,
+  author_name: prayer.is_anonymous ? 'Anonymous' : prayer.author_name,
+  content: prayer.content,
+  pray_count: prayer.pray_count,
+  createdAt: prayer.createdAt,
+});
+
 const getRequests = async (
   page: number = 1,
   limit: number = 10
@@ -35,13 +43,13 @@ const getRequests = async (
 
   return {
     meta: { page, limit, totalPage, total },
-    data,
+    data: data.map(mapPrayerRequest),
   };
 };
 
 const getMyRequests = async (user: JwtPayload) => {
   const data = await PrayerRequest.find({ author_user_id: user.id }).sort({ createdAt: -1 }).lean();
-  return data;
+  return data.map(mapPrayerRequest);
 };
 
 const getSingleRequest = async (id: string) => {
@@ -49,7 +57,7 @@ const getSingleRequest = async (id: string) => {
   if (!data) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Prayer request not found');
   }
-  return data;
+  return mapPrayerRequest(data);
 };
 
 const prayForRequest = async (
