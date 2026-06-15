@@ -17,6 +17,7 @@ router.post(
 
 router.get(
   '/requests',
+  optionalAuth,
   PrayerController.getRequests
 );
 

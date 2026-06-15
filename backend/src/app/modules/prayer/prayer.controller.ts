@@ -18,8 +18,9 @@ const createRequest = catchAsync(async (req: Request, res: Response) => {
 const getRequests = catchAsync(async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
+  const deviceFingerprint = req.query.device_fingerprint as string | undefined;
   
-  const result = await PrayerService.getRequests(page, limit);
+  const result = await PrayerService.getRequests(page, limit, req.user, deviceFingerprint);
 
   sendResponse(res, {
     success: true,
@@ -42,7 +43,8 @@ const getMyRequests = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getSingleRequest = catchAsync(async (req: Request, res: Response) => {
-  const result = await PrayerService.getSingleRequest(req.params.id);
+  const deviceFingerprint = req.query.device_fingerprint as string | undefined;
+  const result = await PrayerService.getSingleRequest(req.params.id, req.user, deviceFingerprint);
 
   sendResponse(res, {
     success: true,

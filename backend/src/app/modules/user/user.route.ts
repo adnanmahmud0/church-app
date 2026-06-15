@@ -39,7 +39,6 @@ router
     UserController.createUser
   );
 
-export const UserRoutes = router;
 
 router
   .route('/profile/favorite-sermons')
@@ -58,6 +57,7 @@ router
   .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.getUserGivingHistory);
 
 router
-  .route('/account')
+  .route('/delete-account')
   .delete(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.deleteAccount);
 
+export const UserRoutes = router;

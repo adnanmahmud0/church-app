@@ -16,17 +16,20 @@ const createRequest = async (
   return prayer;
 };
 
-const mapPrayerRequest = (prayer: any) => ({
+const mapPrayerRequest = (prayer: any, is_prayed: boolean = false) => ({
   id: prayer._id,
   author_name: prayer.is_anonymous ? 'Anonymous' : prayer.author_name,
   content: prayer.content,
   pray_count: prayer.pray_count,
+  is_prayed,
   createdAt: prayer.createdAt,
 });
 
 const getRequests = async (
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  user?: JwtPayload,
+  deviceFingerprint?: string
 ) => {
   const skip = (page - 1) * limit;
 
@@ -41,23 +44,64 @@ const getRequests = async (
 
   const totalPage = Math.ceil(total / limit);
 
+  let interactionSet = new Set<string>();
+  if ((user || deviceFingerprint) && data.length > 0) {
+    const query: any = { prayer_request_id: { $in: data.map(p => p._id) } };
+    if (user) {
+      query.user_id = user.id;
+    } else if (deviceFingerprint) {
+      query.device_fingerprint = deviceFingerprint;
+    }
+    const interactions = await PrayerInteraction.find(query).lean();
+    interactions.forEach(i => interactionSet.add(i.prayer_request_id.toString()));
+  }
+
   return {
     meta: { page, limit, totalPage, total },
-    data: data.map(mapPrayerRequest),
+    data: data.map(p => mapPrayerRequest(p, interactionSet.has(p._id.toString()))),
   };
 };
 
 const getMyRequests = async (user: JwtPayload) => {
   const data = await PrayerRequest.find({ author_user_id: user.id }).sort({ createdAt: -1 }).lean();
-  return data.map(mapPrayerRequest);
+  
+  let interactionSet = new Set<string>();
+  if (data.length > 0) {
+    const interactions = await PrayerInteraction.find({
+      prayer_request_id: { $in: data.map(p => p._id) },
+      user_id: user.id
+    }).lean();
+    interactions.forEach(i => interactionSet.add(i.prayer_request_id.toString()));
+  }
+
+  return data.map(p => mapPrayerRequest(p, interactionSet.has(p._id.toString())));
 };
 
-const getSingleRequest = async (id: string) => {
+const getSingleRequest = async (
+  id: string,
+  user?: JwtPayload,
+  deviceFingerprint?: string
+) => {
   const data = await PrayerRequest.findById(id).lean();
   if (!data) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Prayer request not found');
   }
-  return mapPrayerRequest(data);
+
+  let is_prayed = false;
+  if (user || deviceFingerprint) {
+    const query: any = { prayer_request_id: id };
+    if (user) {
+      query.user_id = user.id;
+    } else if (deviceFingerprint) {
+      query.device_fingerprint = deviceFingerprint;
+    }
+    const interaction = await PrayerInteraction.findOne(query).lean();
+    if (interaction) {
+      is_prayed = true;
+    }
+  }
+
+  return mapPrayerRequest(data, is_prayed);
 };
 
 const prayForRequest = async (
@@ -85,6 +129,10 @@ const prayForRequest = async (
   if (!existingInteraction) {
     await PrayerInteraction.create(query);
     prayer.pray_count += 1;
+    await prayer.save();
+  } else {
+    await PrayerInteraction.deleteOne(query);
+    prayer.pray_count = Math.max(0, prayer.pray_count - 1);
     await prayer.save();
   }
 
