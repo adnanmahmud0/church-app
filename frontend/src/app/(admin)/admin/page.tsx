@@ -76,7 +76,7 @@ export default function AdminManagementPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      if (user.role.toUpperCase() !== "SUPER_ADMIN") {
+      if (user?.role?.toUpperCase() !== "SUPER_ADMIN" && user?.role?.toUpperCase() !== "ADMIN") {
         router.push("/"); // redirect to dashboard/home
       }
     }
@@ -159,7 +159,7 @@ export default function AdminManagementPage() {
     setIsAddOpen(true);
   };
 
-  if (loading || !user || user.role.toUpperCase() !== "SUPER_ADMIN") {
+  if (loading || !user || !user.role || (user.role.toUpperCase() !== "SUPER_ADMIN" && user.role.toUpperCase() !== "ADMIN")) {
     return <div className="flex-1 space-y-4 p-8 pt-6">Loading...</div>;
   }
 
@@ -208,8 +208,8 @@ export default function AdminManagementPage() {
                     <td className="p-4 align-middle font-medium">{admin.name}</td>
                     <td className="p-4 align-middle">{admin.email}</td>
                     <td className="p-4 align-middle">
-                      <Badge variant={admin.role === "super_admin" ? "default" : "secondary"}>
-                        {admin.role.replace("_", " ").toUpperCase()}
+                      <Badge variant={admin?.role === "super_admin" ? "default" : "secondary"}>
+                        {admin?.role ? admin.role.replace("_", " ").toUpperCase() : "N/A"}
                       </Badge>
                     </td>
                     <td className="p-4 align-middle text-right">
@@ -226,7 +226,7 @@ export default function AdminManagementPage() {
                               <PencilIcon className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
-                            {admin.role.toUpperCase() !== "SUPER_ADMIN" && (
+                            {admin?.role?.toUpperCase() !== "SUPER_ADMIN" && user?.role?.toUpperCase() === "SUPER_ADMIN" && (
                               <DropdownMenuItem onClick={() => openDelete(admin)} className="text-red-600">
                                 <TrashIcon className="mr-2 h-4 w-4" />
                                 Delete

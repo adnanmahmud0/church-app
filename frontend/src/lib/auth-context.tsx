@@ -36,10 +36,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       const token = Cookies.get("token");
+      const isPublicRoute = pathname?.includes("/login") || pathname?.includes("/forgot-password") || pathname?.includes("/reset-password");
+
       if (token) {
         try {
-          const res = await apiFetch("/user/profile"); // Assuming a /user/profile route exists
-          if (res.data) {
+          const res = await apiFetch("/user/profile");
+          if (res?.data) {
             const userData = res.data.user || res.data;
             setUser({
               ...userData,
@@ -48,12 +50,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         } catch (error) {
           Cookies.remove("token");
+          Cookies.remove("refreshToken");
+          if (!isPublicRoute) {
+            router.push("/login");
+          }
+        }
+      } else {
+        if (!isPublicRoute) {
+          router.push("/login");
         }
       }
       setLoading(false);
     };
     initAuth();
-  }, []);
+  }, [pathname, router]);
 
   const login = (token: string, refreshToken: string, userData: any) => {
     Cookies.set("token", token, { expires: 7 });

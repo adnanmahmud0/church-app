@@ -9,11 +9,11 @@ const router = express.Router();
 
 router.route('/')
   .get(
-    auth(USER_ROLES.SUPER_ADMIN),
+    auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
     AdminController.getAllAdmins
   )
   .post(
-    auth(USER_ROLES.SUPER_ADMIN),
+    auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
     validateRequest(AdminValidation.createAdminZodSchema),
     AdminController.createAdmin
   );
@@ -27,12 +27,12 @@ router.route('/profile')
 
 router.route('/:id')
   .put(
-    auth(USER_ROLES.SUPER_ADMIN),
+    auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
     validateRequest(AdminValidation.updateAdminZodSchema),
     AdminController.updateAdmin
   )
   .delete(
-    auth(USER_ROLES.SUPER_ADMIN),
+    auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
     AdminController.deleteAdmin
   );
 

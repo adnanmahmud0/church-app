@@ -49,7 +49,7 @@ const data = {
       title: "Admin Management",
       url: "/admin",
       icon: <Shield />,
-      roles: ["SUPER_ADMIN"],
+      roles: ["SUPER_ADMIN", "ADMIN"],
     },
     {
       title: "Media",

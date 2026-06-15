@@ -48,6 +48,7 @@ const getUserProfileFromDB = async (
       initials,
       member_since: new Date((isExistUser as any).createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
       status: 'ACTIVE MEMBER', // Hardcoded as per UI screenshot
+      role: isExistUser.role,
     },
     giving_summary: givingSummary,
     saved_sermons: savedSermons,
