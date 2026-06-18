@@ -29,14 +29,103 @@ const mapDevotional = (d: any) => {
   };
 };
 
-const getDevotionals = async (page: number = 1, limit: number = 20, includeDrafts: boolean = false, userId?: string) => {
-  const skip = (page - 1) * limit;
-  const query = includeDrafts ? {} : { isDraft: false };
+const autoScheduleDevotionals = async () => {
+  const todayStr = new Date().toISOString().split('T')[0];
+  
+  const activeDevotionals = await Devotional.find({ isDraft: false }).lean();
+  if (activeDevotionals.length === 0) return;
 
-  const [devotionals, total] = await Promise.all([
-    Devotional.find(query).sort({ _id: -1 }).skip(skip).limit(limit).lean(),
-    Devotional.countDocuments(query),
-  ]);
+  const scheduled = activeDevotionals.filter(d => d.assignedDateString && d.assignedDateString >= todayStr);
+  const needsScheduling = activeDevotionals.filter(d => !d.assignedDateString || d.assignedDateString < todayStr);
+  
+  if (needsScheduling.length === 0) return;
+
+  needsScheduling.sort((a, b) => {
+    const aCycle = a.cycleCount || 0;
+    const bCycle = b.cycleCount || 0;
+    if (aCycle !== bCycle) return aCycle - bCycle;
+    return a._id.toString().localeCompare(b._id.toString());
+  });
+
+  let currentMaxDate = new Date(todayStr);
+  currentMaxDate.setDate(currentMaxDate.getDate() - 1); 
+
+  if (scheduled.length > 0) {
+    const maxDateStr = scheduled.reduce((max, d) => d.assignedDateString! > max ? d.assignedDateString! : max, "1970-01-01");
+    currentMaxDate = new Date(maxDateStr);
+  }
+
+  for (const d of needsScheduling) {
+    currentMaxDate.setDate(currentMaxDate.getDate() + 1);
+    const nextDateStr = currentMaxDate.toISOString().split('T')[0];
+    
+    const updatePayload: any = {
+      assignedDateString: nextDateStr,
+      $inc: { cycleCount: 1 }
+    };
+
+    if (d.assignedDateString) {
+      updatePayload.lastShownDate = d.assignedDateString;
+    }
+
+    await Devotional.findByIdAndUpdate(d._id, updatePayload);
+  }
+};
+
+const getDevotionals = async (page: number = 1, limit: number = 20, includeDrafts: boolean = false, userId?: string) => {
+  await autoScheduleDevotionals();
+  const skip = (page - 1) * limit;
+
+  let devotionals: any[] = [];
+  let total = 0;
+
+  if (includeDrafts) {
+    const query = {};
+    const [docs, count] = await Promise.all([
+      Devotional.find(query).sort({ _id: -1 }).skip(skip).limit(limit).lean(),
+      Devotional.countDocuments(query),
+    ]);
+    devotionals = docs;
+    total = count;
+  } else {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const pipeline: any[] = [
+      { $match: { isDraft: false } },
+      {
+        $addFields: {
+          effectiveDate: {
+            $cond: {
+              if: { 
+                $and: [ 
+                  { $ne: ["$assignedDateString", null] }, 
+                  { $lte: ["$assignedDateString", todayStr] } 
+                ] 
+              },
+              then: "$assignedDateString",
+              else: "$lastShownDate"
+            }
+          }
+        }
+      },
+      { $match: { effectiveDate: { $ne: null } } }
+    ];
+
+    const [docs, countResult] = await Promise.all([
+      Devotional.aggregate([
+        ...pipeline,
+        { $sort: { effectiveDate: -1, _id: -1 } },
+        { $skip: skip },
+        { $limit: limit }
+      ]),
+      Devotional.aggregate([
+        ...pipeline,
+        { $count: "total" }
+      ])
+    ]);
+    
+    devotionals = docs;
+    total = countResult.length > 0 ? countResult[0].total : 0;
+  }
 
   let readIds: string[] = [];
   if (userId) {
@@ -48,18 +137,17 @@ const getDevotionals = async (page: number = 1, limit: number = 20, includeDraft
     devotionals: devotionals.map(d => {
       const isRead = readIds.includes(d._id.toString());
       if (includeDrafts) {
-        // Admin gets full data
         return {
           ...mapDevotional(d),
           isRead
         };
       } else {
-        // Mobile user gets only required data for the list
+        const dateStr = d.effectiveDate;
         return {
           id: d._id,
           title: d.title,
-          dayLabel: calculateDayLabel(d.assignedDateString),
-          date: d.assignedDateString ? new Date(d.assignedDateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unassigned',
+          dayLabel: calculateDayLabel(dateStr),
+          date: dateStr ? new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unassigned',
           scriptureRef: d.scriptureRef,
           reflectionPreview: d.reflection ? d.reflection.substring(0, 100) + '...' : '',
           isRead
@@ -73,46 +161,21 @@ const getDevotionals = async (page: number = 1, limit: number = 20, includeDraft
 };
 
 const getTodayDevotional = async (userId?: string) => {
+  await autoScheduleDevotionals();
+
   const now = new Date();
   const todayStr = now.toISOString().split('T')[0];
 
-  // 1. Check if we already assigned one for today
   let devotional = await Devotional.findOne({
     isDraft: false,
     assignedDateString: todayStr,
   }).lean();
 
-  // 2. If not found, assign a new one
   if (!devotional) {
-    // Find the minimum cycleCount among active devotionals
-    const minCycleDoc = await Devotional.findOne({ isDraft: false })
-      .sort({ cycleCount: 1 })
-      .select('cycleCount')
-      .lean();
-
-    if (!minCycleDoc) throw new ApiError(StatusCodes.NOT_FOUND, "No active devotionals found in pool");
-    
-    const minCycle = minCycleDoc.cycleCount || 0;
-
-    // Find all devotionals with this minimum cycle count
-    const pool = await Devotional.find({ isDraft: false, cycleCount: minCycle }).lean();
-    
-    // Pick a random one
-    const randomIndex = Math.floor(Math.random() * pool.length);
-    const chosen = pool[randomIndex];
-
-    // Update it
-    devotional = await Devotional.findByIdAndUpdate(
-      chosen._id,
-      { 
-        assignedDateString: todayStr,
-        $inc: { cycleCount: 1 } 
-      },
-      { new: true }
-    ).lean();
+    devotional = await Devotional.findOne({ isDraft: false }).sort({ assignedDateString: 1 }).lean();
   }
 
-  if (!devotional) throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to assign devotional");
+  if (!devotional) throw new ApiError(StatusCodes.NOT_FOUND, "No active devotionals found");
   
   let isRead = false;
   if (userId) {
@@ -157,6 +220,7 @@ const createDevotional = async (payload: Partial<IDevotional>) => {
     payload.publishedAt = new Date();
   }
   const result = await Devotional.create(payload);
+  await autoScheduleDevotionals();
   return mapDevotional(result);
 };
 
@@ -166,6 +230,7 @@ const updateDevotional = async (id: string, payload: Partial<IDevotional>) => {
   }
   const updated = await Devotional.findByIdAndUpdate(id, payload, { new: true }).lean();
   if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Devotional not found');
+  await autoScheduleDevotionals();
   return mapDevotional(updated);
 };
 
@@ -177,11 +242,12 @@ const deleteDevotional = async (id: string) => {
 };
 
 const getStats = async () => {
+  const todayStr = new Date().toISOString().split('T')[0];
   const [totalDevotionals, totalReads, allReads, upcomingScheduled] = await Promise.all([
     Devotional.countDocuments(),
     DevotionalRead.countDocuments(),
     DevotionalRead.find().populate('devotionalId').lean(),
-    Devotional.countDocuments({ isDraft: false, cycleCount: 0 }), // Using this for "upcoming Scheduled" as unused devotionals
+    Devotional.countDocuments({ isDraft: false, assignedDateString: { $gt: todayStr } }),
   ]);
 
   const uniqueReaders = new Set(allReads.map(r => r.userId)).size;

@@ -11,6 +11,7 @@ export interface IDevotional {
   prayer: string;
   isDraft: boolean;
   publishedAt?: Date;
+  lastShownDate?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

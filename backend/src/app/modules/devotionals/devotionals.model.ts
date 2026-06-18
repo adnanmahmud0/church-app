@@ -12,6 +12,7 @@ const DevotionalSchema = new Schema<IDevotional>(
     prayer: { type: String, required: true },
     isDraft: { type: Boolean, required: true, default: false },
     publishedAt: { type: Date },
+    lastShownDate: { type: String, default: null },
   },
   {
     timestamps: true,
