@@ -40,7 +40,10 @@ export default function AddSermonPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const payload = { ...sermonFormData, tags: sermonFormData.tags ? sermonFormData.tags.split(',').map(t => t.trim()) : [], duration_seconds: Number(sermonFormData.duration_seconds) };
+      const payload: any = { ...sermonFormData, tags: sermonFormData.tags ? sermonFormData.tags.split(',').map(t => t.trim()) : [], duration_seconds: Number(sermonFormData.duration_seconds) };
+      if (!payload.category) {
+        delete payload.category;
+      }
       await apiFetch('/sermons', { method: 'POST', body: JSON.stringify(payload) });
       toast.success("Sermon created successfully");
       router.push("/sermons");
