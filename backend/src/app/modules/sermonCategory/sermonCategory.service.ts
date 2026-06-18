@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { ISermonCategory } from './sermonCategory.interface';
 import { SermonCategory } from './sermonCategory.model';
+import { Sermon } from '../sermons/sermon.model';
 
 const createSermonCategory = async (payload: ISermonCategory) => {
   const result = await SermonCategory.create(payload);
@@ -63,6 +64,12 @@ const deleteSermonCategory = async (id: string) => {
   if (!isExist) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Sermon Category not found!');
   }
+
+  const sermonCount = await Sermon.countDocuments({ category: id });
+  if (sermonCount > 0) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, `Cannot delete category. It is still used by ${sermonCount} sermon(s).`);
+  }
+
   const result = await SermonCategory.findByIdAndDelete(id);
   return result;
 };

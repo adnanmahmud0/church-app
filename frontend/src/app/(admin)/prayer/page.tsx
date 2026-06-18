@@ -146,14 +146,14 @@ export default function PrayerAdminPage() {
                   <TableHead>Author</TableHead>
                   <TableHead>Content</TableHead>
                   <TableHead>Prays</TableHead>
-                  <TableHead>Status</TableHead>
+
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {requests?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
                       No active prayer requests found.
                     </TableCell>
                   </TableRow>
@@ -172,21 +172,7 @@ export default function PrayerAdminPage() {
                           <HeartIcon className="h-3 w-3" /> {req.pray_count}
                         </Badge>
                       </TableCell>
-                      <TableCell>
-                        <Select 
-                          value={req.status} 
-                          onValueChange={(val) => handleUpdateStatus(req._id, val)}
-                        >
-                          <SelectTrigger className="w-[110px] h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="answered">Answered</SelectItem>
-                            <SelectItem value="archived">Archived</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
+
                       <TableCell className="text-right">
                         <Button variant="ghost" size="sm" onClick={() => handleDelete(req._id)} className="text-destructive">
                           <ArchiveIcon className="h-4 w-4" />

@@ -351,8 +351,23 @@ export default function SermonsPage() {
 
       <Dialog open={isCategoryDeleteOpen} onOpenChange={setIsCategoryDeleteOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader><DialogTitle>Confirm Deletion</DialogTitle><DialogDescription>Are you sure you want to delete the series <span className="font-semibold">{selectedCategory?.name}</span>? This action cannot be undone.</DialogDescription></DialogHeader>
-          <DialogFooter className="mt-4"><Button type="button" variant="outline" onClick={() => setIsCategoryDeleteOpen(false)}>Cancel</Button><Button type="button" variant="destructive" onClick={handleCategoryDelete} disabled={isLoading}>{isLoading ? "Deleting..." : "Delete Category"}</Button></DialogFooter>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the series <span className="font-semibold">{selectedCategory?.name}</span>? This action cannot be undone.
+              {(selectedCategory?.sermonCount ?? 0) > 0 && (
+                <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-md text-sm border border-red-200">
+                  <strong>Warning:</strong> You cannot delete this category because it is currently used by {selectedCategory?.sermonCount} sermon(s). Please delete or reassign those sermons first.
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button type="button" variant="outline" onClick={() => setIsCategoryDeleteOpen(false)}>Cancel</Button>
+            <Button type="button" variant="destructive" onClick={handleCategoryDelete} disabled={isLoading || (selectedCategory?.sermonCount ?? 0) > 0}>
+              {isLoading ? "Deleting..." : "Delete Category"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

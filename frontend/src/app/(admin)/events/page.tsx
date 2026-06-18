@@ -166,6 +166,9 @@ export default function EventsDashboard() {
                       <div className="flex items-center gap-2">
                         <div className="size-4 rounded-full" style={{ backgroundColor: cat.color }} />
                         <span className="font-medium text-sm">{cat.label}</span>
+                        <Badge variant="secondary" className="ml-2 text-xs">
+                          {cat.eventCount || 0} events
+                        </Badge>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => handleDeleteCategory(cat.id)}>
                         <Trash className="size-4 text-red-500" />

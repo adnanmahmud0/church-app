@@ -169,13 +169,43 @@ const deleteEvent = async (id: string) => {
 
 // Categories
 const getCategories = async () => {
-  const categories = await EventCategory.find().sort({ sortOrder: 1 }).lean();
-  const allCat = { id: 'all', label: 'All', color: null };
+  const result = await EventCategory.aggregate([
+    {
+      $lookup: {
+        from: 'events',
+        localField: '_id',
+        foreignField: 'categoryId',
+        as: 'eventsData'
+      }
+    },
+    {
+      $addFields: {
+        eventCount: { $size: "$eventsData" },
+        id: "$_id"
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        id: "$_id",
+        label: 1,
+        color: 1,
+        eventCount: 1,
+        sortOrder: 1
+      }
+    },
+    {
+      $sort: { sortOrder: 1 }
+    }
+  ]);
+
+  const allCat = { id: 'all', label: 'All', color: null, eventCount: 0 };
   
-  return [allCat, ...categories.map(c => ({
-    id: c._id.toString(),
+  return [allCat, ...result.map(c => ({
+    id: c.id.toString(),
     label: c.label,
-    color: c.color
+    color: c.color,
+    eventCount: c.eventCount
   }))];
 };
 
@@ -191,8 +221,8 @@ const updateCategory = async (id: string, payload: Partial<IEventCategory>) => {
 };
 
 const deleteCategory = async (id: string) => {
-  const inUse = await Event.exists({ categoryId: id });
-  if (inUse) throw new ApiError(StatusCodes.BAD_REQUEST, 'Cannot delete category in use');
+  const eventCount = await Event.countDocuments({ categoryId: id });
+  if (eventCount > 0) throw new ApiError(StatusCodes.BAD_REQUEST, `Cannot delete category. It is still used by ${eventCount} event(s) (Make sure to check both 'Upcoming' and 'Past' tabs).`);
   
   const deleted = await EventCategory.findByIdAndDelete(id);
   if (!deleted) throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found');
