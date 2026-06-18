@@ -18,7 +18,7 @@ const mapDevotional = (d: any) => {
     dayLabel: calculateDayLabel(d.assignedDateString),
     date: d.assignedDateString ? new Date(d.assignedDateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unassigned',
     dateISO: d.assignedDateString || '',
-    posted: !!d.lastShownDate || (!!d.assignedDateString && d.assignedDateString <= new Date().toISOString().split('T')[0]),
+    posted: !!d.assignedDateString && d.assignedDateString <= new Date().toISOString().split('T')[0],
     scriptureRef: d.scriptureRef,
     scriptureQuote: d.scriptureQuote,
     reflection: d.reflection,
