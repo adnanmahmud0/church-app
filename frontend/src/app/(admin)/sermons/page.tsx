@@ -28,7 +28,7 @@ import { MediaPicker } from "@/components/media-picker";
 import { apiFetch } from "@/lib/api";
 
 export type SermonSeries = {
-  _id: string;
+  id: string;
   name: string;
   description?: string;
   cover_image_url?: string;
@@ -144,7 +144,7 @@ export default function SermonsPage() {
     if (!selectedCategory) return;
     setIsLoading(true);
     try {
-      await apiFetch(`/sermon-category/${selectedCategory._id}`, { method: 'PATCH', body: JSON.stringify(categoryFormData) });
+      await apiFetch(`/sermon-category/${selectedCategory.id}`, { method: 'PATCH', body: JSON.stringify(categoryFormData) });
       toast.success("Category updated successfully");
       setIsCategoryEditOpen(false);
       fetchCategoryList();
@@ -159,7 +159,7 @@ export default function SermonsPage() {
     if (!selectedCategory) return;
     setIsLoading(true);
     try {
-      await apiFetch(`/sermon-category/${selectedCategory._id}`, { method: 'DELETE' });
+      await apiFetch(`/sermon-category/${selectedCategory.id}`, { method: 'DELETE' });
       toast.success("Category deleted successfully");
       setIsCategoryDeleteOpen(false);
       fetchCategoryList();
@@ -288,7 +288,7 @@ export default function SermonsPage() {
                   <tr><td colSpan={3} className="h-24 text-center">No categories found.</td></tr>
                 ) : (
                   filteredSeries.map((series) => (
-                    <tr key={series._id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    <tr key={series.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                       <td className="p-4 align-middle font-medium">{series.name}</td>
                       <td className="p-4 align-middle">{series.sermonCount || 0}</td>
                       <td className="p-4 align-middle text-right">

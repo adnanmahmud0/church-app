@@ -28,7 +28,8 @@ const getAllSermonCategory = async () => {
       $project: {
         _id: 0,
         id: "$_id",
-        name: 1
+        name: 1,
+        sermonCount: 1
       }
     },
     {
