@@ -12,6 +12,7 @@ export type ISermon = {
   key_scripture?: string;
   description?: string;
   tags?: string[];
+  share_url?: string;
 };
 
 export type SermonModel = Model<ISermon>;

@@ -79,7 +79,8 @@ List published sermons with optional search and category filter.
         "date": "2025-05-04T10:00:00.000Z",
         "duration_seconds": 2520,
         "audio_url": "http://localhost:5000/audio/sermon1.mp3",
-        "thumbnail_url": "http://localhost:5000/image/sermon1_thumb.jpg"
+        "thumbnail_url": "http://localhost:5000/image/sermon1_thumb.jpg",
+        "share_url": "https://church-app.com/share/sermons/60d5ecb8b392d7001f3e3a41"
       }
     ],
     "pagination": {
@@ -118,7 +119,8 @@ Get the most recently added sermons (used for the home page).
       "title": "Faith in the Valley",
       "speaker": "Pastor John Doe",
       "date": "2025-05-04T10:00:00.000Z",
-      "duration_seconds": 2520
+      "duration_seconds": 2520,
+      "share_url": "https://church-app.com/share/sermons/60d5ecb8b392d7001f3e3a41"
     }
   ]
 }
@@ -147,7 +149,8 @@ Get full detail of a single sermon by ID.
     "thumbnail_url": "http://localhost:5000/image/sermon1_thumb.jpg",
     "key_scripture": "Psalms 23:4",
     "description": "An in-depth look at holding onto faith during difficult seasons.",
-    "tags": ["faith", "hope", "struggle"]
+    "tags": ["faith", "hope", "struggle"],
+    "share_url": "https://church-app.com/share/sermons/60d5ecb8b392d7001f3e3a41"
   }
 }
 ```
@@ -234,7 +237,8 @@ Retrieve the list of favorite sermons for the authenticated user.
   "date": "2025-05-04T10:00:00.000Z",
   "duration_seconds": 2520,
   "audio_url": "http://localhost:5000/audio/sermon1.mp3",
-  "thumbnail_url": "http://localhost:5000/image/sermon1_thumb.jpg"
+  "thumbnail_url": "http://localhost:5000/image/sermon1_thumb.jpg",
+  "share_url": "https://church-app.com/share/sermons/60d5ecb8b392d7001f3e3a41"
 }
 ```
 
@@ -254,7 +258,8 @@ Retrieve the list of favorite sermons for the authenticated user.
   "thumbnail_url": "http://localhost:5000/image/sermon1_thumb.jpg",
   "key_scripture": "Psalms 23:4",
   "description": "An in-depth look at holding onto faith during difficult seasons.",
-  "tags": ["faith", "hope", "struggle"]
+  "tags": ["faith", "hope", "struggle"],
+  "share_url": "https://church-app.com/share/sermons/60d5ecb8b392d7001f3e3a41"
 }
 ```
 
@@ -340,7 +345,7 @@ Retrieve the list of favorite sermons for the authenticated user.
 **Share:**
 14. On "Share This Sermon" press, trigger native share sheet.
 15. Share text: `"<title> — <speaker>"`
-16. Share URL: `<BASE_URL>/sermons/<id>` (e.g., frontend URL if applicable).
+16. Share URL: Use the `share_url` property returned from the backend API (e.g., `https://church-app.com/share/sermons/<id>`).
 
 ---
 
