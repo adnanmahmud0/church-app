@@ -64,7 +64,7 @@ export function SermonsListMobilePreview({ sermons, seriesList }: SermonsListPre
             </button>
             {seriesList.slice(0, 3).map(series => (
               <button 
-                key={series._id}
+                key={series.id}
                 className={`px-5 py-2 rounded-full whitespace-nowrap font-medium text-sm transition-colors ${activeSeries === series.name ? "bg-blue-700 text-white" : "bg-transparent border border-[#2a3b70] text-gray-300"}`}
                 onClick={() => setActiveSeries(series.name)}
               >
