@@ -145,7 +145,7 @@ export default function DevotionalsDashboard() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Assigned Date</TableHead>
-                  <TableHead>Cycles</TableHead>
+                  <TableHead>Posted</TableHead>
                   <TableHead>Reference</TableHead>
                   <TableHead>Scripture</TableHead>
                   <TableHead>Status</TableHead>
@@ -156,7 +156,13 @@ export default function DevotionalsDashboard() {
                 {devotionals.map((dev: any) => (
                   <TableRow key={dev.id}>
                     <TableCell className="font-medium">{dev.date}</TableCell>
-                    <TableCell>{dev.cycleCount}</TableCell>
+                    <TableCell>
+                      {dev.posted ? (
+                        <Badge variant="default" className="bg-blue-100 text-blue-700 hover:bg-blue-100">Yes</Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-gray-500">No</Badge>
+                      )}
+                    </TableCell>
                     <TableCell>{dev.title}</TableCell>
                     <TableCell className="text-muted-foreground">{dev.scriptureRef}</TableCell>
                     <TableCell>
