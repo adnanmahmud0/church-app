@@ -5,7 +5,6 @@ const DevotionalSchema = new Schema<IDevotional>(
   {
     title: { type: String, required: true },
     assignedDateString: { type: String, default: null },
-    cycleCount: { type: Number, default: 0 },
     scriptureRef: { type: String, required: true },
     scriptureQuote: { type: String, required: true },
     reflection: { type: String, required: true },

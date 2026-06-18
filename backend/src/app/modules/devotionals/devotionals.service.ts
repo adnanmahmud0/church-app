@@ -18,7 +18,7 @@ const mapDevotional = (d: any) => {
     dayLabel: calculateDayLabel(d.assignedDateString),
     date: d.assignedDateString ? new Date(d.assignedDateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unassigned',
     dateISO: d.assignedDateString || '',
-    cycleCount: d.cycleCount,
+    posted: !!d.lastShownDate || (!!d.assignedDateString && d.assignedDateString <= new Date().toISOString().split('T')[0]),
     scriptureRef: d.scriptureRef,
     scriptureQuote: d.scriptureQuote,
     reflection: d.reflection,
@@ -41,9 +41,6 @@ const autoScheduleDevotionals = async () => {
   if (needsScheduling.length === 0) return;
 
   needsScheduling.sort((a, b) => {
-    const aCycle = a.cycleCount || 0;
-    const bCycle = b.cycleCount || 0;
-    if (aCycle !== bCycle) return aCycle - bCycle;
     return a._id.toString().localeCompare(b._id.toString());
   });
 
@@ -60,8 +57,7 @@ const autoScheduleDevotionals = async () => {
     const nextDateStr = currentMaxDate.toISOString().split('T')[0];
     
     const updatePayload: any = {
-      assignedDateString: nextDateStr,
-      $inc: { cycleCount: 1 }
+      assignedDateString: nextDateStr
     };
 
     if (d.assignedDateString) {

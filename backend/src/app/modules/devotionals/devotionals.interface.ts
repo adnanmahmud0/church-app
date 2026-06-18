@@ -4,7 +4,6 @@ export interface IDevotional {
   _id?: Types.ObjectId;
   title: string;
   assignedDateString?: string;
-  cycleCount: number;
   scriptureRef: string;
   scriptureQuote: string;
   reflection: string;

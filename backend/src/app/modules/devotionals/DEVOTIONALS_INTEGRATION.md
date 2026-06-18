@@ -26,7 +26,7 @@ The app should configure its HTTP client (e.g., Axios or fetch) to use this base
   "id": "60d5ecb8b392d7001f3e3a41",
   "title": "Finding Peace in the Storm",
   "assignedDateString": "2025-05-04",
-  "cycleCount": 1,
+  "posted": true,
   "scriptureRef": "Mark 4:39",
   "scriptureQuote": "And he arose, and rebuked the wind, and said unto the sea, Peace, be still...",
   "reflection": "A reflection on finding peace...",
