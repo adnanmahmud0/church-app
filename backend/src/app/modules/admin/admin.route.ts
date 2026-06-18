@@ -25,6 +25,12 @@ router.route('/profile')
     AdminController.updateProfile
   );
 
+router.get(
+  '/dashboard',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  AdminController.getDashboard
+);
+
 router.route('/:id')
   .put(
     auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),

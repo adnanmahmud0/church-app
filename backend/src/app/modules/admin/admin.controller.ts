@@ -56,10 +56,21 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getDashboard = catchAsync(async (req: Request, res: Response) => {
+  const result = await AdminService.getDashboard();
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Dashboard data retrieved successfully',
+    data: result,
+  });
+});
+
 export const AdminController = {
   getAllAdmins,
   createAdmin,
   updateAdmin,
   deleteAdmin,
   updateProfile,
+  getDashboard,
 };
