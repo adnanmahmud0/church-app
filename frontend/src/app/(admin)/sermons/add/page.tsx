@@ -18,7 +18,7 @@ export default function AddSermonPage() {
     title: "", speaker: "", category: "", date: new Date().toISOString().split('T')[0],
     duration_seconds: 0, video_url: "", thumbnail_url: "", key_scripture: "", description: "", tags: "",
   });
-  const [categoryList, setCategoryList] = useState<{ _id: string; name: string }[]>([]);
+  const [categoryList, setCategoryList] = useState<{ id: string; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [mediaPickerTarget, setMediaPickerTarget] = useState<{ field: string, type: "image" | "video" } | null>(null);
@@ -81,7 +81,7 @@ export default function AddSermonPage() {
             <div className="grid gap-2"><Label htmlFor="series">Category</Label>
               <select id="series" className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50" value={sermonFormData.category} onChange={(e) => setSermonFormData({...sermonFormData, category: e.target.value})}>
                 <option value="">No Category</option>
-                {categoryList.map(s => (<option key={s._id} value={s._id}>{s.name}</option>))}
+                {categoryList.map(s => (<option key={s.id} value={s.id}>{s.name}</option>))}
               </select>
             </div>
             <div className="grid gap-2"><Label htmlFor="date">Date *</Label><Input id="date" type="date" required value={sermonFormData.date} onChange={(e) => setSermonFormData({...sermonFormData, date: e.target.value})} /></div>
