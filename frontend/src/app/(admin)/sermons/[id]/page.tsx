@@ -13,6 +13,7 @@ type Sermon = {
   _id: string;
   title: string;
   speaker: string;
+  category?: { _id?: string; id?: string; name: string };
   series?: { _id: string; name: string };
   date: string;
   duration_seconds?: number;
@@ -138,9 +139,9 @@ export default function SermonDetailPage() {
               </div>
               
               <div className="flex flex-col space-y-1">
-                <span className="text-sm text-muted-foreground flex items-center"><BookOpenIcon className="mr-2 h-4 w-4" /> Series</span>
+                <span className="text-sm text-muted-foreground flex items-center"><BookOpenIcon className="mr-2 h-4 w-4" /> Category</span>
                 <span className="font-medium text-base">
-                  {sermon.series ? sermon.series.name : "Standalone"}
+                  {sermon.category ? sermon.category.name : (sermon.series ? sermon.series.name : "None")}
                 </span>
               </div>
               
