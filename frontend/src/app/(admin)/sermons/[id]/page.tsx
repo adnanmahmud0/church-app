@@ -9,6 +9,11 @@ import { ArrowLeftIcon, CalendarIcon, UserIcon, HashIcon, AlignLeftIcon, BookOpe
 
 const BACKEND_URL = "http://localhost:5000";
 
+const getMediaUrl = (url: string) => {
+  if (url.startsWith('http')) return url;
+  return `${BACKEND_URL}${url}`;
+};
+
 type Sermon = {
   _id: string;
   title: string;
@@ -91,7 +96,7 @@ export default function SermonDetailPage() {
           {sermon.thumbnail_url ? (
             <div className="rounded-lg overflow-hidden border aspect-video bg-muted flex items-center justify-center">
               <img 
-                src={`${BACKEND_URL}${sermon.thumbnail_url}`} 
+                src={getMediaUrl(sermon.thumbnail_url)} 
                 alt={sermon.title} 
                 className="w-full h-full object-cover" 
               />
@@ -105,16 +110,37 @@ export default function SermonDetailPage() {
           {sermon.video_url && (
             <div className="bg-card border rounded-lg p-4 space-y-3">
               <h3 className="font-semibold text-lg flex items-center">
-                <VideoIcon className="mr-2 h-5 w-5 text-primary" /> Video Playback
+                <VideoIcon className="mr-2 h-5 w-5 text-primary" /> Video
               </h3>
-              <video 
-                controls 
-                className="w-full rounded-md" 
-                src={`${BACKEND_URL}${sermon.video_url}`} 
-                preload="metadata"
-              >
-                Your browser does not support the video element.
-              </video>
+              {(() => {
+                let embedUrl = null;
+                try {
+                  const urlObj = new URL(sermon.video_url);
+                  if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+                    const videoId = urlObj.searchParams.get('v') || urlObj.pathname.split('/').pop();
+                    embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                  }
+                } catch (e) {}
+
+                if (embedUrl) {
+                  return (
+                    <div className="aspect-video w-full rounded-md overflow-hidden">
+                      <iframe 
+                        src={embedUrl} 
+                        className="w-full h-full border-0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <a href={sermon.video_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">
+                      {sermon.video_url}
+                    </a>
+                  );
+                }
+              })()}
             </div>
           )}
 

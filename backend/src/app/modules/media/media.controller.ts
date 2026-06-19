@@ -17,8 +17,12 @@ const uploadMedia = async (req: Request, res: Response) => {
     let mediaType = type;
     if (!mediaType) {
       if (file.mimetype.startsWith('image/')) mediaType = 'image';
-      else if (file.mimetype.startsWith('video/')) mediaType = 'video';
-      else if (file.mimetype.startsWith('audio/')) mediaType = 'audio';
+      else if (file.mimetype.startsWith('audio/')) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: 'Audio uploads are no longer supported.' });
+      }
+      else if (file.mimetype.startsWith('video/')) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ success: false, message: 'Video uploads are no longer supported. Please use YouTube links.' });
+      }
       else mediaType = 'image';
     }
 

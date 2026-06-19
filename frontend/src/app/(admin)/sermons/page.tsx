@@ -376,7 +376,7 @@ export default function SermonsPage() {
         open={isMediaPickerOpen} 
         onOpenChange={setIsMediaPickerOpen}
         onSelect={handleMediaSelect}
-        allowedTypes={mediaPickerTarget ? [mediaPickerTarget.type] : ["image", "video"]}
+        allowedTypes={mediaPickerTarget ? [mediaPickerTarget.type] : ["image"]}
       />
       <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
         <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">

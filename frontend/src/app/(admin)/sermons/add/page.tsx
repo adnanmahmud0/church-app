@@ -86,11 +86,8 @@ export default function AddSermonPage() {
             </div>
             <div className="grid gap-2"><Label htmlFor="date">Date *</Label><Input id="date" type="date" required value={sermonFormData.date} onChange={(e) => setSermonFormData({...sermonFormData, date: e.target.value})} /></div>
             <div className="grid gap-2"><Label htmlFor="duration_seconds">Duration (Seconds)</Label><Input id="duration_seconds" type="number" value={sermonFormData.duration_seconds} onChange={(e) => setSermonFormData({...sermonFormData, duration_seconds: Number(e.target.value)})} /></div>
-            <div className="grid gap-2"><Label htmlFor="video_url">Video URL</Label>
-              <div className="flex gap-2">
-                <Input id="video_url" value={sermonFormData.video_url} onChange={(e) => setSermonFormData({...sermonFormData, video_url: e.target.value})} />
-                <Button type="button" variant="outline" onClick={() => openMediaPicker("video_url", "video")}>Select</Button>
-              </div>
+            <div className="grid gap-2"><Label htmlFor="video_url">YouTube Video Link</Label>
+              <Input id="video_url" placeholder="https://www.youtube.com/watch?v=..." value={sermonFormData.video_url} onChange={(e) => setSermonFormData({...sermonFormData, video_url: e.target.value})} />
             </div>
             <div className="grid gap-2"><Label htmlFor="thumbnail_url">Thumbnail URL</Label>
               <div className="flex gap-2">
@@ -118,7 +115,7 @@ export default function AddSermonPage() {
         open={isMediaPickerOpen} 
         onOpenChange={setIsMediaPickerOpen}
         onSelect={handleMediaSelect}
-        allowedTypes={mediaPickerTarget ? [mediaPickerTarget.type] : ["image", "video"]}
+        allowedTypes={mediaPickerTarget ? [mediaPickerTarget.type] : ["image"]}
       />
     </div>
   );

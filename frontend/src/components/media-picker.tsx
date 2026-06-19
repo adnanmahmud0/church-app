@@ -22,6 +22,11 @@ type MediaItem = {
 
 const BACKEND_URL = "http://localhost:5000";
 
+const getMediaUrl = (url: string) => {
+  if (url.startsWith('http')) return url;
+  return `${BACKEND_URL}${url}`;
+};
+
 interface MediaPickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -142,9 +147,9 @@ export function MediaPicker({ open, onOpenChange, onSelect, allowedTypes = ["ima
                       }}
                     >
                       {item.type === "image" ? (
-                        <img src={`${BACKEND_URL}${item.url}`} alt={item.filename} className="object-cover w-full h-full" />
+                        <img src={getMediaUrl(item.url)} alt={item.filename} className="object-cover w-full h-full" />
                       ) : item.type === "video" ? (
-                        <video src={`${BACKEND_URL}${item.url}`} className="object-contain w-full h-full bg-black" />
+                        <video src={getMediaUrl(item.url)} className="object-contain w-full h-full bg-black" />
                       ) : (
                         <div className="flex flex-col items-center justify-center w-full h-full bg-muted/30 p-2">
                           <FileAudioIcon className="h-8 w-8 mb-2" />

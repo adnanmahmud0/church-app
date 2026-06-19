@@ -25,6 +25,11 @@ type MediaItem = {
 // In a real app, this should come from an environment variable.
 const BACKEND_URL = "http://localhost:5000";
 
+const getMediaUrl = (url: string) => {
+  if (url.startsWith('http')) return url;
+  return `${BACKEND_URL}${url}`;
+};
+
 export default function MediaPage() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +62,7 @@ export default function MediaPage() {
 
     setIsLoading(true);
     const formData = new FormData();
-    const fieldName = activeTab === 'image' ? 'image' : (activeTab === 'video' || activeTab === 'audio') ? 'media' : 'doc';
+    const fieldName = activeTab === 'image' ? 'image' : 'doc';
     formData.append(fieldName, file);
     formData.append("type", activeTab);
 
@@ -90,7 +95,7 @@ export default function MediaPage() {
   };
 
   const handleCopyLink = (url: string) => {
-    navigator.clipboard.writeText(`${BACKEND_URL}${url}`);
+    navigator.clipboard.writeText(getMediaUrl(url));
     toast.success("Link copied to clipboard!");
   };
 
@@ -108,11 +113,9 @@ export default function MediaPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="image">Images</TabsTrigger>
-          <TabsTrigger value="video">Videos</TabsTrigger>
-          <TabsTrigger value="audio">Audio</TabsTrigger>
         </TabsList>
 
-        {["image", "video", "audio"].map((tab) => (
+        {["image"].map((tab) => (
           <TabsContent key={tab} value={tab} className="space-y-4">
             {media.length === 0 ? (
               <div className="flex h-48 items-center justify-center rounded-md border border-dashed text-muted-foreground">
@@ -122,15 +125,8 @@ export default function MediaPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {media.map((item) => (
                   <div key={item._id} className="group relative rounded-md border overflow-hidden bg-muted/50 aspect-square flex items-center justify-center">
-                    {item.type === "image" ? (
-                      <img src={`${BACKEND_URL}${item.url}`} alt={item.filename} className="object-cover w-full h-full" />
-                    ) : item.type === "video" ? (
-                      <video src={`${BACKEND_URL}${item.url}`} controls className="object-contain w-full h-full bg-black" />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center w-full h-full bg-muted/30 p-2">
-                        <audio src={`${BACKEND_URL}${item.url}`} controls className="w-full" />
-                        <span className="text-xs truncate w-full px-2 text-center mt-2" title={item.filename}>{item.filename}</span>
-                      </div>
+                    {item.type === "image" && (
+                      <img src={getMediaUrl(item.url)} alt={item.filename} className="object-cover w-full h-full" />
                     )}
                     
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -163,7 +159,7 @@ export default function MediaPage() {
               type="file" 
               ref={fileInputRef} 
               className="hidden" 
-              accept={activeTab === 'image' ? 'image/*' : activeTab === 'video' ? 'video/*' : 'audio/*'} 
+              accept={activeTab === 'image' ? 'image/*' : '*'} 
               onChange={handleFileChange} 
             />
             <Button onClick={handleUploadClick} disabled={isLoading}>
