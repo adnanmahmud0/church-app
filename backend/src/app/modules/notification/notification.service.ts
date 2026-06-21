@@ -1,4 +1,4 @@
-import { getApps, initializeApp } from 'firebase-admin/app';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
@@ -8,10 +8,17 @@ import {
 } from './notification.interface';
 import { NotificationLog, NotificationToken } from './notification.model';
 
-// Initialize Firebase Admin (Ensure GOOGLE_APPLICATION_CREDENTIALS is set in environment or provide serviceAccountKey)
+// Initialize Firebase Admin
 try {
   if (!getApps().length) {
-    initializeApp();
+    if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+      initializeApp({
+        credential: cert(serviceAccount),
+      });
+    } else {
+      initializeApp();
+    }
   }
 } catch (error) {
   console.error('Firebase admin initialization error', error);
