@@ -11,7 +11,7 @@ const createSermon = async (payload: ISermon) => {
 
   // Send push notification automatically
   try {
-    await NotificationService.sendNotificationToAll({
+    await NotificationService.sendNotificationToTopic('sermon', {
       title: 'New Sermon Available!',
       body: `"${result.title}" has just been added. Tap to watch now!`,
       data: {

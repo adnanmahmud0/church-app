@@ -57,6 +57,23 @@ dependencies:
 3. Make an HTTP POST request to our `/api/v1/notifications/save-token` endpoint (as documented in Section 1) to save the token.
 4. Listen for token refresh events and ensure the new token is also synced to the backend.
 
+### Step 2.5: Subscribe to Notification Topics (IMPORTANT)
+Our backend uses **Firebase Topics** to send notifications. This allows you to easily build a "Settings" page where users can toggle certain notifications on or off without needing to build a complex backend preference sync.
+
+When the user installs the app (or opts-in), you MUST subscribe them to the following topics:
+
+```dart
+// Subscribe to all topics by default
+await FirebaseMessaging.instance.subscribeToTopic('sermon');
+await FirebaseMessaging.instance.subscribeToTopic('service_reminder');
+await FirebaseMessaging.instance.subscribeToTopic('custom');
+```
+
+If a user goes to their settings and toggles off "Sermon Notifications", simply run:
+```dart
+await FirebaseMessaging.instance.unsubscribeFromTopic('sermon');
+```
+
 ### Step 3: Handling Incoming Notifications & Deep Linking
 When the backend automatically sends a notification, it will attach a **data payload** containing a `type` string to help the app route the user properly.
 

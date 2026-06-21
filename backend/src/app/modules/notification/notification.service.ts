@@ -110,7 +110,53 @@ const sendNotificationToAll = async (payload: {
   return logResult;
 };
 
+const sendNotificationToTopic = async (
+  topic: string,
+  payload: {
+    title: string;
+    body: string;
+    data?: { [key: string]: string };
+  }
+): Promise<INotificationLog> => {
+  const message: any = {
+    notification: {
+      title: payload.title,
+      body: payload.body,
+    },
+    topic: topic,
+  };
+
+  if (payload.data) {
+    message.data = payload.data;
+  }
+
+  let successCount = 0;
+  let failureCount = 0;
+
+  try {
+    const response = await getMessaging().send(message);
+    successCount = 1; // topic send counts as 1 successful message dispatch
+  } catch (error: any) {
+    console.error(`Error sending message to topic ${topic}:`, error);
+    failureCount = 1;
+    throw new ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      `Failed to send topic notification: ${error.message || 'Unknown error'}`
+    );
+  }
+
+  const logResult = await NotificationLog.create({
+    title: payload.title,
+    body: payload.body,
+    successCount,
+    failureCount,
+  });
+
+  return logResult;
+};
+
 export const NotificationService = {
   saveDeviceToken,
   sendNotificationToAll,
+  sendNotificationToTopic,
 };

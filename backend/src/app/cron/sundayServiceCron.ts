@@ -57,7 +57,7 @@ export const startSundayServiceCron = () => {
           ) {
             const title = reminder.title || 'Sunday Service Reminder';
             const message = reminder.message || `Sunday service will start in ${reminder.minutes} minutes. See you soon!`;
-            await NotificationService.sendNotificationToAll({
+            await NotificationService.sendNotificationToTopic('service_reminder', {
               title: title,
               body: message,
               data: { type: 'service_reminder' }
@@ -82,7 +82,7 @@ export const startSundayServiceCron = () => {
         if (diffMinutes === 0) {
           const startTitle = churchInfo.sunday_service_start_title || 'Sunday Service Starting';
           const startMessage = churchInfo.sunday_service_start_message || 'Our Sunday service is starting now. Join us!';
-          await NotificationService.sendNotificationToAll({
+          await NotificationService.sendNotificationToTopic('service_reminder', {
             title: startTitle,
             body: startMessage,
             data: { type: 'service_reminder' }
