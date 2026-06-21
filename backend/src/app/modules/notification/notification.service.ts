@@ -12,7 +12,13 @@ import { NotificationLog, NotificationToken } from './notification.model';
 try {
   if (!getApps().length) {
     if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+      let serviceAccount;
+      try {
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+      } catch (e) {
+        const decoded = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_JSON, 'base64').toString('utf8');
+        serviceAccount = JSON.parse(decoded);
+      }
       initializeApp({
         credential: cert(serviceAccount),
       });
@@ -82,7 +88,7 @@ const sendNotificationToAll = async (payload: {
     console.error('Error sending message:', error);
     throw new ApiError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      'Failed to send notifications'
+      `Failed to send notifications: ${error.message || 'Unknown error'}`
     );
   }
 
