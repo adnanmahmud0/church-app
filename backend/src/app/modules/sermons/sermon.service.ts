@@ -4,9 +4,26 @@ import { paginationHelper } from '../../../helpers/paginationHelper';
 import { IPaginationOptions } from '../../../types/pagination';
 import { ISermon } from './sermon.interface';
 import { Sermon } from './sermon.model';
+import { NotificationService } from '../notification/notification.service';
 
 const createSermon = async (payload: ISermon) => {
   const result = await Sermon.create(payload);
+
+  // Send push notification automatically
+  try {
+    await NotificationService.sendNotificationToAll({
+      title: 'New Sermon Available!',
+      body: `"${result.title}" has just been added. Tap to watch now!`,
+      data: {
+        type: 'sermon',
+        id: result._id.toString(),
+      },
+    });
+  } catch (err) {
+    // Ignore error if there are no devices or notification fails
+    console.error('Failed to send notification for new sermon:', err);
+  }
+
   return result;
 };
 

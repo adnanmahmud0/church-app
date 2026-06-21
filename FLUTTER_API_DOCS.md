@@ -119,7 +119,47 @@ class PushNotificationService {
 }
 ```
 
-### Step 3: Handling Incoming Notifications
+### Step 3: Handling Incoming Notifications & Deep Linking
 Make sure to also implement the standard Firebase message handlers in your app to show the notifications when the app is open or in the background:
 - `FirebaseMessaging.onMessage.listen(...)` (Foreground)
 - `FirebaseMessaging.onBackgroundMessage(...)` (Background/Terminated)
+
+When the backend automatically sends a notification (e.g., when an Admin adds a new Sermon), it will attach a **data payload** to the notification.
+
+**Example Data Payload from Backend:**
+```json
+{
+  "type": "sermon",
+  "id": "6678abc123..."
+}
+```
+
+**Flutter Deep Linking Implementation:**
+When the user taps the notification, you can extract the `type` and `id` to navigate directly to the correct screen:
+
+```dart
+// 1. Handle notification tap when app is in background but alive
+FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+  _handleNotificationInteraction(message);
+});
+
+// 2. Handle notification tap when app was completely terminated
+FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+  if (message != null) {
+    _handleNotificationInteraction(message);
+  }
+});
+
+void _handleNotificationInteraction(RemoteMessage message) {
+  if (message.data.isNotEmpty) {
+    final String? type = message.data['type'];
+    final String? id = message.data['id'];
+
+    if (type == 'sermon' && id != null) {
+      // Navigate to the Sermon Details screen using your router
+      // Navigator.pushNamed(context, '/sermon-details', arguments: id);
+      print('Navigate to sermon with ID: $id');
+    }
+  }
+}
+```

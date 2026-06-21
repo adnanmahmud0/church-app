@@ -53,6 +53,7 @@ const saveDeviceToken = async (
 const sendNotificationToAll = async (payload: {
   title: string;
   body: string;
+  data?: { [key: string]: string };
 }): Promise<INotificationLog> => {
   const tokens = await NotificationToken.find().distinct('token');
 
@@ -60,13 +61,17 @@ const sendNotificationToAll = async (payload: {
     throw new ApiError(StatusCodes.NOT_FOUND, 'No device tokens found');
   }
 
-  const message = {
+  const message: any = {
     notification: {
       title: payload.title,
       body: payload.body,
     },
     tokens: tokens,
   };
+
+  if (payload.data) {
+    message.data = payload.data;
+  }
 
   let successCount = 0;
   let failureCount = 0;
