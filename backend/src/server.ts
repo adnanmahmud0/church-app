@@ -5,6 +5,7 @@ import app from './app';
 import config from './config';
 import { seedSuperAdmin } from './DB/seedAdmin';
 import { socketHelper } from './helpers/socketHelper';
+import { startSundayServiceCron } from './app/cron/sundayServiceCron';
 
 //uncaught exception
 process.on('uncaughtException', () => {
@@ -22,6 +23,9 @@ async function main() {
 
     //Seed Super Admin after database connection is successful
     await seedSuperAdmin();
+
+    // Start background jobs
+    startSundayServiceCron();
 
     const port =
       typeof config.port === 'number' ? config.port : Number(config.port);

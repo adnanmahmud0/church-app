@@ -48,7 +48,9 @@ const getContactAndMission = catchAsync(async (req: Request, res: Response) => {
     message: 'Contact info and mission retrieved successfully',
     data: {
       address: result.contact_address,
-      sunday_service: result.sunday_service_time,
+      sunday_service: (result.sunday_service_start_time && result.sunday_service_end_time) 
+        ? `${result.sunday_service_start_time},${result.sunday_service_end_time}` 
+        : result.sunday_service_time,
       email: result.contact_email,
       website: result.contact_website,
       our_mission: result.our_mission_quote

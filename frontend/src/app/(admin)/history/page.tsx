@@ -22,7 +22,6 @@ interface IChurchInfo {
   contact_email?: string;
   contact_phone?: string;
   contact_website?: string;
-  sunday_service_time?: string;
   our_mission_quote?: string;
   updated_at: string;
   updated_by: string;
@@ -39,7 +38,6 @@ export default function HistoryPage() {
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactWebsite, setContactWebsite] = useState("");
-  const [sundayServiceTime, setSundayServiceTime] = useState("");
   const [ourMissionQuote, setOurMissionQuote] = useState("");
 
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
@@ -68,7 +66,6 @@ export default function HistoryPage() {
         setContactEmail(info.contact_email || "");
         setContactPhone(info.contact_phone || "");
         setContactWebsite(info.contact_website || "");
-        setSundayServiceTime(info.sunday_service_time || "");
         setOurMissionQuote(info.our_mission_quote || "");
       }
     } catch (error: any) {
@@ -102,7 +99,6 @@ export default function HistoryPage() {
           contact_email: contactEmail,
           contact_phone: contactPhone,
           contact_website: contactWebsite,
-          sunday_service_time: sundayServiceTime,
           our_mission_quote: ourMissionQuote
         })
       });
@@ -181,17 +177,7 @@ export default function HistoryPage() {
               />
             </div>
             
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Sunday Service Time</label>
-              <input 
-                type="text" 
-                value={sundayServiceTime} 
-                onChange={(e) => { setSundayServiceTime(e.target.value); setIsDirty(true); }}
-                className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                placeholder="10:00 AM - 12:30 PM"
-              />
-            </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Email Address</label>
               <input 

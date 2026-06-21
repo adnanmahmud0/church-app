@@ -2,15 +2,27 @@ import { z } from 'zod';
 
 const updateChurchInfoZodSchema = z.object({
   body: z.object({
-    content: z.string({
-      required_error: 'Content is required',
-    }).min(1, 'Content cannot be empty'),
+    content: z.string().min(1, 'Content cannot be empty').optional(),
     contact_address: z.string().optional(),
     contact_email: z.string().email('Invalid email address').optional(),
     contact_phone: z.string().optional(),
     contact_website: z.string().optional(),
-    sunday_service_time: z.string().optional(),
     our_mission_quote: z.string().optional(),
+    sunday_service_start_time: z.string().optional(),
+    sunday_service_end_time: z.string().optional(),
+    sunday_service_reminder_enabled: z.boolean().optional(),
+    sunday_service_reminders: z.array(
+      z.object({
+        minutes: z.number(),
+        title: z.string().optional().default(""),
+        message: z.string().optional().default(""),
+      })
+    ).optional(),
+    sunday_service_start_notification_enabled: z.boolean().optional(),
+    sunday_service_start_title: z.string().optional(),
+    sunday_service_start_message: z.string().optional(),
+    sent_reminders: z.array(z.string()).optional(),
+    last_start_notification_sent_date: z.string().optional(),
   }),
 });
 

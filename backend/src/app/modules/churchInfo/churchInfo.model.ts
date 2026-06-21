@@ -24,13 +24,47 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
       type: String,
       trim: true,
     },
-    sunday_service_time: {
-      type: String,
-      trim: true,
-    },
     our_mission_quote: {
       type: String,
       trim: true,
+    },
+    sunday_service_start_time: {
+      type: String,
+      trim: true,
+    },
+    sunday_service_end_time: {
+      type: String,
+      trim: true,
+    },
+    sunday_service_reminder_enabled: {
+      type: Boolean,
+      default: false,
+    },
+    sunday_service_reminders: [
+      {
+        minutes: { type: Number, required: true },
+        title: { type: String, default: "" },
+        message: { type: String, default: "" },
+      }
+    ],
+    sunday_service_start_notification_enabled: {
+      type: Boolean,
+      default: false,
+    },
+    sunday_service_start_title: {
+      type: String,
+      default: "Sunday Service Starting",
+    },
+    sunday_service_start_message: {
+      type: String,
+      default: "Our Sunday service is starting now. Join us!",
+    },
+    sent_reminders: {
+      type: [String],
+      default: [],
+    },
+    last_start_notification_sent_date: {
+      type: String,
     },
     updated_at: {
       type: Date,

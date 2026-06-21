@@ -29,7 +29,8 @@ import {
   Landmark,
   Settings2,
   User,
-  Bell
+  Bell,
+  Clock
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
@@ -112,6 +113,11 @@ const data = {
       url: "/notifications",
       icon: <Bell />,
       roles: ["SUPER_ADMIN", "ADMIN"],
+    },
+    {
+      title: "Sunday Service Time",
+      url: "/sunday-service",
+      icon: <Clock />,
     },
   ],
   navSecondary: [
