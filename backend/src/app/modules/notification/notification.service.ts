@@ -1,4 +1,5 @@
-import * as admin from 'firebase-admin';
+import { getApps, initializeApp } from 'firebase-admin/app';
+import { getMessaging } from 'firebase-admin/messaging';
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import {
@@ -9,8 +10,8 @@ import { NotificationLog, NotificationToken } from './notification.model';
 
 // Initialize Firebase Admin (Ensure GOOGLE_APPLICATION_CREDENTIALS is set in environment or provide serviceAccountKey)
 try {
-  if (!admin.apps.length) {
-    admin.initializeApp();
+  if (!getApps().length) {
+    initializeApp();
   }
 } catch (error) {
   console.error('Firebase admin initialization error', error);
@@ -55,14 +56,14 @@ const sendNotificationToAll = async (payload: {
   let failureCount = 0;
 
   try {
-    const response = await admin.messaging().sendEachForMulticast(message);
+    const response = await getMessaging().sendEachForMulticast(message);
     successCount = response.successCount;
     failureCount = response.failureCount;
 
     // Log the failed tokens for debugging/cleaning up
     if (failureCount > 0) {
       const failedTokens: string[] = [];
-      response.responses.forEach((resp, idx) => {
+      response.responses.forEach((resp: any, idx: number) => {
         if (!resp.success) {
           failedTokens.push(tokens[idx]);
         }
