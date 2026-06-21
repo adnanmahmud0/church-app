@@ -29,7 +29,7 @@ export default function NotificationsDashboard() {
     try {
       const response = await apiFetch("/notifications/send", {
         method: "POST",
-        body: JSON.stringify({ title, body }),
+        body: JSON.stringify({ title, body, data: { type: "custom" } }),
       })
 
       if (response?.success) {
