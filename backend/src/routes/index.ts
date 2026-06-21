@@ -14,10 +14,15 @@ import { EventsRoutes } from '../app/modules/events/events.route';
 import { CommunityRoutes } from '../app/modules/community/community.route';
 import { WatchLiveRoutes } from '../app/modules/watchLive/watchLive.route';
 import { ChurchInfoRoutes } from '../app/modules/churchInfo/churchInfo.route';
+import { NotificationRoutes } from '../app/modules/notification/notification.route';
 
 const router = express.Router();
 
 const apiRoutes = [
+  {
+    path: '/notifications',
+    route: NotificationRoutes,
+  },
   {
     path: '/user',
     route: UserRoutes,

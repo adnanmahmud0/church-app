@@ -1,0 +1,16 @@
+import express from 'express';
+import auth from '../../middlewares/auth';
+import { USER_ROLES } from '../../../enums/user';
+import { NotificationController } from './notification.controller';
+
+const router = express.Router();
+
+router.post('/save-token', NotificationController.saveDeviceToken);
+
+router.post(
+  '/send',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+  NotificationController.sendNotification
+);
+
+export const NotificationRoutes = router;

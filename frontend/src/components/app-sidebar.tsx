@@ -28,7 +28,8 @@ import {
   Tv, 
   Landmark,
   Settings2,
-  User
+  User,
+  Bell
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
@@ -105,6 +106,12 @@ const data = {
       title: "History and core Values",
       url: "/history",
       icon: <Landmark />,
+    },
+    {
+      title: "Notifications",
+      url: "/notifications",
+      icon: <Bell />,
+      roles: ["SUPER_ADMIN", "ADMIN"],
     },
   ],
   navSecondary: [

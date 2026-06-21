@@ -1,0 +1,94 @@
+import * as admin from 'firebase-admin';
+import { StatusCodes } from 'http-status-codes';
+import ApiError from '../../../errors/ApiError';
+import {
+  INotificationLog,
+  INotificationToken,
+} from './notification.interface';
+import { NotificationLog, NotificationToken } from './notification.model';
+
+// Initialize Firebase Admin (Ensure GOOGLE_APPLICATION_CREDENTIALS is set in environment or provide serviceAccountKey)
+try {
+  if (!admin.apps.length) {
+    admin.initializeApp();
+  }
+} catch (error) {
+  console.error('Firebase admin initialization error', error);
+}
+
+const saveDeviceToken = async (
+  payload: INotificationToken
+): Promise<INotificationToken> => {
+  const isExist = await NotificationToken.findOne({ token: payload.token });
+
+  if (isExist) {
+    if (payload.user && String(isExist.user) !== String(payload.user)) {
+      isExist.user = payload.user;
+      await isExist.save();
+    }
+    return isExist;
+  }
+
+  const result = await NotificationToken.create(payload);
+  return result;
+};
+
+const sendNotificationToAll = async (payload: {
+  title: string;
+  body: string;
+}): Promise<INotificationLog> => {
+  const tokens = await NotificationToken.find().distinct('token');
+
+  if (!tokens || tokens.length === 0) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'No device tokens found');
+  }
+
+  const message = {
+    notification: {
+      title: payload.title,
+      body: payload.body,
+    },
+    tokens: tokens,
+  };
+
+  let successCount = 0;
+  let failureCount = 0;
+
+  try {
+    const response = await admin.messaging().sendEachForMulticast(message);
+    successCount = response.successCount;
+    failureCount = response.failureCount;
+
+    // Log the failed tokens for debugging/cleaning up
+    if (failureCount > 0) {
+      const failedTokens: string[] = [];
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          failedTokens.push(tokens[idx]);
+        }
+      });
+      // Optionally, you can remove invalid tokens from the database here
+      // await NotificationToken.deleteMany({ token: { $in: failedTokens } });
+    }
+  } catch (error: any) {
+    console.error('Error sending message:', error);
+    throw new ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to send notifications'
+    );
+  }
+
+  const logResult = await NotificationLog.create({
+    title: payload.title,
+    body: payload.body,
+    successCount,
+    failureCount,
+  });
+
+  return logResult;
+};
+
+export const NotificationService = {
+  saveDeviceToken,
+  sendNotificationToAll,
+};
