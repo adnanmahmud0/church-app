@@ -7,6 +7,7 @@ export interface IChurchInfo {
   contact_phone?: string;
   contact_website?: string;
   our_mission_quote?: string;
+  sunday_service_time?: string;
   sunday_service_start_time?: string;
   sunday_service_end_time?: string;
   sunday_service_reminder_enabled?: boolean;
