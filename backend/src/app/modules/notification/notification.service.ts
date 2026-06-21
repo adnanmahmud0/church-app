@@ -12,6 +12,9 @@ import { NotificationLog, NotificationToken } from './notification.model';
 try {
   if (!getApps().length) {
     if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+      // Forcibly remove the conflicting environment variable so Firebase doesn't crash looking for the file
+      delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
       let serviceAccount;
       try {
         serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
