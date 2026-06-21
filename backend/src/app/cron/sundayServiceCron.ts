@@ -85,7 +85,7 @@ export const startSundayServiceCron = () => {
           await NotificationService.sendNotificationToAll({
             title: startTitle,
             body: startMessage,
-            data: { type: 'service_start' }
+            data: { type: 'service_reminder' }
           });
           
           churchInfo.last_start_notification_sent_date = todayStr;
