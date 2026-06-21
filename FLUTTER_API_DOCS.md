@@ -124,18 +124,22 @@ Make sure to also implement the standard Firebase message handlers in your app t
 - `FirebaseMessaging.onMessage.listen(...)` (Foreground)
 - `FirebaseMessaging.onBackgroundMessage(...)` (Background/Terminated)
 
-When the backend automatically sends a notification (e.g., when an Admin adds a new Sermon), it will attach a **data payload** to the notification.
+When the backend automatically sends a notification, it will attach a **data payload** containing a `type` string to help the app route the user properly.
 
-**Example Data Payload from Backend:**
-```json
-{
-  "type": "sermon",
-  "id": "6678abc123..."
-}
-```
+#### Supported Notification Types
+Currently, the backend sends **4 types of notifications**, each with a specific `type` identifier in the data payload:
 
-**Flutter Deep Linking Implementation:**
-When the user taps the notification, you can extract the `type` and `id` to navigate directly to the correct screen:
+1. **New Sermon (`sermon`)**: Sent automatically when an Admin adds a new sermon. Includes the sermon ID.
+   - Payload: `{ "type": "sermon", "id": "<sermon_id>" }`
+2. **Service Reminder (`service_reminder`)**: Sent before the Sunday service (e.g., 60 mins before).
+   - Payload: `{ "type": "service_reminder" }`
+3. **Service Started (`service_start`)**: Sent at the exact time the Sunday service starts.
+   - Payload: `{ "type": "service_start" }`
+4. **Custom/Manual (`custom`)**: Sent manually by the Admin from the Push Notifications dashboard.
+   - Payload: `{ "type": "custom" }`
+
+#### Flutter Deep Linking Implementation Example:
+When the user taps the notification, you can extract the `type` to navigate directly to the correct screen or show a specific UI dialog:
 
 ```dart
 // 1. Handle notification tap when app is in background but alive
@@ -153,12 +157,33 @@ FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
 void _handleNotificationInteraction(RemoteMessage message) {
   if (message.data.isNotEmpty) {
     final String? type = message.data['type'];
-    final String? id = message.data['id'];
 
-    if (type == 'sermon' && id != null) {
-      // Navigate to the Sermon Details screen using your router
-      // Navigator.pushNamed(context, '/sermon-details', arguments: id);
-      print('Navigate to sermon with ID: $id');
+    switch (type) {
+      case 'sermon':
+        final String? id = message.data['id'];
+        if (id != null) {
+          // Navigate to the Sermon Details screen
+          // Navigator.pushNamed(context, '/sermon-details', arguments: id);
+          print('Navigate to sermon with ID: $id');
+        }
+        break;
+
+      case 'service_reminder':
+      case 'service_start':
+        // Navigate to the Sunday Service / Live Stream screen
+        // Navigator.pushNamed(context, '/live-stream');
+        print('Navigating to Sunday Service / Live Stream page');
+        break;
+
+      case 'custom':
+        // General notification, maybe navigate to a generic notifications center or home screen
+        // Navigator.pushNamed(context, '/notifications-center');
+        print('Handling custom push notification');
+        break;
+
+      default:
+        // Handle unknown types safely
+        break;
     }
   }
 }
