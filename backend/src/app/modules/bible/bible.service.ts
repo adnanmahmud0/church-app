@@ -8,13 +8,14 @@ import config from '../../../config';
 
 const cache = new NodeCache();
 
-// The translations the user wants, but they require YouVersion approval.
+// The translations the user actually has access to via the YouVersion API key.
+// Copyrighted versions like KJV/NIV require explicit YouVersion approval.
 const DEFAULT_VERSIONS: IBibleVersion[] = [
-  { id: 1, name: 'King James Version', abbreviation: 'KJV', isActive: true },
-  { id: 111, name: 'New International Version', abbreviation: 'NIV', isActive: true },
-  { id: 116, name: 'New Living Translation', abbreviation: 'NLT', isActive: true },
-  { id: 1588, name: 'Amplified Bible', abbreviation: 'AMP', isActive: true },
-  { id: 97, name: 'The Message', abbreviation: 'MSG', isActive: true },
+  { id: 12, name: 'American Standard Version', abbreviation: 'ASV', isActive: true },
+  { id: 3034, name: 'Berean Standard Bible', abbreviation: 'BSB', isActive: true },
+  { id: 2660, name: 'Literal Standard Version', abbreviation: 'LSV', isActive: true },
+  { id: 1932, name: 'Free Bible Version', abbreviation: 'FBV', isActive: true },
+  { id: 206, name: 'World English Bible', abbreviation: 'WEBUS', isActive: true },
 ];
 
 const YOUVERSION_BASE_URL = 'https://api.youversion.com/v1';
