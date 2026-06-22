@@ -1,23 +1,71 @@
 "use client"
 
 import * as React from "react"
-import { useState } from "react"
-import { Send, Loader2, Bell } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Send, Loader2, Bell, Settings2 } from "lucide-react"
 import { toast } from "sonner"
 import { apiFetch } from "@/lib/api"
+import { Switch } from "@/components/ui/switch"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function NotificationsDashboard() {
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
-  const [topic, setTopic] = useState("custom")
   const [isSending, setIsSending] = useState(false)
+  const [isFetchingSettings, setIsFetchingSettings] = useState(true)
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // Default settings
+  const [defaultSermon, setDefaultSermon] = useState(false)
+  const [defaultServiceReminder, setDefaultServiceReminder] = useState(false)
+  const [defaultCustom, setDefaultCustom] = useState(true)
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await apiFetch('/church-info/admin');
+        if (data && data.data) {
+          setDefaultSermon(data.data.default_sermon_notification ?? false);
+          setDefaultServiceReminder(data.data.default_service_reminder_notification ?? false);
+          setDefaultCustom(data.data.default_custom_notification ?? true);
+        }
+      } catch (error) {
+        console.error("Failed to fetch notification settings:", error);
+      } finally {
+        setIsFetchingSettings(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true);
+    try {
+      const response = await apiFetch('/church-info/admin', {
+        method: 'PUT',
+        body: JSON.stringify({
+          default_sermon_notification: defaultSermon,
+          default_service_reminder_notification: defaultServiceReminder,
+          default_custom_notification: defaultCustom,
+        })
+      });
+      if (response?.success) {
+        toast.success("Default settings updated successfully!");
+      } else {
+        toast.error("Failed to update default settings.");
+      }
+    } catch (error: any) {
+      console.error("Save settings error:", error);
+      toast.error(error.message || "Failed to save settings");
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,7 +79,7 @@ export default function NotificationsDashboard() {
     try {
       const response = await apiFetch("/notifications/send", {
         method: "POST",
-        body: JSON.stringify({ title, body, topic, data: { type: topic } }),
+        body: JSON.stringify({ title, body, data: { type: "custom" } }),
       })
 
       if (response?.success) {
@@ -86,19 +134,6 @@ export default function NotificationsDashboard() {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="topic">Notification Topic (Type)</Label>
-                <Select value={topic} onValueChange={setTopic}>
-                  <SelectTrigger id="topic">
-                    <SelectValue placeholder="Select topic" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="custom">General / Custom (All Users)</SelectItem>
-                    <SelectItem value="sermon">Sermons (Opt-in users)</SelectItem>
-                    <SelectItem value="service_reminder">Service Reminders (Opt-in users)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </CardContent>
             <CardFooter>
               <Button type="submit" disabled={isSending}>
@@ -144,6 +179,79 @@ export default function NotificationsDashboard() {
               </p>
             </div>
           </CardContent>
+        </Card>
+
+        {/* Default Notification Settings */}
+        <Card className="col-span-1 lg:col-span-3 mt-4">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Settings2 className="mr-2 h-5 w-5 text-muted-foreground" />
+              App Default Subscriptions
+            </CardTitle>
+            <CardDescription>
+              Configure which notification types are enabled by default when a user installs the mobile app.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isFetchingSettings ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-3">
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Sermon Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                      New sermons and series
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={defaultSermon} 
+                    onCheckedChange={setDefaultSermon}
+                  />
+                </div>
+                
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Service Reminders</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Sunday service start times
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={defaultServiceReminder} 
+                    onCheckedChange={setDefaultServiceReminder}
+                  />
+                </div>
+
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Custom Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Manual alerts (like above)
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={defaultCustom} 
+                    onCheckedChange={setDefaultCustom}
+                  />
+                </div>
+              </div>
+            )}
+          </CardContent>
+          <CardFooter className="justify-end border-t pt-6">
+            <Button onClick={handleSaveSettings} disabled={isFetchingSettings || isSavingSettings}>
+              {isSavingSettings ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Defaults"
+              )}
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     </div>

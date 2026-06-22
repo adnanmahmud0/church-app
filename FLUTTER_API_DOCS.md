@@ -60,23 +60,51 @@ dependencies:
 ### Step 2.5: Subscribe to Notification Topics (IMPORTANT)
 Our backend uses **Firebase Topics** to send notifications. This allows you to easily build a "Settings" page where users can toggle certain notifications on or off without needing to build a complex backend preference sync.
 
-**By default, the Admin has decided that:**
-- `custom` notifications should be **ON** by default.
-- `sermon` and `service_reminder` notifications should be **OFF** by default.
+**Dynamic Default Subscriptions:**
+The admin can control which notifications are enabled by default for new users. 
+You must fetch the `notification_defaults` object from the backend API:
 
-When the user installs the app (or opts-in), you MUST subscribe them to the custom topic only:
+`GET /api/v1/church-info/contact-and-mission`
+*(Note: no authentication is required for this endpoint).*
 
-```dart
-// Subscribe to the custom topic by default so they receive important manual updates
-await FirebaseMessaging.instance.subscribeToTopic('custom');
+**Response Example:**
+```json
+{
+  "success": true,
+  "data": {
+    "address": "...",
+    "sunday_service": "10:20,12:00",
+    "notification_defaults": {
+      "sermon": false,
+      "service_reminder": false,
+      "custom": true
+    }
+  }
+}
 ```
 
-If a user goes to their settings and toggles **ON** "Sermon Notifications" or "Service Reminders", then run:
+When the user installs the app, read these values. If `sermon` is `true`, then subscribe them to the `sermon` topic.
+```dart
+// Example implementation:
+if (apiResponse.notification_defaults.sermon == true) {
+  await FirebaseMessaging.instance.subscribeToTopic('sermon');
+}
+if (apiResponse.notification_defaults.service_reminder == true) {
+  await FirebaseMessaging.instance.subscribeToTopic('service_reminder');
+}
+if (apiResponse.notification_defaults.custom == true) {
+  await FirebaseMessaging.instance.subscribeToTopic('custom');
+}
+```
+
+If a user goes to their settings and manually toggles **ON** "Sermon Notifications", simply run:
 ```dart
 await FirebaseMessaging.instance.subscribeToTopic('sermon');
-await FirebaseMessaging.instance.subscribeToTopic('service_reminder');
 ```
-If they turn them back off, run the unsubscribe method.
+If they turn them back off, run the unsubscribe method:
+```dart
+await FirebaseMessaging.instance.unsubscribeFromTopic('sermon');
+```
 
 ### Step 3: Handling Incoming Notifications & Deep Linking
 When the backend automatically sends a notification, it will attach a **data payload** containing a `type` string to help the app route the user properly.

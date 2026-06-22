@@ -53,7 +53,12 @@ const getContactAndMission = catchAsync(async (req: Request, res: Response) => {
         : result.sunday_service_time,
       email: result.contact_email,
       website: result.contact_website,
-      our_mission: result.our_mission_quote
+      our_mission: result.our_mission_quote,
+      notification_defaults: {
+        sermon: result.default_sermon_notification ?? false,
+        service_reminder: result.default_service_reminder_notification ?? false,
+        custom: result.default_custom_notification ?? true,
+      }
     },
   });
 });

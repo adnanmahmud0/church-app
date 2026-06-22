@@ -15,6 +15,9 @@ export interface IChurchInfo {
   sunday_service_start_notification_enabled?: boolean;
   sunday_service_start_title?: string;
   sunday_service_start_message?: string;
+  default_sermon_notification?: boolean;
+  default_service_reminder_notification?: boolean;
+  default_custom_notification?: boolean;
   sent_reminders?: string[];
   last_start_notification_sent_date?: string;
   updated_at: Date;

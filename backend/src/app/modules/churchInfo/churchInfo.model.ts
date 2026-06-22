@@ -63,6 +63,18 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
       type: String,
       default: "Our Sunday service is starting now. Join us!",
     },
+    default_sermon_notification: {
+      type: Boolean,
+      default: false,
+    },
+    default_service_reminder_notification: {
+      type: Boolean,
+      default: false,
+    },
+    default_custom_notification: {
+      type: Boolean,
+      default: true,
+    },
     sent_reminders: {
       type: [String],
       default: [],
