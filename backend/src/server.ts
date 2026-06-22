@@ -6,6 +6,7 @@ import config from './config';
 import { seedSuperAdmin } from './DB/seedAdmin';
 import { socketHelper } from './helpers/socketHelper';
 import { startSundayServiceCron } from './app/cron/sundayServiceCron';
+import { User } from './app/modules/user/user.model';
 
 //uncaught exception
 process.on('uncaughtException', () => {
@@ -23,6 +24,9 @@ async function main() {
 
     //Seed Super Admin after database connection is successful
     await seedSuperAdmin();
+
+    // Sync User indexes to ensure 'sparse: true' is applied to existing MongoDB collections
+    await User.syncIndexes();
 
     // Start background jobs
     startSundayServiceCron();
