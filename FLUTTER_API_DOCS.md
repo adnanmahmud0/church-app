@@ -60,19 +60,23 @@ dependencies:
 ### Step 2.5: Subscribe to Notification Topics (IMPORTANT)
 Our backend uses **Firebase Topics** to send notifications. This allows you to easily build a "Settings" page where users can toggle certain notifications on or off without needing to build a complex backend preference sync.
 
-When the user installs the app (or opts-in), you MUST subscribe them to the following topics:
+**By default, the Admin has decided that:**
+- `custom` notifications should be **ON** by default.
+- `sermon` and `service_reminder` notifications should be **OFF** by default.
+
+When the user installs the app (or opts-in), you MUST subscribe them to the custom topic only:
 
 ```dart
-// Subscribe to all topics by default
-await FirebaseMessaging.instance.subscribeToTopic('sermon');
-await FirebaseMessaging.instance.subscribeToTopic('service_reminder');
+// Subscribe to the custom topic by default so they receive important manual updates
 await FirebaseMessaging.instance.subscribeToTopic('custom');
 ```
 
-If a user goes to their settings and toggles off "Sermon Notifications", simply run:
+If a user goes to their settings and toggles **ON** "Sermon Notifications" or "Service Reminders", then run:
 ```dart
-await FirebaseMessaging.instance.unsubscribeFromTopic('sermon');
+await FirebaseMessaging.instance.subscribeToTopic('sermon');
+await FirebaseMessaging.instance.subscribeToTopic('service_reminder');
 ```
+If they turn them back off, run the unsubscribe method.
 
 ### Step 3: Handling Incoming Notifications & Deep Linking
 When the backend automatically sends a notification, it will attach a **data payload** containing a `type` string to help the app route the user properly.
