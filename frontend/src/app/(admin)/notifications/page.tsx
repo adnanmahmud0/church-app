@@ -11,10 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function NotificationsDashboard() {
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
+  const [topic, setTopic] = useState("custom")
   const [isSending, setIsSending] = useState(false)
 
   const handleSend = async (e: React.FormEvent) => {
@@ -29,7 +31,7 @@ export default function NotificationsDashboard() {
     try {
       const response = await apiFetch("/notifications/send", {
         method: "POST",
-        body: JSON.stringify({ title, body, data: { type: "custom" } }),
+        body: JSON.stringify({ title, body, topic, data: { type: topic } }),
       })
 
       if (response?.success) {
@@ -83,6 +85,19 @@ export default function NotificationsDashboard() {
                   onChange={(e) => setBody(e.target.value)}
                   required
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="topic">Notification Topic (Type)</Label>
+                <Select value={topic} onValueChange={setTopic}>
+                  <SelectTrigger id="topic">
+                    <SelectValue placeholder="Select topic" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="custom">General / Custom (All Users)</SelectItem>
+                    <SelectItem value="sermon">Sermons (Opt-in users)</SelectItem>
+                    <SelectItem value="service_reminder">Service Reminders (Opt-in users)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
             <CardFooter>

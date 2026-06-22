@@ -16,7 +16,8 @@ const saveDeviceToken = catchAsync(async (req: Request, res: Response) => {
 });
 
 const sendNotification = catchAsync(async (req: Request, res: Response) => {
-  const result = await NotificationService.sendNotificationToTopic('custom', req.body);
+  const topic = req.body.topic || 'custom';
+  const result = await NotificationService.sendNotificationToTopic(topic, req.body);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
