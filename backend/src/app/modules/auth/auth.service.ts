@@ -16,12 +16,76 @@ import {
 } from '../../../types/auth';
 import cryptoToken from '../../../util/cryptoToken';
 import generateOTP from '../../../util/generateOTP';
+import { USER_ROLES } from '../../../enums/user';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
+import { NotificationToken } from '../notification/notification.model';
+
+//device init - create guest user from deviceId
+const deviceInitToDB = async (payload: {
+  deviceId: string;
+  fcmToken: string;
+  platform?: 'android' | 'ios' | 'web';
+}) => {
+  const { deviceId, fcmToken, platform } = payload;
+
+  if (!deviceId) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Device ID is required');
+  }
+  if (!fcmToken) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'FCM Token is required');
+  }
+
+  // Check if a user already exists with this deviceId
+  let user = await User.findOne({ deviceId });
+
+  if (!user) {
+    // Create a new guest user
+    user = await User.create({
+      role: USER_ROLES.GUEST,
+      deviceId,
+      verified: false,
+      status: 'active',
+    });
+  }
+
+  // Save or update the FCM token
+  const existingToken = await NotificationToken.findOne({ token: fcmToken });
+  if (existingToken) {
+    existingToken.user = user._id as any;
+    if (platform) existingToken.platform = platform;
+    await existingToken.save();
+  } else {
+    await NotificationToken.create({
+      token: fcmToken,
+      user: user._id,
+      platform: platform || 'android',
+    });
+  }
+
+  // Create tokens
+  const jwtPayload = {
+    id: user._id,
+    role: user.role,
+    email: user.email || null,
+  };
+  const accessToken = jwtHelper.createToken(
+    jwtPayload,
+    config.jwt.jwt_secret as string,
+    config.jwt.jwt_expire_in as StringValue
+  );
+  const refreshToken = jwtHelper.createToken(
+    jwtPayload,
+    config.jwt.jwt_refresh_secret as string,
+    config.jwt.jwt_refresh_expire_in as StringValue
+  );
+
+  return { accessToken, refreshToken };
+};
 
 //login
-const loginUserFromDB = async (payload: ILoginData) => {
-  const { email, password } = payload;
+const loginUserFromDB = async (payload: ILoginData & { deviceId?: string }) => {
+  const { email, password, deviceId } = payload;
   debug('auth.login.db', { email });
   const isExistUser = await User.findOne({ email }).select('+password');
   if (!isExistUser) {
@@ -50,7 +114,7 @@ const loginUserFromDB = async (payload: ILoginData) => {
   //check match password
   if (
     password &&
-    !(await User.isMatchPassword(password, isExistUser.password))
+    !(await User.isMatchPassword(password, isExistUser.password!))
   ) {
     debug('auth.login.db.password_mismatch', { email });
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect!');
@@ -74,6 +138,25 @@ const loginUserFromDB = async (payload: ILoginData) => {
   );
   debug('auth.login.db.tokens_created', { email });
 
+  // If deviceId is provided, link the device to this user
+  if (deviceId) {
+    // Find the guest user with this deviceId and clean up
+    const guestUser = await User.findOne({ deviceId, role: USER_ROLES.GUEST });
+    if (guestUser && String(guestUser._id) !== String(isExistUser._id)) {
+      // Delete orphaned guest user (their data is lost since user chose to login to existing account)
+      await User.findByIdAndDelete(guestUser._id);
+    }
+
+    // Link deviceId to the logged-in user
+    await User.findByIdAndUpdate(isExistUser._id, { deviceId });
+
+    // Update all FCM tokens that were linked to the guest to point to logged-in user
+    await NotificationToken.updateMany(
+      { user: guestUser?._id },
+      { user: isExistUser._id }
+    );
+  }
+
   return { accessToken, refreshToken };
 };
 
@@ -90,7 +173,7 @@ const forgetPasswordToDB = async (email: string) => {
     otp,
     email: isExistUser.email,
   };
-  const forgetPassword = emailTemplate.resetPassword(value);
+  const forgetPassword = emailTemplate.resetPassword(value as any);
   emailHelper.sendEmail(forgetPassword);
   debug('auth.forget_password.email_sent', { email });
 
@@ -247,7 +330,7 @@ const changePasswordToDB = async (
   //current password match
   if (
     currentPassword &&
-    !(await User.isMatchPassword(currentPassword, isExistUser.password))
+    !(await User.isMatchPassword(currentPassword, isExistUser.password!))
   ) {
     debug('auth.change_password.password_incorrect');
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect');
@@ -290,6 +373,7 @@ const logoutUserFromDB = async () => {
 };
 
 export const AuthService = {
+  deviceInitToDB,
   verifyEmailToDB,
   loginUserFromDB,
   forgetPasswordToDB,
@@ -311,7 +395,7 @@ export const AuthService = {
       otp,
       email: isExistUser.email!,
     };
-    const createAccountTemplate = emailTemplate.createAccount(values);
+    const createAccountTemplate = emailTemplate.createAccount(values as any);
     emailHelper.sendEmail(createAccountTemplate);
     debug('auth.resend_verify.sent', { email });
 

@@ -19,17 +19,17 @@ router.post(
 );
 router.get(
   '/history',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
   GivingController.getHistory
 );
 router.get(
   '/total-this-year',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
   GivingController.getTotalThisYear
 );
 router.get(
   '/profile-summary',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
   GivingController.getProfileGivingSummary
 );
 

@@ -2,13 +2,14 @@ import { Model, Types } from 'mongoose';
 import { USER_ROLES } from '../../../enums/user';
 
 export type IUser = {
-  name: string;
+  name?: string;
   role: USER_ROLES;
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
   image?: string;
   status: 'active' | 'delete';
   verified: boolean;
+  deviceId?: string;
   favoriteSermons?: Types.ObjectId[];
   authentication?: {
     isResetPassword: boolean;

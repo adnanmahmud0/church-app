@@ -4,6 +4,32 @@
 
 ---
 
+### Device Initialization (Guest Access)
+Registers a device and creates a guest session for a user who hasn't logged in yet.
+
+- **URL:** `/auth/device-init`
+- **Method:** `POST`
+- **Auth Required:** No
+- **Request Body (JSON):**
+  ```json
+  {
+    "deviceId": "unique_device_uuid_here", // required
+    "fcmToken": "firebase_fcm_token_here", // required
+    "platform": "android"                  // required: "android" | "ios" | "web"
+  }
+  ```
+- **Success Response:** `200 OK`
+  ```json
+  {
+    "success": true,
+    "statusCode": 200,
+    "message": "Device initialized successfully",
+    "data": { "accessToken": "...", "refreshToken": "..." }
+  }
+  ```
+
+---
+
 ### Login User
 Authenticates a user and returns access/refresh tokens.
 
@@ -14,7 +40,8 @@ Authenticates a user and returns access/refresh tokens.
   ```json
   {
     "email": "user@email.com", // required
-    "password": "password123"  // required
+    "password": "password123", // required
+    "deviceId": "uuid_string"  // optional (used to link guest session to account)
   }
   ```
 - **Success Response:** `200 OK`

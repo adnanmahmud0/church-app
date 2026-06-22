@@ -16,7 +16,8 @@ Creates a new user account. (Email verification is currently bypassed).
     "name": "John Doe",       // required
     "email": "user@email.com",// required
     "password": "password123",// required
-    "image": "url_string"     // optional
+    "image": "url_string",    // optional
+    "deviceId": "uuid_string" // optional (used to upgrade a guest session)
   }
   ```
 - **Success Response:** `200 OK`

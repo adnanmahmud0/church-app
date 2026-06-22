@@ -23,7 +23,7 @@ router.get(
 
 router.get(
   '/requests/mine',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
   PrayerController.getMyRequests
 );
 
@@ -47,14 +47,14 @@ router.post(
 
 router.patch(
   '/requests/:id',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
   validateRequest(PrayerValidation.updatePrayerRequestZodSchema),
   PrayerController.updateRequest
 );
 
 router.delete(
   '/requests/:id',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
   PrayerController.deleteRequest
 );
 

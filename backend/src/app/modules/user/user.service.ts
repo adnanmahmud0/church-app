@@ -1,5 +1,7 @@
+import bcrypt from 'bcrypt';
 import { StatusCodes } from 'http-status-codes';
 import { JwtPayload } from 'jsonwebtoken';
+import config from '../../../config';
 import { USER_ROLES } from '../../../enums/user';
 import ApiError from '../../../errors/ApiError';
 import unlinkFile from '../../../shared/unlinkFile';
@@ -8,6 +10,48 @@ import { IUser } from './user.interface';
 import { User } from './user.model';
 
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
+  const { deviceId, name, email, password, ...rest } = payload;
+
+  // If deviceId is provided, try to find an existing guest user and upgrade them
+  if (deviceId) {
+    const existingGuest = await User.findOne({ deviceId, role: USER_ROLES.GUEST });
+    if (existingGuest) {
+      // Check if email is already taken by another user
+      if (email) {
+        const emailTaken = await User.findOne({ email, _id: { $ne: existingGuest._id } });
+        if (emailTaken) {
+          throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exist!');
+        }
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(
+        password as string,
+        Number(config.bcrypt_salt_rounds)
+      );
+
+      // Upgrade the guest user to a full user
+      const upgradedUser = await User.findOneAndUpdate(
+        { _id: existingGuest._id },
+        {
+          name,
+          email,
+          password: hashedPassword,
+          role: USER_ROLES.USER,
+          verified: true,
+          ...rest,
+        },
+        { new: true }
+      );
+
+      if (!upgradedUser) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to upgrade guest user');
+      }
+
+      return upgradedUser;
+    }
+  }
+
   //set role and verified status
   payload.role = USER_ROLES.USER;
   payload.verified = true;

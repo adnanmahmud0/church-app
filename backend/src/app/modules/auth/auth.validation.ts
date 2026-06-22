@@ -7,10 +7,19 @@ const createVerifyEmailZodSchema = z.object({
   }),
 });
 
+const createDeviceInitZodSchema = z.object({
+  body: z.object({
+    deviceId: z.string({ required_error: 'Device ID is required' }),
+    fcmToken: z.string({ required_error: 'FCM Token is required' }),
+    platform: z.enum(['android', 'ios', 'web']).optional(),
+  }),
+});
+
 const createLoginZodSchema = z.object({
   body: z.object({
     email: z.string({ required_error: 'Email is required' }),
     password: z.string({ required_error: 'Password is required' }),
+    deviceId: z.string().optional(),
   }),
 });
 
@@ -42,6 +51,7 @@ const createChangePasswordZodSchema = z.object({
 });
 
 export const AuthValidation = {
+  createDeviceInitZodSchema,
   createVerifyEmailZodSchema,
   createForgetPasswordZodSchema,
   createLoginZodSchema,

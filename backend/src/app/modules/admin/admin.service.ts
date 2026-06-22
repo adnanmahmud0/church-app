@@ -84,7 +84,7 @@ const updateProfileToDB = async (
     if (!payload.currentPassword) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Current password is required to set a new password');
     }
-    const isMatch = await User.isMatchPassword(payload.currentPassword, isExistUser.password);
+    const isMatch = await User.isMatchPassword(payload.currentPassword, isExistUser.password!);
     if (!isMatch) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Incorrect current password');
     }
@@ -115,7 +115,7 @@ const updateProfileToDB = async (
       otp: otp,
       email: payload.email,
     };
-    const template = emailTemplate.createAccount(values);
+    const template = emailTemplate.createAccount(values as any);
     emailHelper.sendEmail(template);
     debug('admin.profile.email_verification_sent', { email: payload.email });
   }

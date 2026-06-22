@@ -5,6 +5,20 @@ import sendResponse from '../../../shared/sendResponse';
 import { AuthService } from './auth.service';
 import { debug } from '../../../shared/debug';
 
+const deviceInit = catchAsync(async (req: Request, res: Response) => {
+  const result = await AuthService.deviceInitToDB(req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Device initialized successfully.',
+    data: {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    },
+  });
+});
+
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const { ...verifyData } = req.body;
   const result = await AuthService.verifyEmailToDB(verifyData);
@@ -115,6 +129,7 @@ const resendVerifyEmail = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const AuthController = {
+  deviceInit,
   verifyEmail,
   loginUser,
   forgetPassword,

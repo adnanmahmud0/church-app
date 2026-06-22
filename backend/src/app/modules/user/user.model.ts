@@ -10,7 +10,9 @@ const userSchema = new Schema<IUser, UserModal>(
   {
     name: {
       type: String,
-      required: true,
+      required: function (this: IUser) {
+        return this.role !== USER_ROLES.GUEST;
+      },
     },
     role: {
       type: String,
@@ -19,13 +21,12 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     email: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
       lowercase: true,
     },
     password: {
       type: String,
-      required: true,
       select: 0,
       minlength: 8,
     },
@@ -41,6 +42,11 @@ const userSchema = new Schema<IUser, UserModal>(
     verified: {
       type: Boolean,
       default: false,
+    },
+    deviceId: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
     favoriteSermons: [
       {
@@ -90,18 +96,28 @@ userSchema.statics.isMatchPassword = async (
 
 //check user
 userSchema.pre('save', async function (next) {
+  // Skip email check and password hashing for guest users
+  if (this.role === USER_ROLES.GUEST) {
+    return next();
+  }
+
   //check user
-  const isExist = await User.findOne({ email: this.email });
-  if (isExist) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exist!');
+  if (this.email) {
+    const isExist = await User.findOne({ email: this.email, _id: { $ne: this._id } });
+    if (isExist) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exist!');
+    }
   }
 
   //password hash
-  this.password = await bcrypt.hash(
-    this.password,
-    Number(config.bcrypt_salt_rounds)
-  );
+  if (this.password && this.isModified('password')) {
+    this.password = await bcrypt.hash(
+      this.password,
+      Number(config.bcrypt_salt_rounds)
+    );
+  }
   next();
 });
 
 export const User = model<IUser, UserModal>('User', userSchema);
+

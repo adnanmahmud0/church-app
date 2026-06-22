@@ -14,14 +14,14 @@ router.get('/today', optionalAuth, DevotionalsController.getTodayDevotional);
 router.get('/read-status', optionalAuth, DevotionalsController.getReadStatus);
 router.get(
   '/profile-summary',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
   DevotionalsController.getProfileDevotionalSummary
 );
 
 router.get('/:id', optionalAuth, DevotionalsController.getDevotionalById);
 router.post(
   '/:id/read',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
   DevotionalsController.markAsRead
 );
 

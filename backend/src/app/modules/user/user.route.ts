@@ -9,9 +9,9 @@ const router = express.Router();
 
 router
   .route('/profile')
-  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.getUserProfile)
+  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.GUEST), UserController.getUserProfile)
   .patch(
-    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER),
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.GUEST),
     fileUploadHandler(),
     (req: Request, res: Response, next: NextFunction) => {
       if (req.body.data) {
@@ -23,7 +23,7 @@ router
     }
   )
   .put(
-    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER),
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.GUEST),
     validateRequest(UserValidation.updateUserZodSchema),
     UserController.updateProfileJson
   );
@@ -42,22 +42,23 @@ router
 
 router
   .route('/profile/favorite-sermons')
-  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.getFavoriteSermons);
+  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.GUEST), UserController.getFavoriteSermons);
 
 router
   .route('/profile/favorite-sermons/:sermonId')
-  .post(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.toggleFavoriteSermon);
+  .post(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.GUEST), UserController.toggleFavoriteSermon);
 
 router
   .route('/giving/summary')
-  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.getUserGivingSummary);
+  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.GUEST), UserController.getUserGivingSummary);
 
 router
   .route('/giving/history')
-  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.getUserGivingHistory);
+  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.GUEST), UserController.getUserGivingHistory);
 
 router
   .route('/delete-account')
-  .delete(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), UserController.deleteAccount);
+  .delete(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.GUEST), UserController.deleteAccount);
 
 export const UserRoutes = router;
+

@@ -8,6 +8,12 @@ import { AuthValidation } from './auth.validation';
 const router = express.Router();
 
 router.post(
+  '/device-init',
+  validateRequest(AuthValidation.createDeviceInitZodSchema),
+  AuthController.deviceInit
+);
+
+router.post(
   '/login',
   validateRequest(AuthValidation.createLoginZodSchema),
   AuthController.loginUser
@@ -58,7 +64,7 @@ router.post(
 
 router.post(
   '/logout',
-  auth(USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.SUPER_ADMIN),
+  auth(USER_ROLES.ADMIN, USER_ROLES.USER, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
   AuthController.logoutUser
 );
 
