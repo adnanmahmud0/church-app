@@ -3,7 +3,7 @@
 This document outlines the Push Notification system structure from the backend to the mobile app client. It details the different types of notifications sent by the system, their data payloads, and how the mobile app should handle them.
 
 ## Overview
-The backend uses Firebase Cloud Messaging (FCM) to send notifications. It uses two delivery methods:
+The backend uses Firebase Cloud Messaging (FCM) via the `firebase-admin` SDK to send notifications. It uses two delivery methods:
 1. **Topic Messaging**: Used for broad broadcasts (e.g., all users subscribed to `sermon`, `service_reminder`, or `custom` topics).
 2. **Targeted Multicast**: Used for specific user groups (e.g., event RSVP participants or prayer authors).
 
@@ -11,7 +11,35 @@ When a push notification is sent, a `data` payload is attached alongside the sta
 
 ---
 
-## Notification Types & Payloads
+## 1. Firebase Backend Setup (For Backend/Admin)
+
+For notifications to work, the backend requires a Firebase Admin SDK private key.
+1. Go to your Firebase Console -> Project Settings -> Service Accounts.
+2. Click "Generate new private key".
+3. Save the downloaded JSON file.
+4. Convert the JSON file content to a base64 string or set the individual environment variables in your `.env` file as required by your `firebase.ts` configuration (e.g., `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`).
+
+---
+
+## 2. API Endpoints
+
+### Register Device Token
+To send targeted notifications to a user, the backend must know their current FCM device token. The app should call this endpoint every time the user logs in or launches the app.
+
+- **Endpoint**: `POST /api/v1/notifications/device-token`
+- **Headers**: `Authorization: Bearer <token>`
+- **Body**:
+```json
+{
+  "token": "dck_1x...fcm_token_string",
+  "userId": "64a2b1... (optional, inferred from auth token if omitted)",
+  "deviceType": "android" // 'android' | 'ios' | 'web'
+}
+```
+
+---
+
+## 3. Notification Types & Payloads
 
 Your app should parse the `data.type` field from the notification payload to determine the routing or action to perform. Below are the supported notification types:
 
