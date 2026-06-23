@@ -60,6 +60,7 @@ const userSchema = new Schema<IUser, UserModal>(
       prayer: { type: Boolean, default: true },
       service_reminder: { type: Boolean, default: true },
       custom: { type: Boolean, default: true },
+      devotional: { type: Boolean, default: true },
     },
     authentication: {
       type: {

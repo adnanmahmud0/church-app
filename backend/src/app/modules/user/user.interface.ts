@@ -17,6 +17,7 @@ export type IUser = {
     prayer: boolean;
     service_reminder: boolean;
     custom: boolean;
+    devotional: boolean;
   };
   authentication?: {
     isResetPassword: boolean;

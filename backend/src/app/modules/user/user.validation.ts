@@ -21,6 +21,7 @@ const updateUserZodSchema = z.object({
       prayer: z.boolean().optional(),
       service_reminder: z.boolean().optional(),
       custom: z.boolean().optional(),
+      devotional: z.boolean().optional(),
     })
     .optional(),
 });

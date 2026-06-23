@@ -217,15 +217,52 @@ const createDevotional = async (payload: Partial<IDevotional>) => {
   }
   const result = await Devotional.create(payload);
   await autoScheduleDevotionals();
+
+  if (!payload.isDraft) {
+    const { NotificationService } = await import('../notification/notification.service');
+    try {
+      await NotificationService.sendNotificationToTopic('devotional', {
+        title: 'New Devotional Available!',
+        body: `"${result.title}" has just been posted. Read it now!`,
+        data: {
+          type: 'devotional',
+          devotionalId: result._id.toString(),
+        },
+      });
+    } catch (err) {
+      console.error('Failed to send notification for new devotional:', err);
+    }
+  }
+
   return mapDevotional(result);
 };
 
 const updateDevotional = async (id: string, payload: Partial<IDevotional>) => {
+  const existing = await Devotional.findById(id).lean();
+  if (!existing) throw new ApiError(StatusCodes.NOT_FOUND, 'Devotional not found');
+
   if (payload.isDraft === false && !payload.publishedAt) {
     payload.publishedAt = new Date();
   }
   const updated = await Devotional.findByIdAndUpdate(id, payload, { new: true }).lean();
   if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Devotional not found');
+  
+  if (existing.isDraft && payload.isDraft === false) {
+    const { NotificationService } = await import('../notification/notification.service');
+    try {
+      await NotificationService.sendNotificationToTopic('devotional', {
+        title: 'New Devotional Available!',
+        body: `"${updated.title}" has just been posted. Read it now!`,
+        data: {
+          type: 'devotional',
+          devotionalId: updated._id.toString(),
+        },
+      });
+    } catch (err) {
+      console.error('Failed to send notification for updated devotional:', err);
+    }
+  }
+
   await autoScheduleDevotionals();
   return mapDevotional(updated);
 };
