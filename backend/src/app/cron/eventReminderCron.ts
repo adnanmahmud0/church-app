@@ -68,7 +68,7 @@ export const startEventReminderCron = () => {
                 await NotificationService.sendNotificationToUsers(userIds, {
                   title: title,
                   body: message,
-                  data: { type: 'event_reminder', eventId: event._id.toString() }
+                  data: { type: 'event', eventId: event._id.toString() }
                 });
               }
               
@@ -88,7 +88,7 @@ export const startEventReminderCron = () => {
             await NotificationService.sendNotificationToUsers(userIds, {
               title: 'Event Starting Now',
               body: `The event "${event.title}" is starting now. See you there!`,
-              data: { type: 'event_reminder', eventId: event._id.toString() }
+              data: { type: 'event', eventId: event._id.toString() }
             });
           }
           
