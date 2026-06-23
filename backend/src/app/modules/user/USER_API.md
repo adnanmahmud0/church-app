@@ -25,7 +25,11 @@ Creates a new user account. (Email verification is currently bypassed).
     "success": true,
     "statusCode": 200,
     "message": "User created successfully",
-    "data": { ...userObject }
+    "data": { 
+      "user": { ...userObject },
+      "accessToken": "ey...",
+      "refreshToken": "ey..."
+    }
   }
   ```
 

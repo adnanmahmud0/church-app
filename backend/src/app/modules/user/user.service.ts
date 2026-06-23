@@ -1,15 +1,17 @@
 import bcrypt from 'bcrypt';
 import { StatusCodes } from 'http-status-codes';
 import { JwtPayload } from 'jsonwebtoken';
+import type { StringValue } from 'ms';
 import config from '../../../config';
 import { USER_ROLES } from '../../../enums/user';
 import ApiError from '../../../errors/ApiError';
+import { jwtHelper } from '../../../helpers/jwtHelper';
 import unlinkFile from '../../../shared/unlinkFile';
 import { GivingService } from '../giving/giving.service';
 import { IUser } from './user.interface';
 import { User } from './user.model';
 
-const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
+const createUserToDB = async (payload: Partial<IUser>): Promise<{ user: IUser; accessToken: string; refreshToken: string }> => {
   const { deviceId, name, email, password, ...rest } = payload;
 
   // If deviceId is provided, try to find an existing guest user and upgrade them
@@ -48,7 +50,23 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
         throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to upgrade guest user');
       }
 
-      return upgradedUser;
+      const jwtPayload = {
+        id: upgradedUser._id,
+        role: upgradedUser.role,
+        email: upgradedUser.email,
+      };
+      const accessToken = jwtHelper.createToken(
+        jwtPayload,
+        config.jwt.jwt_secret as string,
+        config.jwt.jwt_expire_in as StringValue
+      );
+      const refreshToken = jwtHelper.createToken(
+        jwtPayload,
+        config.jwt.jwt_refresh_secret as string,
+        config.jwt.jwt_refresh_expire_in as StringValue
+      );
+
+      return { user: upgradedUser, accessToken, refreshToken };
     }
   }
 
@@ -56,12 +74,28 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   payload.role = USER_ROLES.USER;
   payload.verified = true;
   
-  const createUser = await User.create(payload);
-  if (!createUser) {
+  const createdUser = await User.create(payload);
+  if (!createdUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
   }
 
-  return createUser;
+  const jwtPayload = {
+    id: createdUser._id,
+    role: createdUser.role,
+    email: createdUser.email,
+  };
+  const accessToken = jwtHelper.createToken(
+    jwtPayload,
+    config.jwt.jwt_secret as string,
+    config.jwt.jwt_expire_in as StringValue
+  );
+  const refreshToken = jwtHelper.createToken(
+    jwtPayload,
+    config.jwt.jwt_refresh_secret as string,
+    config.jwt.jwt_refresh_expire_in as StringValue
+  );
+
+  return { user: createdUser, accessToken, refreshToken };
 };
 
 const getUserProfileFromDB = async (
