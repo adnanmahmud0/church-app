@@ -69,6 +69,10 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
         message: { type: String, default: "" },
       }
     ],
+    event_start_notification_enabled: {
+      type: Boolean,
+      default: false,
+    },
     sunday_service_start_notification_enabled: {
       type: Boolean,
       default: false,

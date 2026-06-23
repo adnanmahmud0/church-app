@@ -33,6 +33,7 @@ const updateChurchInfoZodSchema = z.object({
         message: z.string().optional().default(""),
       })
     ).optional(),
+    event_start_notification_enabled: z.boolean().optional(),
     sunday_service_start_notification_enabled: z.boolean().optional(),
     sunday_service_start_title: z.string().optional(),
     sunday_service_start_message: z.string().optional(),

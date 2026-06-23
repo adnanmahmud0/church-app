@@ -15,6 +15,7 @@ export interface IChurchInfo {
   sunday_service_reminders?: { minutes: number; title: string; message: string }[];
   event_reminder_enabled?: boolean;
   event_reminders?: { minutes: number; title: string; message: string }[];
+  event_start_notification_enabled?: boolean;
   sunday_service_start_notification_enabled?: boolean;
   sunday_service_start_title?: string;
   sunday_service_start_message?: string;
