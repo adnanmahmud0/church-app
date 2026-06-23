@@ -3,6 +3,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import ApiError from '../../../errors/ApiError';
 import { IPrayerRequest } from './prayer.interface';
 import { PrayerInteraction, PrayerRequest } from './prayer.model';
+import { NotificationService } from '../notification/notification.service';
 
 const createRequest = async (
   payload: Partial<IPrayerRequest>,
@@ -130,6 +131,17 @@ const prayForRequest = async (
     await PrayerInteraction.create(query);
     prayer.pray_count += 1;
     await prayer.save();
+
+    if (prayer.author_user_id) {
+      const isSelfPray = user && prayer.author_user_id.toString() === user.id;
+      if (!isSelfPray) {
+        NotificationService.sendNotificationToUser(prayer.author_user_id.toString(), {
+          title: 'Someone prayed for you 🙏',
+          body: 'Someone just prayed for your prayer request.',
+          data: { type: 'prayer', prayerId: prayer._id.toString() },
+        }).catch(err => console.error('Failed to send prayer notification:', err));
+      }
+    }
   } else {
     await PrayerInteraction.deleteOne(query);
     prayer.pray_count = Math.max(0, prayer.pray_count - 1);

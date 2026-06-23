@@ -156,8 +156,70 @@ const sendNotificationToTopic = async (
   return logResult;
 };
 
+const sendNotificationToUser = async (
+  userId: string,
+  payload: {
+    title: string;
+    body: string;
+    data?: { [key: string]: string };
+  }
+): Promise<INotificationLog | null> => {
+  const tokens = await NotificationToken.find({ user: userId }).distinct('token');
+
+  if (!tokens || tokens.length === 0) {
+    // Silently ignore if the user doesn't have any registered devices.
+    return null;
+  }
+
+  const message: any = {
+    notification: {
+      title: payload.title,
+      body: payload.body,
+    },
+    tokens: tokens,
+  };
+
+  if (payload.data) {
+    message.data = payload.data;
+  }
+
+  let successCount = 0;
+  let failureCount = 0;
+
+  try {
+    const response = await getMessaging().sendEachForMulticast(message);
+    successCount = response.successCount;
+    failureCount = response.failureCount;
+
+    if (failureCount > 0) {
+      const failedTokens: string[] = [];
+      response.responses.forEach((resp: any, idx: number) => {
+        if (!resp.success) {
+          failedTokens.push(tokens[idx]);
+        }
+      });
+      // Optionally clean up invalid tokens
+      // await NotificationToken.deleteMany({ token: { $in: failedTokens } });
+    }
+  } catch (error: any) {
+    console.error(`Error sending message to user ${userId}:`, error);
+    failureCount = tokens.length;
+  }
+
+  const logResult = await NotificationLog.create({
+    title: payload.title,
+    body: payload.body,
+    successCount,
+    failureCount,
+  });
+
+  return logResult;
+};
+
+
 export const NotificationService = {
   saveDeviceToken,
   sendNotificationToAll,
   sendNotificationToTopic,
+  sendNotificationToUser,
 };
