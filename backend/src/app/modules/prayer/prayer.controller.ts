@@ -67,7 +67,8 @@ const prayForRequest = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateRequest = catchAsync(async (req: Request, res: Response) => {
-  const result = await PrayerService.updateRequest(req.params.id, req.user, req.body);
+  const deviceFingerprint = req.body.device_fingerprint;
+  const result = await PrayerService.updateRequest(req.params.id, req.body, req.user, deviceFingerprint);
 
   sendResponse(res, {
     success: true,
@@ -78,7 +79,8 @@ const updateRequest = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteRequest = catchAsync(async (req: Request, res: Response) => {
-  const result = await PrayerService.deleteRequest(req.params.id, req.user);
+  const deviceFingerprint = req.body?.device_fingerprint;
+  const result = await PrayerService.deleteRequest(req.params.id, req.user, deviceFingerprint);
 
   sendResponse(res, {
     success: true,

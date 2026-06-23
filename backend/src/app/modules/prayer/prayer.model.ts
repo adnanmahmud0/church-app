@@ -30,6 +30,10 @@ const prayerRequestSchema = new Schema<IPrayerRequest, PrayerRequestModel>(
       type: Number,
       default: 0,
     },
+    device_fingerprint: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

@@ -7,6 +7,7 @@ export type IPrayerRequest = {
   is_anonymous: boolean;
   status: 'active' | 'answered' | 'archived';
   pray_count: number;
+  device_fingerprint?: string;
   createdAt?: Date;
   updatedAt?: Date;
 };

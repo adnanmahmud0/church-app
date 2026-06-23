@@ -47,14 +47,15 @@ router.post(
 
 router.patch(
   '/requests/:id',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
+  optionalAuth,
   validateRequest(PrayerValidation.updatePrayerRequestZodSchema),
   PrayerController.updateRequest
 );
 
 router.delete(
   '/requests/:id',
-  auth(USER_ROLES.USER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.GUEST),
+  optionalAuth,
+  validateRequest(PrayerValidation.deletePrayerRequestZodSchema),
   PrayerController.deleteRequest
 );
 

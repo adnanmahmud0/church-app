@@ -40,3 +40,37 @@ The backend has been updated to automatically return an `accessToken` and `refre
      - **React Native**: `AsyncStorage` or `SecureStore`
      - **Native iOS / Android**: `Keychain`, `UserDefaults`, or `EncryptedSharedPreferences`
   3. Navigate the user directly to the Home Screen (or main app flow) since they are now fully registered, verified, and logged in. No need to show a separate login screen.
+
+## 3. Prayer Requests - Edit & Delete (With Guest Support)
+
+We have updated the Prayer Requests API to fully support editing and deleting requests. Crucially, this now supports **unauthenticated guests** who created requests using a `device_fingerprint`.
+
+### A. Edit a Prayer Request
+**Endpoint:** `PATCH /api/v1/prayer/requests/:id`
+**Authentication:** Optional (Bearer token if logged in, otherwise use `device_fingerprint`).
+
+**Body:**
+```json
+{
+  "content": "Updated prayer content...",
+  "author_name": "John Doe",
+  "is_anonymous": false,
+  "device_fingerprint": "your_device_id_here" // REQUIRED if the user is a guest
+}
+```
+
+### B. Delete a Prayer Request
+**Endpoint:** `DELETE /api/v1/prayer/requests/:id`
+**Authentication:** Optional (Bearer token if logged in, otherwise use `device_fingerprint`).
+
+**Body:**
+```json
+{
+  "device_fingerprint": "your_device_id_here" // REQUIRED if the user is a guest
+}
+```
+
+**Note on Authorization:**
+- If the user is logged in, the backend checks `author_user_id === user.id`.
+- If the user is a guest, the backend checks `prayer.device_fingerprint === req.body.device_fingerprint`.
+- Admin users can edit/delete any request.

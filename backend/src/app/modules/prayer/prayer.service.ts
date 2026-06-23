@@ -159,15 +159,21 @@ const prayForRequest = async (
 
 const updateRequest = async (
   id: string,
-  user: JwtPayload,
-  payload: Partial<IPrayerRequest>
+  payload: Partial<IPrayerRequest>,
+  user?: JwtPayload,
+  deviceFingerprint?: string
 ) => {
   const prayer = await PrayerRequest.findById(id);
   if (!prayer) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Prayer request not found');
   }
 
-  if (prayer.author_user_id?.toString() !== user.id) {
+  // Authorization check
+  const isOwner = user && prayer.author_user_id?.toString() === user.id;
+  const isGuestOwner = !prayer.author_user_id && deviceFingerprint && prayer.device_fingerprint === deviceFingerprint;
+  const isAdmin = user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN');
+
+  if (!isOwner && !isGuestOwner && !isAdmin) {
     throw new ApiError(StatusCodes.FORBIDDEN, 'You can only update your own prayer requests');
   }
 
@@ -175,13 +181,18 @@ const updateRequest = async (
   return updated;
 };
 
-const deleteRequest = async (id: string, user: JwtPayload) => {
+const deleteRequest = async (id: string, user?: JwtPayload, deviceFingerprint?: string) => {
   const prayer = await PrayerRequest.findById(id);
   if (!prayer) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Prayer request not found');
   }
 
-  if (prayer.author_user_id?.toString() !== user.id && user.role !== 'SUPER_ADMIN' && user.role !== 'ADMIN') {
+  // Authorization check
+  const isOwner = user && prayer.author_user_id?.toString() === user.id;
+  const isGuestOwner = !prayer.author_user_id && deviceFingerprint && prayer.device_fingerprint === deviceFingerprint;
+  const isAdmin = user && (user.role === 'SUPER_ADMIN' || user.role === 'ADMIN');
+
+  if (!isOwner && !isGuestOwner && !isAdmin) {
     throw new ApiError(StatusCodes.FORBIDDEN, 'You can only delete your own prayer requests');
   }
 
