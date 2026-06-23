@@ -19,21 +19,17 @@ export default function EventSettingsPage() {
   const [isDirty, setIsDirty] = useState(false);
 
   const [reminderEnabled, setReminderEnabled] = useState(false);
-  const [reminders, setReminders] = useState<{minutes: number, title: string, message: string}[]>([]);
+  const [reminders, setReminders] = useState<{minutes: number}[]>([]);
   
   const [newReminderMinute, setNewReminderMinute] = useState("");
-  const [newReminderTitle, setNewReminderTitle] = useState("");
-  const [newReminderMessage, setNewReminderMessage] = useState("");
 
   const handleAddReminder = () => {
     const val = Number(newReminderMinute);
     if (val > 0 && !reminders.find(r => r.minutes === val)) {
-      setReminders([...reminders, { minutes: val, title: newReminderTitle, message: newReminderMessage }].sort((a, b) => b.minutes - a.minutes));
+      setReminders([...reminders, { minutes: val }].sort((a, b) => b.minutes - a.minutes));
       setIsDirty(true);
     }
     setNewReminderMinute("");
-    setNewReminderTitle("");
-    setNewReminderMessage("");
   };
 
   const handleRemoveReminder = (val: number) => {
@@ -150,11 +146,8 @@ export default function EventSettingsPage() {
                       <span className="inline-block bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-2 py-1 rounded text-xs font-bold mb-2 md:mb-0 md:mr-3">
                         {reminder.minutes} mins before
                       </span>
-                      <span className="text-sm font-medium text-zinc-900 dark:text-white block">
-                        {reminder.title || "Upcoming Event Reminder"}
-                      </span>
                       <span className="text-sm text-zinc-700 dark:text-zinc-300">
-                        {reminder.message || `The event starts in ${reminder.minutes} minutes. See you there!`}
+                        The event starts in {reminder.minutes} minutes. See you there!
                       </span>
                     </div>
                     <button 
@@ -188,27 +181,6 @@ export default function EventSettingsPage() {
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Custom Notification Title</label>
-                  <input 
-                    type="text" 
-                    value={newReminderTitle}
-                    onChange={(e) => setNewReminderTitle(e.target.value)}
-                    placeholder="e.g. Upcoming Event Reminder"
-                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Custom Notification Message</label>
-                  <textarea 
-                    value={newReminderMessage}
-                    onChange={(e) => setNewReminderMessage(e.target.value)}
-                    placeholder="Get ready! The event starts in 60 minutes."
-                    className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500 min-h-[80px]"
-                  />
-                  <p className="text-xs text-zinc-500">Leave blank to use default message.</p>
-                </div>
 
                 <div className="pt-2">
                   <button 
