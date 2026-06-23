@@ -36,17 +36,18 @@ try {
 const saveDeviceToken = async (
   payload: INotificationToken
 ): Promise<INotificationToken> => {
-  const isExist = await NotificationToken.findOne({ token: payload.token });
-
-  if (isExist) {
-    if (payload.user && String(isExist.user) !== String(payload.user)) {
-      isExist.user = payload.user;
-      await isExist.save();
-    }
-    return isExist;
+  const updateData: any = { platform: payload.platform || 'android' };
+  if (payload.user) {
+    updateData.user = payload.user;
   }
 
-  const result = await NotificationToken.create(payload);
+  // Use findOneAndUpdate with upsert: true to prevent E11000 duplicate key error
+  const result = await NotificationToken.findOneAndUpdate(
+    { token: payload.token },
+    { $set: updateData },
+    { upsert: true, new: true }
+  );
+
   return result;
 };
 

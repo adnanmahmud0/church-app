@@ -54,6 +54,7 @@ const getContactAndMission = catchAsync(async (req: Request, res: Response) => {
       email: result.contact_email,
       website: result.contact_website,
       our_mission: result.our_mission_quote,
+      social_links: result.social_links,
       notification_defaults: {
         sermon: result.default_sermon_notification ?? false,
         service_reminder: result.default_service_reminder_notification ?? false,

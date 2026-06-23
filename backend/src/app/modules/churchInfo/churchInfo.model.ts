@@ -28,6 +28,13 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
       type: String,
       trim: true,
     },
+    social_links: [
+      {
+        platform: { type: String, required: true },
+        url: { type: String, required: true },
+        isEnabled: { type: Boolean, default: true }
+      }
+    ],
     sunday_service_time: {
       type: String,
       trim: true,

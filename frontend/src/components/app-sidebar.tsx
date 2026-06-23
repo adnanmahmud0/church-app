@@ -30,7 +30,8 @@ import {
   Settings2,
   User,
   Bell,
-  Clock
+  Clock,
+  Phone
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
@@ -107,6 +108,11 @@ const data = {
       title: "History and core Values",
       url: "/history",
       icon: <Landmark />,
+    },
+    {
+      title: "Contact & Mission",
+      url: "/contact-mission",
+      icon: <Phone />,
     },
     {
       title: "Notifications",

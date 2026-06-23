@@ -18,11 +18,6 @@ import "react-quill-new/dist/quill.snow.css";
 
 interface IChurchInfo {
   content: string;
-  contact_address?: string;
-  contact_email?: string;
-  contact_phone?: string;
-  contact_website?: string;
-  our_mission_quote?: string;
   updated_at: string;
   updated_by: string;
 }
@@ -34,11 +29,6 @@ export default function HistoryPage() {
   const [isDirty, setIsDirty] = useState(false);
 
   const [content, setContent] = useState("");
-  const [contactAddress, setContactAddress] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactWebsite, setContactWebsite] = useState("");
-  const [ourMissionQuote, setOurMissionQuote] = useState("");
 
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
 
@@ -62,11 +52,6 @@ export default function HistoryPage() {
         const info = res.data;
         setData(info);
         setContent(info.content || "");
-        setContactAddress(info.contact_address || "");
-        setContactEmail(info.contact_email || "");
-        setContactPhone(info.contact_phone || "");
-        setContactWebsite(info.contact_website || "");
-        setOurMissionQuote(info.our_mission_quote || "");
       }
     } catch (error: any) {
       toast.error(error.message || "Failed to load church info");
@@ -94,12 +79,7 @@ export default function HistoryPage() {
       const res = await apiFetch("/church-info/admin", {
         method: "PUT",
         body: JSON.stringify({ 
-          content,
-          contact_address: contactAddress,
-          contact_email: contactEmail,
-          contact_phone: contactPhone,
-          contact_website: contactWebsite,
-          our_mission_quote: ourMissionQuote
+          content
         })
       });
       
@@ -162,66 +142,7 @@ export default function HistoryPage() {
           </div>
         </section>
 
-        <section className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 space-y-4">
-          <h2 className="text-xl font-semibold mb-4 text-zinc-900 dark:text-white">Contact & Mission Details (More Page)</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Church Address</label>
-              <input 
-                type="text" 
-                value={contactAddress} 
-                onChange={(e) => { setContactAddress(e.target.value); setIsDirty(true); }}
-                className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                placeholder="71 Stoneyburn Street..."
-              />
-            </div>
-            
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Email Address</label>
-              <input 
-                type="email" 
-                value={contactEmail} 
-                onChange={(e) => { setContactEmail(e.target.value); setIsDirty(true); }}
-                className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                placeholder="info@piwcstoneyburn.org"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Website URL</label>
-              <input 
-                type="text" 
-                value={contactWebsite} 
-                onChange={(e) => { setContactWebsite(e.target.value); setIsDirty(true); }}
-                className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                placeholder="www.piwcstoneyburn.org"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Phone Number (Optional)</label>
-              <input 
-                type="text" 
-                value={contactPhone} 
-                onChange={(e) => { setContactPhone(e.target.value); setIsDirty(true); }}
-                className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                placeholder="+44 123 456 7890"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2 pt-2">
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Our Mission (Short Quote)</label>
-            <textarea 
-              value={ourMissionQuote} 
-              onChange={(e) => { setOurMissionQuote(e.target.value); setIsDirty(true); }}
-              className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500 min-h-[100px]"
-              placeholder='"To make heaven, to take as many people as possible with us..."'
-            />
-          </div>
-        </section>
 
         {/* Action Buttons */}
         <div className="flex justify-end pt-4 pb-12">

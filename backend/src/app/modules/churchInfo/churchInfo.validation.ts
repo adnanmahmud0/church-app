@@ -8,6 +8,13 @@ const updateChurchInfoZodSchema = z.object({
     contact_phone: z.string().optional(),
     contact_website: z.string().optional(),
     our_mission_quote: z.string().optional(),
+    social_links: z.array(
+      z.object({
+        platform: z.string(),
+        url: z.string().url('Invalid URL').or(z.literal('')),
+        isEnabled: z.boolean().optional().default(true),
+      })
+    ).optional(),
     sunday_service_start_time: z.string().optional(),
     sunday_service_end_time: z.string().optional(),
     sunday_service_reminder_enabled: z.boolean().optional(),
