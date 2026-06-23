@@ -41,7 +41,16 @@ Returns a list of all active Bible versions supported by the church app.
       "id": 1, 
       "name": "King James Version", 
       "abbreviation": "KJV", 
-      "isActive": true 
+      "isActive": true,
+      "books": [
+        {
+          "id": "GEN",
+          "name": "Genesis",
+          "abbreviation": "Gen",
+          "testament": "OT",
+          "chapters_count": 50
+        }
+      ]
     }
   ]
 }

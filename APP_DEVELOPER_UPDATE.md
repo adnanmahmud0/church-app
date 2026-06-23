@@ -74,3 +74,40 @@ We have updated the Prayer Requests API to fully support editing and deleting re
 - If the user is logged in, the backend checks `author_user_id === user.id`.
 - If the user is a guest, the backend checks `prayer.device_fingerprint === req.body.device_fingerprint`.
 - Admin users can edit/delete any request.
+
+## 4. Bible API - Get Versions with Full Book Data
+The Bible API has been updated to include full book data within the `GET /versions` response. This makes it easier to load all books for all supported versions simultaneously without making subsequent API calls.
+
+**Endpoint:** `GET /api/v1/bible/versions`
+**Method:** `GET`
+**Authentication:** Optional / Bearer Token
+
+**Response:**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Versions retrieved successfully",
+  "data": [
+    {
+      "id": 12,
+      "name": "American Standard Version",
+      "abbreviation": "ASV",
+      "isActive": true,
+      "books": [
+        {
+          "id": "GEN",
+          "name": "Genesis",
+          "abbreviation": "Gen",
+          "testament": "OT",
+          "chapters_count": 50
+        },
+        ...
+      ]
+    }
+  ]
+}
+```
+
+**Troubleshooting Data Not Updating:**
+If a user selects a version like KJV or NIV and the data does not seem to update (showing the exact same chapters/verses as another translation), this is because the YouVersion API key configured in the backend doesn't have permission for that copyrighted translation. In those cases, the backend API silently falls back to the public domain **WEBUS** translation to prevent the app from crashing. Ensure your API key has explicit approval for copyrighted versions.

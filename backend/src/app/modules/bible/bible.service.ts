@@ -152,7 +152,19 @@ const getVersions = async () => {
       versions: DEFAULT_VERSIONS,
     });
   }
-  return settings.versions.filter(v => v.isActive);
+  const activeVersions = settings.versions.filter(v => v.isActive);
+  
+  // Fetch books for each version
+  const versionsWithBooks = await Promise.all(activeVersions.map(async (v) => {
+    try {
+      const books = await getBooks(v.id);
+      return { ...(v as any).toObject?.() || v, books };
+    } catch (error) {
+      return { ...(v as any).toObject?.() || v, books: [] };
+    }
+  }));
+
+  return versionsWithBooks;
 };
 
 const getAdminSettings = async () => {
