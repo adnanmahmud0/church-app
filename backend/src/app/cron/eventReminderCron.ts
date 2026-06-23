@@ -64,8 +64,16 @@ export const startEventReminderCron = () => {
               const rsvps = await EventRSVP.find({ eventId: event._id });
               const userIds = rsvps.map(rsvp => rsvp.userId).filter(Boolean);
 
-              if (userIds.length > 0) {
-                await NotificationService.sendNotificationToUsers(userIds, {
+              // Filter out users who have turned off event notifications
+              const { User } = await import('../modules/user/user.model');
+              const usersToNotify = await User.find({
+                _id: { $in: userIds },
+                'notificationPreferences.event': { $ne: false }
+              });
+              const filteredUserIds = usersToNotify.map(u => u._id.toString());
+
+              if (filteredUserIds.length > 0) {
+                await NotificationService.sendNotificationToUsers(filteredUserIds, {
                   title: title,
                   body: message,
                   data: { type: 'event', eventId: event._id.toString() }
@@ -84,8 +92,16 @@ export const startEventReminderCron = () => {
           const rsvps = await EventRSVP.find({ eventId: event._id });
           const userIds = rsvps.map(rsvp => rsvp.userId).filter(Boolean);
 
-          if (userIds.length > 0) {
-            await NotificationService.sendNotificationToUsers(userIds, {
+          // Filter out users who have turned off event notifications
+          const { User } = await import('../modules/user/user.model');
+          const usersToNotify = await User.find({
+            _id: { $in: userIds },
+            'notificationPreferences.event': { $ne: false }
+          });
+          const filteredUserIds = usersToNotify.map(u => u._id.toString());
+
+          if (filteredUserIds.length > 0) {
+            await NotificationService.sendNotificationToUsers(filteredUserIds, {
               title: 'Event Starting Now',
               body: `The event "${event.title}" is starting now. See you there!`,
               data: { type: 'event', eventId: event._id.toString() }

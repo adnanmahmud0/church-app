@@ -14,6 +14,15 @@ const updateUserZodSchema = z.object({
   name: z.string().optional(),
   email: z.string().optional(),
   image: z.string().optional(),
+  notificationPreferences: z
+    .object({
+      sermon: z.boolean().optional(),
+      event: z.boolean().optional(),
+      prayer: z.boolean().optional(),
+      service_reminder: z.boolean().optional(),
+      custom: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 export const UserValidation = {

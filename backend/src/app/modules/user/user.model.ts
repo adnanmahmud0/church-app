@@ -54,6 +54,13 @@ const userSchema = new Schema<IUser, UserModal>(
         ref: 'Sermon',
       },
     ],
+    notificationPreferences: {
+      sermon: { type: Boolean, default: true },
+      event: { type: Boolean, default: true },
+      prayer: { type: Boolean, default: true },
+      service_reminder: { type: Boolean, default: true },
+      custom: { type: Boolean, default: true },
+    },
     authentication: {
       type: {
         isResetPassword: {

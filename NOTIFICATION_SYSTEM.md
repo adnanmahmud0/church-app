@@ -98,3 +98,27 @@ To ensure these notifications work seamlessly, the app developer must:
 3. **Background & Foreground Handlers**:
    - Parse `message.data.type`.
    - Dispatch to your navigation router (e.g., deep linking logic) passing the associated ID (like `id` or `eventId`) as a navigation argument.
+
+---
+
+## User Notification Preferences
+
+The system allows users to turn specific notifications on or off. The user profile (`GET /api/v1/user/profile`) now includes a `notificationPreferences` object:
+
+```json
+"notificationPreferences": {
+  "sermon": true,
+  "event": true,
+  "prayer": true,
+  "service_reminder": true,
+  "custom": true
+}
+```
+
+You can update these settings via `PATCH /api/v1/user/update-profile`.
+
+### How these preferences are enforced:
+1. **Targeted Notifications (`event`, `prayer`)**: The backend enforces these automatically. If the user sets `"event": false`, the backend will simply skip sending them the event reminder push.
+2. **Topic-Based Notifications (`sermon`, `service_reminder`, `custom`)**: The backend broadcasts these to Firebase topics and *cannot* skip individual users. **The app developer must handle this.** 
+   - When the user toggles one of these off in your app settings, you must call the Firebase SDK to unsubscribe them from that topic (e.g., `messaging().unsubscribeFromTopic('sermon')`).
+   - When they toggle it back on, call `messaging().subscribeToTopic('sermon')`.

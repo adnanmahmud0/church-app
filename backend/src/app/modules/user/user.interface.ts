@@ -11,6 +11,13 @@ export type IUser = {
   verified: boolean;
   deviceId?: string;
   favoriteSermons?: Types.ObjectId[];
+  notificationPreferences?: {
+    sermon: boolean;
+    event: boolean;
+    prayer: boolean;
+    service_reminder: boolean;
+    custom: boolean;
+  };
   authentication?: {
     isResetPassword: boolean;
     oneTimeCode: number;

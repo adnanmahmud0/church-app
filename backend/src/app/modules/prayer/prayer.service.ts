@@ -135,11 +135,17 @@ const prayForRequest = async (
     if (prayer.author_user_id) {
       const isSelfPray = user && prayer.author_user_id.toString() === user.id;
       if (!isSelfPray) {
-        NotificationService.sendNotificationToUser(prayer.author_user_id.toString(), {
-          title: 'Someone prayed for you 🙏',
-          body: 'Someone just prayed for your prayer request.',
-          data: { type: 'prayer', prayerId: prayer._id.toString() },
-        }).catch(err => console.error('Failed to send prayer notification:', err));
+        const { User } = await import('../user/user.model');
+        const author = await User.findById(prayer.author_user_id);
+        
+        // Only send if the author hasn't turned off prayer notifications
+        if (author && author.notificationPreferences?.prayer !== false) {
+          NotificationService.sendNotificationToUser(prayer.author_user_id.toString(), {
+            title: 'Someone prayed for you 🙏',
+            body: 'Someone just prayed for your prayer request.',
+            data: { type: 'prayer', prayerId: prayer._id.toString() },
+          }).catch(err => console.error('Failed to send prayer notification:', err));
+        }
       }
     }
   } else {
