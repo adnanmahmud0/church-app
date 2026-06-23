@@ -37,7 +37,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { EventsMobilePreview } from "@/components/events-mobile-preview"
-import { EventSettingsModal } from "@/components/event-settings-modal"
 
 export default function EventsDashboard() {
   const router = useRouter()
@@ -53,9 +52,6 @@ export default function EventsDashboard() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
   const [newCategoryColor, setNewCategoryColor] = useState("#3b5bdb")
-
-  // Settings Modal State
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -187,10 +183,12 @@ export default function EventsDashboard() {
             </DialogContent>
           </Dialog>
 
-          <Button variant="outline" onClick={() => setIsSettingsModalOpen(true)}>
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Button>
+          <Link href="/events/settings">
+            <Button variant="outline">
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </Button>
+          </Link>
 
           <Link href="/events/new">
             <Button>
@@ -200,11 +198,6 @@ export default function EventsDashboard() {
           </Link>
         </div>
       </div>
-
-      <EventSettingsModal 
-        open={isSettingsModalOpen} 
-        onOpenChange={setIsSettingsModalOpen} 
-      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
