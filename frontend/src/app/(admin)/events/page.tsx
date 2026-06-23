@@ -4,7 +4,7 @@ import * as React from "react"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { format } from "date-fns"
-import { CalendarIcon, Loader2, Plus, Users, Clock, History, MoreHorizontal, Pencil, Trash, Tags, SmartphoneIcon } from "lucide-react"
+import { CalendarIcon, Loader2, Plus, Users, Clock, History, MoreHorizontal, Pencil, Trash, Tags, SmartphoneIcon, Settings } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { apiFetch } from "@/lib/api"
@@ -37,6 +37,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { EventsMobilePreview } from "@/components/events-mobile-preview"
+import { EventSettingsModal } from "@/components/event-settings-modal"
 
 export default function EventsDashboard() {
   const router = useRouter()
@@ -52,6 +53,9 @@ export default function EventsDashboard() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
   const [newCategoryColor, setNewCategoryColor] = useState("#3b5bdb")
+
+  // Settings Modal State
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -183,6 +187,11 @@ export default function EventsDashboard() {
             </DialogContent>
           </Dialog>
 
+          <Button variant="outline" onClick={() => setIsSettingsModalOpen(true)}>
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </Button>
+
           <Link href="/events/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -191,6 +200,11 @@ export default function EventsDashboard() {
           </Link>
         </div>
       </div>
+
+      <EventSettingsModal 
+        open={isSettingsModalOpen} 
+        onOpenChange={setIsSettingsModalOpen} 
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>

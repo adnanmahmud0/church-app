@@ -58,6 +58,17 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
         message: { type: String, default: "" },
       }
     ],
+    event_reminder_enabled: {
+      type: Boolean,
+      default: false,
+    },
+    event_reminders: [
+      {
+        minutes: { type: Number, required: true },
+        title: { type: String, default: "" },
+        message: { type: String, default: "" },
+      }
+    ],
     sunday_service_start_notification_enabled: {
       type: Boolean,
       default: false,

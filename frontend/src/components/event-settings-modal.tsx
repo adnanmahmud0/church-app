@@ -1,0 +1,220 @@
+"use client"
+
+import { useState, useEffect, FormEvent } from "react"
+import { apiFetch } from "@/lib/api"
+import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+interface EventSettingsModalProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function EventSettingsModal({ open, onOpenChange }: EventSettingsModalProps) {
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  
+  const [reminderEnabled, setReminderEnabled] = useState(false)
+  const [reminders, setReminders] = useState<{minutes: number, title: string, message: string}[]>([])
+  
+  const [newReminderMinute, setNewReminderMinute] = useState("")
+  const [newReminderTitle, setNewReminderTitle] = useState("")
+  const [newReminderMessage, setNewReminderMessage] = useState("")
+
+  useEffect(() => {
+    if (open) {
+      fetchSettings()
+    }
+  }, [open])
+
+  const fetchSettings = async () => {
+    setIsLoading(true)
+    try {
+      const res = await apiFetch("/church-info/admin")
+      if (res.success && res.data) {
+        const info = res.data
+        setReminderEnabled(info.event_reminder_enabled || false)
+        setReminders(info.event_reminders || [])
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to load event settings")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAddReminder = () => {
+    const val = Number(newReminderMinute)
+    if (val > 0 && !reminders.find(r => r.minutes === val)) {
+      setReminders([...reminders, { minutes: val, title: newReminderTitle, message: newReminderMessage }].sort((a, b) => b.minutes - a.minutes))
+    }
+    setNewReminderMinute("")
+    setNewReminderTitle("")
+    setNewReminderMessage("")
+  }
+
+  const handleRemoveReminder = (val: number) => {
+    setReminders(reminders.filter((m) => m.minutes !== val))
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    try {
+      setIsSaving(true)
+      const res = await apiFetch("/church-info/admin", {
+        method: "PUT",
+        body: JSON.stringify({ 
+          event_reminder_enabled: reminderEnabled,
+          event_reminders: reminders,
+        })
+      })
+      
+      if (res.success) {
+        toast.success("Event settings updated")
+        onOpenChange(false)
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save. Please try again.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl">Event Settings</DialogTitle>
+        </DialogHeader>
+
+        {isLoading ? (
+          <div className="flex justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+            
+            <section className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 space-y-6">
+              <h2 className="text-lg font-semibold mb-4 text-zinc-900 dark:text-white">Reminder Notification Before Event</h2>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-base font-medium text-zinc-900 dark:text-white block">Enable Reminder Notification</label>
+                  <span className="text-sm text-zinc-500">Send push notifications to RSVPs before an event starts</span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={reminderEnabled}
+                    onChange={(e) => setReminderEnabled(e.target.checked)}
+                  />
+                  <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-zinc-300 dark:peer-focus:ring-zinc-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-zinc-900 dark:peer-checked:bg-white"></div>
+                </label>
+              </div>
+
+              {reminderEnabled && (
+                <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-700">
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">Active Reminders</h3>
+                  
+                  <div className="flex flex-col gap-3 mb-6">
+                    {reminders.map((reminder) => (
+                      <div key={reminder.minutes} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-700/50 p-3 rounded-md border border-zinc-200 dark:border-zinc-700">
+                        <div>
+                          <span className="inline-block bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-2 py-1 rounded text-xs font-bold mb-2 md:mb-0 md:mr-3">
+                            {reminder.minutes} mins before
+                          </span>
+                          <span className="text-sm font-medium text-zinc-900 dark:text-white block">
+                            {reminder.title || "Upcoming Event Reminder"}
+                          </span>
+                          <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                            {reminder.message || `The event starts in ${reminder.minutes} minutes. See you there!`}
+                          </span>
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={() => handleRemoveReminder(reminder.minutes)}
+                          className="text-sm text-red-500 hover:text-red-700 font-medium px-2 py-1 shrink-0"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    {reminders.length === 0 && (
+                      <div className="text-sm text-zinc-500 italic p-3 text-center border border-dashed border-zinc-300 dark:border-zinc-700 rounded-md">
+                        No reminders configured yet. Add one below.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-md border border-zinc-200 dark:border-zinc-700 space-y-4">
+                    <h4 className="text-sm font-medium text-zinc-900 dark:text-white">Add New Reminder</h4>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Minutes Before Event</label>
+                      <input 
+                        type="number" 
+                        min="1"
+                        value={newReminderMinute}
+                        onChange={(e) => setNewReminderMinute(e.target.value)}
+                        placeholder="e.g. 60"
+                        className="w-full md:w-1/3 px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Custom Notification Title</label>
+                      <input 
+                        type="text" 
+                        value={newReminderTitle}
+                        onChange={(e) => setNewReminderTitle(e.target.value)}
+                        placeholder="e.g. Upcoming Event Reminder"
+                        className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Custom Notification Message</label>
+                      <textarea 
+                        value={newReminderMessage}
+                        onChange={(e) => setNewReminderMessage(e.target.value)}
+                        placeholder="Get ready! The event starts in 60 minutes."
+                        className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500 min-h-[80px]"
+                      />
+                      <p className="text-xs text-zinc-500">Leave blank to use default message.</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <button 
+                        type="button"
+                        onClick={handleAddReminder}
+                        disabled={!newReminderMinute || Number(newReminderMinute) <= 0}
+                        className="px-4 py-2 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 transition-colors"
+                      >
+                        Add Reminder
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <div className="flex justify-end pt-4">
+              <Button type="submit" disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}

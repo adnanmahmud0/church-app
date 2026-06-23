@@ -6,6 +6,7 @@ import config from './config';
 import { seedSuperAdmin } from './DB/seedAdmin';
 import { socketHelper } from './helpers/socketHelper';
 import { startSundayServiceCron } from './app/cron/sundayServiceCron';
+import { startEventReminderCron } from './app/cron/eventReminderCron';
 import { User } from './app/modules/user/user.model';
 
 //uncaught exception
@@ -30,6 +31,7 @@ async function main() {
 
     // Start background jobs
     startSundayServiceCron();
+    startEventReminderCron();
 
     const port =
       typeof config.port === 'number' ? config.port : Number(config.port);

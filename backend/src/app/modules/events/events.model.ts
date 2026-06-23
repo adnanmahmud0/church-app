@@ -21,6 +21,7 @@ const EventSchema = new Schema<IEvent>(
     location: { type: String, required: true },
     description: { type: String, required: true },
     isDraft: { type: Boolean, default: false },
+    sent_reminders: { type: [String], default: [] },
   },
   { timestamps: true }
 );

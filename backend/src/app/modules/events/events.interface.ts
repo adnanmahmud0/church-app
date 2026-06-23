@@ -16,6 +16,7 @@ export interface IEvent {
   location: string;
   description: string;
   isDraft: boolean;
+  sent_reminders?: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }
