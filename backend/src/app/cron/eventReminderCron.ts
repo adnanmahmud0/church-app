@@ -60,7 +60,9 @@ export const startEventReminderCron = () => {
             !(event.sent_reminders || []).includes(reminderKey)
           ) {
             const title = 'Event Reminder';
-            const message = `The event "${event.title}" starts in ${reminder.minutes} minutes. See you there!`;
+            const message = reminder.minutes === 0 
+              ? `The event "${event.title}" is starting now. See you there!`
+              : `The event "${event.title}" starts in ${reminder.minutes} minutes. See you there!`;
 
             // Get all users who RSVP'd
             const rsvps = await EventRSVP.find({ eventId: event._id });
