@@ -4,7 +4,7 @@ const updateChurchInfoZodSchema = z.object({
   body: z.object({
     content: z.string().min(1, 'Content cannot be empty').optional(),
     contact_address: z.string().optional(),
-    contact_email: z.string().email('Invalid email address').optional(),
+    contact_email: z.string().email('Invalid email address').or(z.literal('')).optional(),
     contact_phone: z.string().optional(),
     contact_website: z.string().optional(),
     our_mission_quote: z.string().optional(),
