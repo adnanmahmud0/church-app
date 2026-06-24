@@ -101,6 +101,10 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
       type: [String],
       default: [],
     },
+    timezone: {
+      type: String,
+      default: 'UTC',
+    },
     last_start_notification_sent_date: {
       type: String,
     },

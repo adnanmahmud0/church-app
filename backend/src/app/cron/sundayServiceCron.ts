@@ -2,38 +2,47 @@ import cron from 'node-cron';
 import { ChurchInfo } from '../modules/churchInfo/churchInfo.model';
 import { NotificationService } from '../modules/notification/notification.service';
 
-const getTodayDateString = () => new Date().toISOString().split('T')[0];
-
-const parseTime = (timeStr: string) => {
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  const date = new Date();
-  date.setHours(hours, minutes, 0, 0);
-  return date;
+const getTodayDateString = (tz: string) => {
+  const parts = new Intl.DateTimeFormat('en-US', { 
+    timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' 
+  }).formatToParts(new Date());
+  const y = parts.find(p => p.type === 'year')?.value;
+  const m = parts.find(p => p.type === 'month')?.value;
+  const d = parts.find(p => p.type === 'day')?.value;
+  return `${y}-${m}-${d}`;
 };
 
 export const startSundayServiceCron = () => {
   // Run every minute
   cron.schedule('* * * * *', async () => {
     try {
-      const now = new Date();
-      // 0 is Sunday in JavaScript's getDay()
-      if (now.getDay() !== 0) {
-        return; // It's not Sunday
-      }
-
       const churchInfo = await ChurchInfo.findOne();
       if (!churchInfo || !churchInfo.sunday_service_start_time) {
         return; // No service time configured
       }
 
-      const todayStr = getTodayDateString();
-      const startTime = parseTime(churchInfo.sunday_service_start_time);
-      const currentTimeMs = now.getTime();
-      const startTimeMs = startTime.getTime();
+      const tz = churchInfo.timezone || 'UTC';
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat('en-US', { 
+        timeZone: tz, 
+        weekday: 'long', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' 
+      }).formatToParts(now);
+      
+      const currentDay = parts.find(p => p.type === 'weekday')?.value;
+      if (currentDay !== 'Sunday') {
+        return; // It's not Sunday in the configured timezone
+      }
+
+      const todayStr = getTodayDateString(tz);
+      const currentHour = Number(parts.find(p => p.type === 'hour')?.value);
+      const currentMinute = Number(parts.find(p => p.type === 'minute')?.value);
+      
+      const [startHour, startMin] = churchInfo.sunday_service_start_time.split(':').map(Number);
       
       // Calculate minutes difference
-      const diffMs = startTimeMs - currentTimeMs;
-      const diffMinutes = Math.round(diffMs / 60000);
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      const startTimeInMinutes = startHour * 60 + startMin;
+      const diffMinutes = startTimeInMinutes - currentTimeInMinutes;
 
       // Check for Reminder Notification
       if (

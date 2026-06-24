@@ -24,6 +24,7 @@ export interface IChurchInfo {
   default_custom_notification?: boolean;
   sent_reminders?: string[];
   last_start_notification_sent_date?: string;
+  timezone?: string;
   updated_at: Date;
   updated_by: string;
 }

@@ -37,6 +37,7 @@ const updateChurchInfoZodSchema = z.object({
     sunday_service_start_notification_enabled: z.boolean().optional(),
     sunday_service_start_title: z.string().optional(),
     sunday_service_start_message: z.string().optional(),
+    timezone: z.string().optional(),
     default_sermon_notification: z.boolean().optional(),
     default_service_reminder_notification: z.boolean().optional(),
     default_custom_notification: z.boolean().optional(),

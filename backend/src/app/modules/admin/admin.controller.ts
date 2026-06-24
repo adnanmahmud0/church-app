@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { AdminService } from './admin.service';
+import { ChurchInfo } from '../churchInfo/churchInfo.model';
 
 const getAllAdmins = catchAsync(async (req: Request, res: Response) => {
   const result = await AdminService.getAllAdminsToDB();
@@ -67,11 +68,14 @@ const getDashboard = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getServerTime = catchAsync(async (req: Request, res: Response) => {
+  const churchInfo = await ChurchInfo.findOne();
+  const timezone = churchInfo?.timezone || 'UTC';
+  
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Server time retrieved successfully',
-    data: { time: new Date().toISOString() },
+    data: { time: new Date().toISOString(), timezone },
   });
 });
 
