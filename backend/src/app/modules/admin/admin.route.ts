@@ -31,6 +31,11 @@ router.get(
   AdminController.getDashboard
 );
 
+router.get(
+  '/server-time',
+  AdminController.getServerTime
+);
+
 router.route('/:id')
   .put(
     auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),

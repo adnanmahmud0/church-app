@@ -66,6 +66,15 @@ const getDashboard = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getServerTime = catchAsync(async (req: Request, res: Response) => {
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Server time retrieved successfully',
+    data: { time: new Date().toISOString() },
+  });
+});
+
 export const AdminController = {
   getAllAdmins,
   createAdmin,
@@ -73,4 +82,5 @@ export const AdminController = {
   deleteAdmin,
   updateProfile,
   getDashboard,
+  getServerTime,
 };
