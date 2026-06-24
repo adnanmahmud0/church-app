@@ -179,7 +179,7 @@ Allows the author to update the status or content of their own prayer request. *
 
 **Body Parameters (JSON)**
 - `content` (optional, string): Updated text.
-- `status` (optional, string): Must be one of `"active"`, `"answered"`, or `"archived"`.
+- `status` (optional, string): Must be one of `"active"` or `"answered"`.
 
 **Example Request**
 ```json
@@ -190,8 +190,8 @@ Allows the author to update the status or content of their own prayer request. *
 
 ---
 
-## 7. Delete (Archive) a Prayer Request
-Allows the author (or an Admin) to soft-delete a prayer request. This changes the status to `"archived"` so it no longer appears in the public feed. **Requires Authentication.**
+## 7. Delete a Prayer Request
+Allows the author (or an Admin) to fully delete a prayer request. This permanently removes the request and its interactions. **Requires Authentication.**
 
 **Request**
 `DELETE /requests/:id`

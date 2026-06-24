@@ -23,7 +23,7 @@ const prayerRequestSchema = new Schema<IPrayerRequest, PrayerRequestModel>(
     },
     status: {
       type: String,
-      enum: ['active', 'answered', 'archived'],
+      enum: ['active', 'answered'],
       default: 'active',
     },
     pray_count: {

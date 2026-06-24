@@ -62,20 +62,20 @@ export default function PrayerAdminPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete/archive this prayer request?')) return;
+    if (!confirm('Are you sure you want to permanently delete this prayer request?')) return;
     
     try {
       const res = await apiFetch(`/prayer/requests/${id}`, {
         method: 'DELETE'
       })
       if (res.success) {
-        toast.success('Prayer request archived successfully')
+        toast.success('Prayer request deleted successfully')
         fetchDashboardData()
       } else {
-        toast.error('Failed to archive request')
+        toast.error('Failed to delete request')
       }
     } catch (err) {
-      toast.error('Failed to archive request')
+        toast.error('Failed to delete request')
     }
   }
 
@@ -158,8 +158,8 @@ export default function PrayerAdminPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  requests?.map((req: any) => (
-                    <TableRow key={req._id}>
+                  requests?.map((req: any, index: number) => (
+                    <TableRow key={req._id || req.id || index}>
                       <TableCell className="whitespace-nowrap">{new Date(req.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className="font-medium">
                         {req.is_anonymous ? 'Anonymous' : req.author_name || 'Anonymous'}
@@ -175,7 +175,7 @@ export default function PrayerAdminPage() {
 
                       <TableCell className="text-right">
                         <Button variant="ghost" size="sm" onClick={() => handleDelete(req._id)} className="text-destructive">
-                          <ArchiveIcon className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>

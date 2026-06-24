@@ -196,9 +196,10 @@ const deleteRequest = async (id: string, user?: JwtPayload, deviceFingerprint?: 
     throw new ApiError(StatusCodes.FORBIDDEN, 'You can only delete your own prayer requests');
   }
 
-  // Soft delete by archiving
-  const archived = await PrayerRequest.findByIdAndUpdate(id, { status: 'archived' }, { new: true });
-  return archived;
+  // Hard delete the request and its associated interactions
+  await PrayerInteraction.deleteMany({ prayer_request_id: id });
+  const deleted = await PrayerRequest.findByIdAndDelete(id);
+  return deleted;
 };
 
 const getStats = async () => {

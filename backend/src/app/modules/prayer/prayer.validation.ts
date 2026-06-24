@@ -23,7 +23,7 @@ const updatePrayerRequestZodSchema = z.object({
       .max(50, 'Author name must not exceed 50 characters')
       .optional(),
     is_anonymous: z.boolean().optional(),
-    status: z.enum(['active', 'answered', 'archived']).optional(),
+    status: z.enum(['active', 'answered']).optional(),
     device_fingerprint: z.string().optional(),
   }),
 });
