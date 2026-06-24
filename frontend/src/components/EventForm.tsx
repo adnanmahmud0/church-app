@@ -16,43 +16,29 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   
-  // Preview States
-  const [previewTitle, setPreviewTitle] = useState("")
-  const [previewCategoryId, setPreviewCategoryId] = useState("")
-  const [previewDate, setPreviewDate] = useState("")
-  const [previewTime, setPreviewTime] = useState("")
-  const [previewLocation, setPreviewLocation] = useState("")
-  const [previewDescription, setPreviewDescription] = useState("")
+  const [previewTitle, setPreviewTitle] = useState(initialData?.title || "")
+  const [previewCategoryId, setPreviewCategoryId] = useState(initialData?.categoryId?._id || initialData?.categoryId || "")
+  const [previewDate, setPreviewDate] = useState(initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : "")
+  
+  const getInitialTime = () => {
+    let initialTime = initialData?.time || "";
+    const match = initialTime.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
+    if (match && match[3]) {
+      let hours = parseInt(match[1], 10);
+      const minutes = match[2];
+      const modifier = match[3].toLowerCase();
+      if (modifier === 'pm' && hours < 12) hours += 12;
+      if (modifier === 'am' && hours === 12) hours = 0;
+      initialTime = `${hours.toString().padStart(2, '0')}:${minutes}`;
+    }
+    return initialTime;
+  }
+  
+  const [previewTime, setPreviewTime] = useState(getInitialTime())
+  const [previewLocation, setPreviewLocation] = useState(initialData?.location || "")
+  const [previewDescription, setPreviewDescription] = useState(initialData?.description || "")
   
   const selectedCategory = categories.find(c => c.id === previewCategoryId || c._id === previewCategoryId)
-
-  useEffect(() => {
-    if(initialData) {
-      setPreviewTitle(initialData.title || "")
-      setPreviewCategoryId(initialData.categoryId?._id || initialData.categoryId || "")
-      setPreviewDate(initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : "")
-      let initialTime = initialData.time || "";
-      const match = initialTime.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
-      if (match && match[3]) {
-        let hours = parseInt(match[1], 10);
-        const minutes = match[2];
-        const modifier = match[3].toLowerCase();
-        if (modifier === 'pm' && hours < 12) hours += 12;
-        if (modifier === 'am' && hours === 12) hours = 0;
-        initialTime = `${hours.toString().padStart(2, '0')}:${minutes}`;
-      }
-      setPreviewTime(initialTime)
-      setPreviewLocation(initialData.location || "")
-      setPreviewDescription(initialData.description || "")
-    } else {
-      setPreviewTitle("")
-      setPreviewCategoryId("")
-      setPreviewDate("")
-      setPreviewTime("")
-      setPreviewLocation("")
-      setPreviewDescription("")
-    }
-  }, [initialData])
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -79,7 +65,7 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
         ? `/events/${initialData._id || initialData.id}` 
         : `/events`
       
-      const method = initialData ? 'PUT' : 'POST'
+      const method = initialData ? 'PATCH' : 'POST'
 
       await apiFetch(endpoint, {
         method,
