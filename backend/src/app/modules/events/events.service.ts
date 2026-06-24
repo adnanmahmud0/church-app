@@ -6,7 +6,25 @@ import { Types } from 'mongoose';
 
 const mapEvent = (e: any, currentUserId?: string, rsvps: any[] = []) => {
   const dateObj = new Date(e.date);
-  const isPast = dateObj < new Date(new Date().setHours(0, 0, 0, 0));
+  
+  let eventDateTime = new Date(dateObj);
+  if (e.time) {
+    const match = e.time.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+    if (match) {
+      let hours = parseInt(match[1]);
+      const minutes = parseInt(match[2]);
+      const ampm = match[3]?.toUpperCase();
+      if (ampm === 'PM' && hours < 12) hours += 12;
+      if (ampm === 'AM' && hours === 12) hours = 0;
+      eventDateTime.setHours(hours, minutes, 0, 0);
+    } else {
+      eventDateTime.setHours(23, 59, 59, 999);
+    }
+  } else {
+    eventDateTime.setHours(23, 59, 59, 999);
+  }
+
+  const isPast = eventDateTime < new Date();
   
   let attendingCount = 0;
   let hasRsvp = false;
