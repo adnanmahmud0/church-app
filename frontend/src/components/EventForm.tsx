@@ -18,7 +18,7 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
   
   const [previewTitle, setPreviewTitle] = useState(initialData?.title || "")
   const [previewCategoryId, setPreviewCategoryId] = useState(initialData?.categoryId?._id || initialData?.categoryId || "")
-  const [previewDate, setPreviewDate] = useState(initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : "")
+  const [previewDate, setPreviewDate] = useState(initialData?.dateISO || (initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : ""))
   
   const getInitialTime = () => {
     let initialTime = initialData?.time || "";
