@@ -26,7 +26,7 @@ For notifications to work, the backend requires a Firebase Admin SDK private key
 ### Register Device Token
 To send targeted notifications to a user, the backend must know their current FCM device token. The app should call this endpoint every time the user logs in or launches the app.
 
-- **Endpoint**: `POST /api/v1/notifications/device-token`
+- **Endpoint**: `POST /api/v1/notifications/save-token`
 - **Headers**: `Authorization: Bearer <token>`
 - **Body**:
 ```json
@@ -127,7 +127,7 @@ Triggered manually by the admin from the Notification dashboard. This allows the
 To ensure these notifications work seamlessly, the app developer must:
 
 1. **Register the Device Token**: When the user logs in or opens the app, retrieve the FCM token and send it to the backend to register the device.
-   - `POST /api/v1/notifications/device-token`
+   - `POST /api/v1/notifications/save-token`
    - Body: `{ "token": "fcm_token_here", "userId": "user_id_here", "deviceType": "ios|android" }`
 
 2. **Subscribe to Topics**: Ensure the app subscribes the user to the generic Firebase topics upon initialization (if you prefer handling topic subscriptions directly on the client side):
