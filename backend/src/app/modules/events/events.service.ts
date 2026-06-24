@@ -3,28 +3,53 @@ import ApiError from '../../../errors/ApiError';
 import { Event, EventCategory, EventRSVP } from './events.model';
 import { IEvent, IEventCategory } from './events.interface';
 import { Types } from 'mongoose';
+import { ChurchInfo } from '../churchInfo/churchInfo.model';
 
-const mapEvent = (e: any, currentUserId?: string, rsvps: any[] = []) => {
+const mapEvent = (e: any, currentUserId?: string, rsvps: any[] = [], timezone: string = 'UTC') => {
   const dateObj = new Date(e.date);
   
-  let eventDateTime = new Date(dateObj);
+  // Use exact wall-clock time for the target timezone to determine if event is past
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hourCycle: 'h23'
+  });
+  
+  const parts = formatter.formatToParts(now);
+  const extract = (type: string) => parts.find(p => p.type === type)?.value || '00';
+  const currentWallDate = `${extract('year')}-${extract('month')}-${extract('day')}`;
+  const currentWallTime = `${extract('hour')}:${extract('minute')}:${extract('second')}`;
+
+  const eventWallDate = dateObj.toISOString().split('T')[0];
+  
+  let evHours = 23;
+  let evMinutes = 59;
+  
   if (e.time) {
     const match = e.time.match(/(\d+):(\d+)\s*(AM|PM)?/i);
     if (match) {
-      let hours = parseInt(match[1]);
-      const minutes = parseInt(match[2]);
+      let h = parseInt(match[1]);
+      const m = parseInt(match[2]);
       const ampm = match[3]?.toUpperCase();
-      if (ampm === 'PM' && hours < 12) hours += 12;
-      if (ampm === 'AM' && hours === 12) hours = 0;
-      eventDateTime.setHours(hours, minutes, 0, 0);
-    } else {
-      eventDateTime.setHours(23, 59, 59, 999);
+      if (ampm === 'PM' && h < 12) h += 12;
+      if (ampm === 'AM' && h === 12) h = 0;
+      evHours = h;
+      evMinutes = m;
     }
-  } else {
-    eventDateTime.setHours(23, 59, 59, 999);
   }
 
-  const isPast = eventDateTime < new Date();
+  const evHoursStr = evHours.toString().padStart(2, '0');
+  const evMinutesStr = evMinutes.toString().padStart(2, '0');
+  const eventWallTime = `${evHoursStr}:${evMinutesStr}:00`;
+
+  let isPast = false;
+  if (eventWallDate < currentWallDate) {
+    isPast = true;
+  } else if (eventWallDate === currentWallDate) {
+    isPast = eventWallTime < currentWallTime;
+  }
   
   let attendingCount = 0;
   let hasRsvp = false;
@@ -65,8 +90,18 @@ const mapEvent = (e: any, currentUserId?: string, rsvps: any[] = []) => {
 
 const getEvents = async (page: number = 1, limit: number = 20, isPast: boolean | null = false, category?: string, currentUserId?: string, includeDrafts: boolean = false, onlyRsvpd: boolean = false) => {
   const skip = (page - 1) * limit;
+  const churchInfo = await ChurchInfo.findOne().lean();
+  const tz = churchInfo?.timezone || 'UTC';
+  
+  // Use the timezone to get the current date midnight in UTC terms for accurate day filtering
   const now = new Date();
-  const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const formatter = new Intl.DateTimeFormat('en-US', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const parts = formatter.formatToParts(now);
+  const extract = (type: string) => parts.find(p => p.type === type)?.value || '00';
+  const y = parseInt(extract('year'));
+  const m = parseInt(extract('month')) - 1;
+  const d = parseInt(extract('day'));
+  const startOfToday = new Date(Date.UTC(y, m, d));
 
   let query: any = {};
   if (!includeDrafts) query.isDraft = false;
@@ -114,7 +149,7 @@ const getEvents = async (page: number = 1, limit: number = 20, isPast: boolean |
   const rsvps = await EventRSVP.find({ eventId: { $in: eventIds } }).lean();
 
   return {
-    events: events.map(e => mapEvent(e, currentUserId, rsvps)),
+    events: events.map(e => mapEvent(e, currentUserId, rsvps, tz)),
     total,
     page,
     limit,
@@ -122,8 +157,17 @@ const getEvents = async (page: number = 1, limit: number = 20, isPast: boolean |
 };
 
 const getLatestEvents = async (limit: number = 3, currentUserId?: string) => {
+  const churchInfo = await ChurchInfo.findOne().lean();
+  const tz = churchInfo?.timezone || 'UTC';
+  
   const now = new Date();
-  const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const formatter = new Intl.DateTimeFormat('en-US', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const parts = formatter.formatToParts(now);
+  const extract = (type: string) => parts.find(p => p.type === type)?.value || '00';
+  const y = parseInt(extract('year'));
+  const m = parseInt(extract('month')) - 1;
+  const d = parseInt(extract('day'));
+  const startOfToday = new Date(Date.UTC(y, m, d));
 
   const events = await Event.find({ isDraft: false, date: { $gte: startOfToday } })
     .populate('categoryId')
@@ -137,7 +181,7 @@ const getLatestEvents = async (limit: number = 3, currentUserId?: string) => {
   const eventIds = events.map(e => e._id);
   const rsvps = await EventRSVP.find({ eventId: { $in: eventIds } }).lean();
 
-  return events.map(e => mapEvent(e, currentUserId, rsvps));
+  return events.map(e => mapEvent(e, currentUserId, rsvps, tz));
 };
 
 const getEventById = async (id: string, currentUserId?: string) => {
@@ -145,7 +189,9 @@ const getEventById = async (id: string, currentUserId?: string) => {
   if (!event) throw new ApiError(StatusCodes.NOT_FOUND, 'Event not found');
 
   const rsvps = await EventRSVP.find({ eventId: id }).lean();
-  return mapEvent(event, currentUserId, rsvps);
+  const churchInfo = await ChurchInfo.findOne().lean();
+  const tz = churchInfo?.timezone || 'UTC';
+  return mapEvent(event, currentUserId, rsvps, tz);
 };
 
 const rsvpEvent = async (id: string, userId: string) => {
@@ -169,13 +215,17 @@ const rsvpEvent = async (id: string, userId: string) => {
 const createEvent = async (payload: Partial<IEvent>) => {
   const result = await Event.create(payload);
   const populated = await Event.findById(result._id).populate('categoryId').lean();
-  return mapEvent(populated);
+  const churchInfo = await ChurchInfo.findOne().lean();
+  const tz = churchInfo?.timezone || 'UTC';
+  return mapEvent(populated, undefined, [], tz);
 };
 
 const updateEvent = async (id: string, payload: Partial<IEvent>) => {
   const updated = await Event.findByIdAndUpdate(id, payload, { new: true }).populate('categoryId').lean();
   if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Event not found');
-  return mapEvent(updated);
+  const churchInfo = await ChurchInfo.findOne().lean();
+  const tz = churchInfo?.timezone || 'UTC';
+  return mapEvent(updated, undefined, [], tz);
 };
 
 const deleteEvent = async (id: string) => {
@@ -249,8 +299,17 @@ const deleteCategory = async (id: string) => {
 
 // Stats
 const getStats = async () => {
+  const churchInfo = await ChurchInfo.findOne().lean();
+  const tz = churchInfo?.timezone || 'UTC';
+  
   const now = new Date();
-  const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const formatter = new Intl.DateTimeFormat('en-US', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const parts = formatter.formatToParts(now);
+  const extract = (type: string) => parts.find(p => p.type === type)?.value || '00';
+  const y = parseInt(extract('year'));
+  const m = parseInt(extract('month')) - 1;
+  const d = parseInt(extract('day'));
+  const startOfToday = new Date(Date.UTC(y, m, d));
   const nextWeek = new Date(startOfToday.getTime() + 7 * 24 * 60 * 60 * 1000);
 
   const [totalUpcoming, totalPast, upcomingThisWeek, totalRsvps, eventsWithRsvps, allCategories] = await Promise.all([
