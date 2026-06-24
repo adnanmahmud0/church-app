@@ -66,7 +66,7 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
     setIsLoading(true)
     try {
       const endpoint = initialData 
-        ? `/events/${initialData.id}` 
+        ? `/events/${initialData._id || initialData.id}` 
         : `/events`
       
       const method = initialData ? 'PUT' : 'POST'

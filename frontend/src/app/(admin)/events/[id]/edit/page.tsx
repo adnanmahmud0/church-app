@@ -7,10 +7,14 @@ async function getEvent(id: string) {
     const res = await fetch(`${baseUrl}/events/${id}`, {
       cache: 'no-store'
     })
-    if (!res.ok) return null
+    if (!res.ok) {
+      console.error(`getEvent failed: ${res.status} ${res.statusText}`);
+      return null
+    }
     const json = await res.json()
     return json.data
   } catch (error) {
+    console.error(`getEvent fetch error:`, error);
     return null
   }
 }
@@ -29,9 +33,10 @@ async function getCategories() {
   }
 }
 
-export default async function EditEventPage({ params }: { params: { id: string } }) {
+export default async function EditEventPage({ params }: { params: { id: string } | Promise<{id: string}> }) {
+  const resolvedParams = await Promise.resolve(params);
   const [event, categories] = await Promise.all([
-    getEvent(params.id),
+    getEvent(resolvedParams.id),
     getCategories()
   ])
 
