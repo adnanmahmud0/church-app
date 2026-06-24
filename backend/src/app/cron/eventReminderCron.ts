@@ -3,11 +3,16 @@ import { ChurchInfo } from '../modules/churchInfo/churchInfo.model';
 import { Event, EventRSVP } from '../modules/events/events.model';
 import { NotificationService } from '../modules/notification/notification.service';
 
-const parseEventDateTime = (date: Date, timeStr: string) => {
-  const eventDate = new Date(date);
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  eventDate.setHours(hours, minutes, 0, 0);
-  return eventDate;
+const parseTimeString = (timeStr: string): [number, number] | null => {
+  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
+  if (!match) return null;
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  const modifier = match[3]?.toLowerCase();
+
+  if (modifier === 'pm' && hours < 12) hours += 12;
+  if (modifier === 'am' && hours === 12) hours = 0;
+  return [hours, minutes];
 };
 
 export const startEventReminderCron = () => {
@@ -24,25 +29,46 @@ export const startEventReminderCron = () => {
         return; // Nothing to do
       }
 
+      const tz = churchInfo.timezone || 'UTC';
       const now = new Date();
-      const currentTimeMs = now.getTime();
+      
+      const parts = new Intl.DateTimeFormat('en-US', { 
+        timeZone: tz, 
+        year: 'numeric', month: '2-digit', day: '2-digit', 
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23' 
+      }).formatToParts(now);
 
-      // Find all upcoming events (date is today or in the future)
-      const startOfToday = new Date(now);
-      startOfToday.setHours(0, 0, 0, 0);
+      const y = Number(parts.find(p => p.type === 'year')?.value);
+      const m = Number(parts.find(p => p.type === 'month')?.value) - 1; // 0-indexed month
+      const d = Number(parts.find(p => p.type === 'day')?.value);
+      const currentHour = Number(parts.find(p => p.type === 'hour')?.value);
+      const currentMinute = Number(parts.find(p => p.type === 'minute')?.value);
+
+      const nowInChurchTz = new Date(Date.UTC(y, m, d, currentHour, currentMinute));
+
+      // Find all upcoming events (date is yesterday or in the future to account for tz offsets)
+      const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
       const upcomingEvents = await Event.find({
-        date: { $gte: startOfToday },
+        date: { $gte: yesterday },
         isDraft: { $ne: true }
       });
 
       for (const event of upcomingEvents) {
-        if (!event.time) continue;
+        if (!event.time || !event.date) continue;
 
-        const eventStart = parseEventDateTime(event.date, event.time);
-        const startTimeMs = eventStart.getTime();
+        const parsedTime = parseTimeString(event.time);
+        if (!parsedTime) continue; // Invalid time format
+        
+        const [startHour, startMinute] = parsedTime;
+        
+        const eventYear = event.date.getUTCFullYear();
+        const eventMonth = event.date.getUTCMonth();
+        const eventDay = event.date.getUTCDate();
 
-        const diffMs = startTimeMs - currentTimeMs;
+        const eventStartInChurchTz = new Date(Date.UTC(eventYear, eventMonth, eventDay, startHour, startMinute));
+
+        const diffMs = eventStartInChurchTz.getTime() - nowInChurchTz.getTime();
         const diffMinutes = Math.round(diffMs / 60000);
 
         if (diffMinutes < 0) continue;
