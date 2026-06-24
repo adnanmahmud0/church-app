@@ -31,7 +31,17 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
       setPreviewTitle(initialData.title || "")
       setPreviewCategoryId(initialData.categoryId?._id || initialData.categoryId || "")
       setPreviewDate(initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : "")
-      setPreviewTime(initialData.time || "")
+      let initialTime = initialData.time || "";
+      const match = initialTime.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
+      if (match && match[3]) {
+        let hours = parseInt(match[1], 10);
+        const minutes = match[2];
+        const modifier = match[3].toLowerCase();
+        if (modifier === 'pm' && hours < 12) hours += 12;
+        if (modifier === 'am' && hours === 12) hours = 0;
+        initialTime = `${hours.toString().padStart(2, '0')}:${minutes}`;
+      }
+      setPreviewTime(initialTime)
       setPreviewLocation(initialData.location || "")
       setPreviewDescription(initialData.description || "")
     } else {
@@ -142,6 +152,7 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
               <Input 
                 id="time" 
                 name="time" 
+                type="time"
                 placeholder="e.g. 10:00 AM" 
                 value={previewTime} 
                 onChange={e => setPreviewTime(e.target.value)} 
@@ -261,7 +272,19 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
                   <div className="flex flex-col">
                     <span className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Time</span>
                     <span className="text-white text-sm font-semibold mt-0.5">
-                      {previewTime || "Time"}
+                      {(() => {
+                        if (!previewTime) return "Time";
+                        const match = previewTime.match(/^(\d{1,2}):(\d{2})$/);
+                        if (match) {
+                          let hours = parseInt(match[1], 10);
+                          const minutes = match[2];
+                          const ampm = hours >= 12 ? 'PM' : 'AM';
+                          hours = hours % 12;
+                          hours = hours ? hours : 12; 
+                          return `${hours}:${minutes} ${ampm}`;
+                        }
+                        return previewTime;
+                      })()}
                     </span>
                   </div>
                 </div>
