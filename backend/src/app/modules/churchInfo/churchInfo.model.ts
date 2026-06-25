@@ -89,6 +89,18 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
       type: Boolean,
       default: false,
     },
+    default_devotional_notification: {
+      type: Boolean,
+      default: false,
+    },
+    default_event_notification: {
+      type: Boolean,
+      default: false,
+    },
+    default_prayer_notification: {
+      type: Boolean,
+      default: false,
+    },
     default_service_reminder_notification: {
       type: Boolean,
       default: false,

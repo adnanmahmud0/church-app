@@ -22,6 +22,9 @@ export default function NotificationsDashboard() {
 
   // Default settings
   const [defaultSermon, setDefaultSermon] = useState(false)
+  const [defaultDevotional, setDefaultDevotional] = useState(false)
+  const [defaultEvent, setDefaultEvent] = useState(false)
+  const [defaultPrayer, setDefaultPrayer] = useState(false)
   const [defaultServiceReminder, setDefaultServiceReminder] = useState(false)
   const [defaultCustom, setDefaultCustom] = useState(true)
 
@@ -31,6 +34,9 @@ export default function NotificationsDashboard() {
         const data = await apiFetch('/church-info/admin');
         if (data && data.data) {
           setDefaultSermon(data.data.default_sermon_notification ?? false);
+          setDefaultDevotional(data.data.default_devotional_notification ?? false);
+          setDefaultEvent(data.data.default_event_notification ?? false);
+          setDefaultPrayer(data.data.default_prayer_notification ?? false);
           setDefaultServiceReminder(data.data.default_service_reminder_notification ?? false);
           setDefaultCustom(data.data.default_custom_notification ?? true);
         }
@@ -50,6 +56,9 @@ export default function NotificationsDashboard() {
         method: 'PUT',
         body: JSON.stringify({
           default_sermon_notification: defaultSermon,
+          default_devotional_notification: defaultDevotional,
+          default_event_notification: defaultEvent,
+          default_prayer_notification: defaultPrayer,
           default_service_reminder_notification: defaultServiceReminder,
           default_custom_notification: defaultCustom,
         })
@@ -209,6 +218,45 @@ export default function NotificationsDashboard() {
                   <Switch 
                     checked={defaultSermon} 
                     onCheckedChange={setDefaultSermon}
+                  />
+                </div>
+
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Devotional Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                      New daily devotionals
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={defaultDevotional} 
+                    onCheckedChange={setDefaultDevotional}
+                  />
+                </div>
+
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Event Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Reminders and starts
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={defaultEvent} 
+                    onCheckedChange={setDefaultEvent}
+                  />
+                </div>
+
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Prayer Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Updates on your prayers
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={defaultPrayer} 
+                    onCheckedChange={setDefaultPrayer}
                   />
                 </div>
                 

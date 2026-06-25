@@ -20,6 +20,9 @@ export interface IChurchInfo {
   sunday_service_start_title?: string;
   sunday_service_start_message?: string;
   default_sermon_notification?: boolean;
+  default_devotional_notification?: boolean;
+  default_event_notification?: boolean;
+  default_prayer_notification?: boolean;
   default_service_reminder_notification?: boolean;
   default_custom_notification?: boolean;
   sent_reminders?: string[];
