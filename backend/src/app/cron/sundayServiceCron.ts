@@ -29,9 +29,10 @@ export const startSundayServiceCron = () => {
       }).formatToParts(now);
       
       const currentDay = parts.find(p => p.type === 'weekday')?.value;
-      if (currentDay !== 'Sunday') {
-        return; // It's not Sunday in the configured timezone
-      }
+      // TEMPORARY: Commented out the Sunday check so you can test it today!
+      // if (currentDay !== 'Sunday') {
+      //   return; // It's not Sunday in the configured timezone
+      // }
 
       const todayStr = getTodayDateString(tz);
       const currentHour = Number(parts.find(p => p.type === 'hour')?.value);
