@@ -40,6 +40,7 @@ const updateChurchInfoZodSchema = z.object({
     timezone: z.string().optional(),
     default_sermon_notification: z.boolean().optional(),
     default_devotional_notification: z.boolean().optional(),
+    devotional_appearance_time: z.string().optional(),
     default_event_notification: z.boolean().optional(),
     default_prayer_notification: z.boolean().optional(),
     default_service_reminder_notification: z.boolean().optional(),

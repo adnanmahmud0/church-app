@@ -11,6 +11,7 @@ export interface IDevotional {
   isDraft: boolean;
   publishedAt?: Date;
   lastShownDate?: string;
+  notificationSent?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

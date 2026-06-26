@@ -93,6 +93,10 @@ const ChurchInfoSchema = new Schema<IChurchInfo, ChurchInfoModel>(
       type: Boolean,
       default: false,
     },
+    devotional_appearance_time: {
+      type: String,
+      default: "00:00",
+    },
     default_event_notification: {
       type: Boolean,
       default: false,

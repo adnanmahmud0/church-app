@@ -12,6 +12,7 @@ const DevotionalSchema = new Schema<IDevotional>(
     isDraft: { type: Boolean, required: true, default: false },
     publishedAt: { type: Date },
     lastShownDate: { type: String, default: null },
+    notificationSent: { type: Boolean, default: false },
   },
   {
     timestamps: true,

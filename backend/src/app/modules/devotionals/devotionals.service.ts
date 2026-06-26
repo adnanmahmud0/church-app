@@ -2,6 +2,41 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { Devotional, DevotionalRead } from './devotionals.model';
 import { IDevotional } from './devotionals.interface';
+import { ChurchInfo } from '../churchInfo/churchInfo.model';
+
+const getEffectiveTodayString = async (): Promise<string> => {
+  const churchInfo = await ChurchInfo.findOne();
+  const tz = churchInfo?.timezone || 'UTC';
+  const appearanceTime = churchInfo?.devotional_appearance_time || '00:00';
+  
+  const now = new Date();
+  
+  const parts = new Intl.DateTimeFormat('en-US', { 
+    timeZone: tz, 
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+  }).formatToParts(now);
+
+  const y = Number(parts.find(p => p.type === 'year')?.value);
+  const m = Number(parts.find(p => p.type === 'month')?.value) - 1; // 0-indexed
+  const d = Number(parts.find(p => p.type === 'day')?.value);
+  const h = Number(parts.find(p => p.type === 'hour')?.value);
+  const min = Number(parts.find(p => p.type === 'minute')?.value);
+
+  const [appHStr, appMStr] = appearanceTime.split(':');
+  const appH = Number(appHStr) || 0;
+  const appM = Number(appMStr) || 0;
+
+  const nowMinutes = h * 60 + min;
+  const appMinutes = appH * 60 + appM;
+
+  const effectiveDate = new Date(Date.UTC(y, m, d));
+  if (nowMinutes < appMinutes) {
+    effectiveDate.setUTCDate(effectiveDate.getUTCDate() - 1);
+  }
+
+  return effectiveDate.toISOString().split('T')[0];
+};
 
 const calculateDayLabel = (dateStr: string | Date | undefined | null): string => {
   if (!dateStr) return '';
@@ -30,7 +65,7 @@ const mapDevotional = (d: any) => {
 };
 
 const autoScheduleDevotionals = async () => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = await getEffectiveTodayString();
   
   const activeDevotionals = await Devotional.find({ isDraft: false }).lean();
   if (activeDevotionals.length === 0) return;
@@ -57,7 +92,8 @@ const autoScheduleDevotionals = async () => {
     const nextDateStr = currentMaxDate.toISOString().split('T')[0];
     
     const updatePayload: any = {
-      assignedDateString: nextDateStr
+      assignedDateString: nextDateStr,
+      notificationSent: false
     };
 
     if (d.assignedDateString) {
@@ -84,7 +120,7 @@ const getDevotionals = async (page: number = 1, limit: number = 20, includeDraft
     devotionals = docs;
     total = count;
   } else {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = await getEffectiveTodayString();
     const pipeline: any[] = [
       { $match: { isDraft: false } },
       {
@@ -159,8 +195,7 @@ const getDevotionals = async (page: number = 1, limit: number = 20, includeDraft
 const getTodayDevotional = async (userId?: string) => {
   await autoScheduleDevotionals();
 
-  const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
+  const todayStr = await getEffectiveTodayString();
 
   let devotional = await Devotional.findOne({
     isDraft: false,
@@ -218,21 +253,7 @@ const createDevotional = async (payload: Partial<IDevotional>) => {
   const result = await Devotional.create(payload);
   await autoScheduleDevotionals();
 
-  if (!payload.isDraft) {
-    const { NotificationService } = await import('../notification/notification.service');
-    try {
-      await NotificationService.sendNotificationToTopic('devotional', {
-        title: 'New Devotional Available!',
-        body: `"${result.title}" has just been posted. Read it now!`,
-        data: {
-          type: 'devotional',
-          devotionalId: result._id.toString(),
-        },
-      });
-    } catch (err) {
-      console.error('Failed to send notification for new devotional:', err);
-    }
-  }
+
 
   return mapDevotional(result);
 };
@@ -247,21 +268,7 @@ const updateDevotional = async (id: string, payload: Partial<IDevotional>) => {
   const updated = await Devotional.findByIdAndUpdate(id, payload, { new: true }).lean();
   if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Devotional not found');
   
-  if (existing.isDraft && payload.isDraft === false) {
-    const { NotificationService } = await import('../notification/notification.service');
-    try {
-      await NotificationService.sendNotificationToTopic('devotional', {
-        title: 'New Devotional Available!',
-        body: `"${updated.title}" has just been posted. Read it now!`,
-        data: {
-          type: 'devotional',
-          devotionalId: updated._id.toString(),
-        },
-      });
-    } catch (err) {
-      console.error('Failed to send notification for updated devotional:', err);
-    }
-  }
+
 
   await autoScheduleDevotionals();
   return mapDevotional(updated);
@@ -275,7 +282,7 @@ const deleteDevotional = async (id: string) => {
 };
 
 const getStats = async () => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = await getEffectiveTodayString();
   const [totalDevotionals, totalReads, allReads, upcomingScheduled] = await Promise.all([
     Devotional.countDocuments(),
     DevotionalRead.countDocuments(),

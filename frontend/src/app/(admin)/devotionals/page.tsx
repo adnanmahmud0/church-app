@@ -23,13 +23,16 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { DevotionalsMobilePreview } from "@/components/devotionals-mobile-preview"
 import { apiFetch } from "@/lib/api"
 import { toast } from "sonner"
-import { BookIcon, PencilIcon, TrashIcon, PlusIcon, UsersIcon, BarChart3Icon, CalendarIcon, SmartphoneIcon } from "lucide-react"
+import { BookIcon, PencilIcon, TrashIcon, PlusIcon, UsersIcon, BarChart3Icon, CalendarIcon, SmartphoneIcon, SettingsIcon } from "lucide-react"
 
 export default function DevotionalsDashboard() {
   const [stats, setStats] = useState<any>(null)
   const [devotionals, setDevotionals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [appearanceTime, setAppearanceTime] = useState("00:00")
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -38,13 +41,15 @@ export default function DevotionalsDashboard() {
   const fetchData = async () => {
     try {
       setIsLoading(true)
-      const [statsRes, devRes] = await Promise.all([
+      const [statsRes, devRes, infoRes] = await Promise.all([
         apiFetch("/devotionals/admin/stats"),
-        apiFetch("/devotionals?limit=100") // get recent for table
+        apiFetch("/devotionals?limit=100"), // get recent for table
+        apiFetch("/church-info/admin")
       ])
       
       if (statsRes.success) setStats(statsRes.data)
       if (devRes.success) setDevotionals(devRes.data.devotionals)
+      if (infoRes.success) setAppearanceTime(infoRes.data.devotional_appearance_time || "00:00")
     } catch (error) {
       toast.error("Failed to load devotionals data")
     } finally {
@@ -63,6 +68,26 @@ export default function DevotionalsDashboard() {
     }
   }
 
+  const handleSaveSettings = async () => {
+    try {
+      setIsSavingSettings(true)
+      const res = await apiFetch("/church-info/admin", {
+        method: "PUT",
+        body: JSON.stringify({ devotional_appearance_time: appearanceTime })
+      })
+      if (res.success) {
+        toast.success("Settings saved successfully")
+        setIsSettingsOpen(false)
+      } else {
+        toast.error(res.message || "Failed to save settings")
+      }
+    } catch (error) {
+      toast.error("An error occurred while saving settings")
+    } finally {
+      setIsSavingSettings(false)
+    }
+  }
+
   if (isLoading) {
     return <div className="p-8">Loading...</div>
   }
@@ -72,6 +97,9 @@ export default function DevotionalsDashboard() {
       <div className="flex items-center justify-between space-y-2">
         <div className="flex items-center gap-4">
           <h2 className="text-3xl font-bold tracking-tight">Devotionals</h2>
+          <Button variant="outline" size="icon" onClick={() => setIsSettingsOpen(true)} title="Devotionals Settings" className="rounded-full shrink-0">
+            <SettingsIcon className="h-5 w-5" />
+          </Button>
           <Button variant="outline" size="icon" onClick={() => setIsMobilePreviewOpen(true)} title="View Mobile App Visualization" className="rounded-full shrink-0">
             <SmartphoneIcon className="h-5 w-5" />
           </Button>
@@ -256,6 +284,30 @@ export default function DevotionalsDashboard() {
         <DialogContent className="sm:max-w-max bg-transparent border-none shadow-none p-0 flex justify-center [&>button]:hidden">
           <DialogTitle className="sr-only">Mobile App Preview</DialogTitle>
           <DevotionalsMobilePreview devotionals={devotionals} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogContent>
+          <DialogTitle>Devotionals Settings</DialogTitle>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Appearance Time</label>
+              <p className="text-xs text-muted-foreground">Select what time of day the new devotional should appear on the app (uses the Church Timezone).</p>
+              <input 
+                type="time" 
+                value={appearanceTime}
+                onChange={(e) => setAppearanceTime(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveSettings} disabled={isSavingSettings}>
+                {isSavingSettings ? "Saving..." : "Save Settings"}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
