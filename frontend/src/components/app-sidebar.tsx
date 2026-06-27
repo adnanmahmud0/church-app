@@ -31,7 +31,8 @@ import {
   User,
   Bell,
   Clock,
-  Phone
+  Phone,
+  FileText
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
@@ -113,6 +114,12 @@ const data = {
       title: "Contact & Mission",
       url: "/contact-mission",
       icon: <Phone />,
+    },
+    {
+      title: "Legal",
+      url: "/legal",
+      icon: <FileText />,
+      roles: ["SUPER_ADMIN", "ADMIN"],
     },
     {
       title: "Notifications",

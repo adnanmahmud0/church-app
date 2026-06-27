@@ -15,6 +15,7 @@ import { CommunityRoutes } from '../app/modules/community/community.route';
 import { WatchLiveRoutes } from '../app/modules/watchLive/watchLive.route';
 import { ChurchInfoRoutes } from '../app/modules/churchInfo/churchInfo.route';
 import { NotificationRoutes } from '../app/modules/notification/notification.route';
+import { LegalRoutes } from '../app/modules/legal/legal.route';
 
 const router = express.Router();
 
@@ -78,6 +79,10 @@ const apiRoutes = [
   {
     path: '/church-info',
     route: ChurchInfoRoutes,
+  },
+  {
+    path: '/legal',
+    route: LegalRoutes,
   },
 ];
 
