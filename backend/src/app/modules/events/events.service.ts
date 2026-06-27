@@ -83,6 +83,7 @@ const mapEvent = (e: any, currentUserId?: string, rsvps: any[] = [], timezone: s
     hasRsvp,
     isPast,
     ...(e.description && { description: e.description }),
+    ...(e.image && { image: e.image }),
     ...(e.isDraft !== undefined && { isDraft: e.isDraft }),
     ...(e.createdAt && { createdAt: e.createdAt }),
   };
@@ -137,7 +138,7 @@ const getEvents = async (page: number = 1, limit: number = 20, isPast: boolean |
     .limit(limit);
 
   if (!includeDrafts) {
-    queryBuilder = queryBuilder.select('title categoryId date time location');
+    queryBuilder = queryBuilder.select('title categoryId date time location description image');
   }
 
   const [events, total] = await Promise.all([
@@ -173,7 +174,7 @@ const getLatestEvents = async (limit: number = 3, currentUserId?: string) => {
     .populate('categoryId')
     .sort({ date: 1 })
     .limit(limit)
-    .select('title categoryId date time location')
+    .select('title categoryId date time location description image')
     .lean();
 
   if (!events.length) return [];
