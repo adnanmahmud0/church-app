@@ -17,6 +17,7 @@ const createSermon = async (payload: ISermon) => {
       data: {
         type: 'sermon',
         id: result._id.toString(),
+        thumbnail_url: result.thumbnail_url || '',
       },
     });
   } catch (err) {

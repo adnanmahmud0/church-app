@@ -102,7 +102,7 @@ export const startEventReminderCron = () => {
                 await NotificationService.sendNotificationToUsers(filteredUserIds, {
                   title: title,
                   body: message,
-                  data: { type: 'event', eventId: event._id.toString() }
+                  data: { type: 'event', eventId: event._id.toString(), image: event.image || '' }
                 });
               }
               
@@ -130,7 +130,7 @@ export const startEventReminderCron = () => {
             await NotificationService.sendNotificationToUsers(filteredUserIds, {
               title: 'Event Starting Now',
               body: `The event "${event.title}" is starting now. See you there!`,
-              data: { type: 'event', eventId: event._id.toString() }
+              data: { type: 'event', eventId: event._id.toString(), image: event.image || '' }
             });
           }
           
