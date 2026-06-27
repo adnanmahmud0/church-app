@@ -250,9 +250,6 @@ export default function BibleAdminPage() {
               </TableBody>
             </Table>
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" disabled>+ Add Version (Coming Soon)</Button>
-          </CardFooter>
         </Card>
 
         {/* Section 3 & 6: App Default & Dev Info */}

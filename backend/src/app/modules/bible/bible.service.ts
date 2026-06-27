@@ -8,18 +8,18 @@ import config from '../../../config';
 
 const cache = new NodeCache();
 
-// The translations the user actually has access to via the YouVersion API key.
-// Copyrighted versions like KJV/NIV require explicit YouVersion approval.
+// Client requested versions
 const DEFAULT_VERSIONS: IBibleVersion[] = [
-  { id: 12, name: 'American Standard Version', abbreviation: 'ASV', isActive: true },
-  { id: 3034, name: 'Berean Standard Bible', abbreviation: 'BSB', isActive: true },
-  { id: 2660, name: 'Literal Standard Version', abbreviation: 'LSV', isActive: true },
-  { id: 1932, name: 'Free Bible Version', abbreviation: 'FBV', isActive: true },
-  { id: 206, name: 'World English Bible', abbreviation: 'WEBUS', isActive: true },
+  { id: 1, name: 'King James Version', abbreviation: 'KJV', isActive: true },
+  { id: 116, name: 'New Living Translation', abbreviation: 'NLT', isActive: true },
+  { id: 1588, name: 'Amplified Bible', abbreviation: 'AMP', isActive: true },
+  { id: 111, name: 'New International Version', abbreviation: 'NIV', isActive: true },
+  { id: 97, name: 'The Message', abbreviation: 'MSG', isActive: true }
 ];
 
+const FALLBACK_BIBLE_ID = 206; // WEBUS - public domain fallback if KJV/NIV access is denied
+
 const YOUVERSION_BASE_URL = 'https://api.youversion.com/v1';
-const FALLBACK_BIBLE_ID = 206; // WEBUS - World English Bible (public domain, available on all keys)
 
 const fetchYouVersion = async (endpoint: string, fallbackToPublic = false): Promise<any> => {
   const YOUVERSION_API_KEY = config.youversion_api_key;
@@ -28,7 +28,7 @@ const fetchYouVersion = async (endpoint: string, fallbackToPublic = false): Prom
   }
 
   const url = `${YOUVERSION_BASE_URL}${endpoint}`;
-  let response = await fetch(url, {
+  const response = await fetch(url, {
     headers: {
       'X-YVP-App-Key': YOUVERSION_API_KEY,
       'Accept': 'application/json',
@@ -45,13 +45,11 @@ const fetchYouVersion = async (endpoint: string, fallbackToPublic = false): Prom
          }
        }
     }
-    
     const errorBody = await response.text();
     throw new ApiError(StatusCodes.BAD_GATEWAY, `YouVersion API Error: ${response.status} - ${errorBody}`);
   }
 
-  const json = await response.json();
-  return json.data ? json : { data: json.response?.data || json };
+  return response.json();
 };
 
 const getBooks = async (versionId: number) => {
@@ -59,15 +57,15 @@ const getBooks = async (versionId: number) => {
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  // Uses v1 endpoint /bibles/{id}/books
-  const data = await fetchYouVersion(`/bibles/${versionId}/books`, true);
-  
-  const booksData = Array.isArray(data.data) ? data.data : (data.data?.items || []);
+  // API returns: { data: [{ id: "GEN", title: "Genesis", abbreviation: "Gen.", canon: "old_testament", chapters: [...] }] }
+  const response = await fetchYouVersion(`/bibles/${versionId}/books`, true);
+  const booksData = response.data || [];
+
   const books = booksData.map((book: any) => ({
-    id: book.id || book.usfm,
-    name: book.name || book.human,
-    abbreviation: book.abbreviation || book.human_long,
-    testament: book.testament || (book.id && ['GEN','EXO','LEV','NUM','DEU','JOS','JDG','RUT','1SA','2SA','1KI','2KI','1CH','2CH','EZR','NEH','EST','JOB','PSA','PRO','ECC','SNG','ISA','JER','LAM','EZK','DAN','HOS','JOL','AMO','OBA','JON','MIC','NAM','HAB','ZEP','HAG','ZEC','MAL'].includes(book.id) ? 'OT' : 'NT'),
+    id: book.id,               // e.g. "GEN"
+    name: book.title,          // e.g. "Genesis"
+    abbreviation: book.abbreviation, // e.g. "Gen."
+    testament: book.canon === 'old_testament' ? 'OT' : 'NT',
     chapters_count: book.chapters ? book.chapters.length : 0,
   }));
 
@@ -80,15 +78,18 @@ const getChapters = async (versionId: number, bookId: string) => {
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  // v1 /books endpoint returns chapters inside each book
-  const data = await fetchYouVersion(`/bibles/${versionId}/books`, true);
-  const booksData = Array.isArray(data.data) ? data.data : (data.data?.items || []);
-  
+  // API returns books with chapters embedded. We need to fetch books and find the specific one.
+  const response = await fetchYouVersion(`/bibles/${versionId}/books`, true);
+  const booksData = response.data || [];
+
   const book = booksData.find((b: any) => b.id === bookId);
   if (!book || !book.chapters) return [];
 
+  // Each chapter: { id: "1", passage_id: "GEN.1", title: "1", verses: [{id: "1", ...}] }
   const chapters = book.chapters.map((ch: any) => ({
-    chapter_number: ch.id || ch.number || ch.reference || ch.usfm,
+    chapter_number: ch.id,        // e.g. "1"
+    passage_id: ch.passage_id,    // e.g. "GEN.1"
+    verses_count: ch.verses ? ch.verses.length : 0,
   }));
 
   cache.set(cacheKey, chapters, 86400); // 24 hours
@@ -100,44 +101,55 @@ const getVerses = async (versionId: number, bookId: string, chapter: string) => 
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  // Fetch passage in HTML format so we can parse verses
-  const data = await fetchYouVersion(`/bibles/${versionId}/passages/${bookId}.${chapter}?format=html`, true);
-  
-  const contentHtml = data.data?.content || data.content || '';
-  
-  // Parse HTML into verses using cheerio
+  // API endpoint: /bibles/{id}/passages/{BOOK}.{CHAPTER}?format=html
+  const passageId = `${bookId}.${chapter}`;
+  const response = await fetchYouVersion(`/bibles/${versionId}/passages/${passageId}?format=html`, true);
+
+  // Response: { id: "GEN.1", content: "<div>...<span class=\"yv-v\" v=\"1\"></span><span class=\"yv-vlbl\">1</span>In the beginning..." }
+  const contentHtml = response.content || '';
+
+  // Parse HTML into individual verses using cheerio
   const $ = cheerio.load(contentHtml);
   const versesMap = new Map<string, string>();
-  
-  // v1 HTML structure uses <span class="yv-v" v="1"></span><span class="yv-vlbl">1</span> Verse Text...
-  // We can just iterate through text nodes and associate them with the most recent verse number.
-  let currentVerse = "1";
-  
-  // Select all top-level elements or text within paragraphs
+
+  // The HTML structure uses:
+  //   <span class="yv-v" v="1"></span>  -- marks the start of verse 1
+  //   <span class="yv-vlbl">1</span>   -- the visible verse label
+  //   Text content follows...
+  let currentVerse = '1';
+
   $('*').contents().each((_, el) => {
     if (el.type === 'tag' && el.tagName === 'span' && $(el).hasClass('yv-v')) {
       const v = $(el).attr('v');
       if (v) currentVerse = v;
     } else if (el.type === 'text') {
       const text = $(el).text().trim();
-      // Ignore verse labels like "1" directly, though usually they are in yv-vlbl
-      if (text.length > 0 && el.parent && el.parent.type === 'tag' && !$(el.parent).hasClass('yv-vlbl') && !$(el.parent).hasClass('yv-c')) {
-         const existing = versesMap.get(currentVerse) || '';
-         versesMap.set(currentVerse, existing + (existing ? ' ' : '') + text);
+      // Skip verse label spans and chapter header spans
+      if (
+        text.length > 0 &&
+        el.parent &&
+        el.parent.type === 'tag' &&
+        !$(el.parent).hasClass('yv-vlbl') &&
+        !$(el.parent).hasClass('yv-c')
+      ) {
+        const existing = versesMap.get(currentVerse) || '';
+        versesMap.set(currentVerse, existing + (existing ? ' ' : '') + text);
       }
     }
   });
 
   const parsedVerses = Array.from(versesMap.entries()).map(([verse_number, text]) => ({
     verse_number,
-    text: text.replace(/\s+/g, ' ').trim()
+    text: text.replace(/\s+/g, ' ').trim(),
   })).filter(v => v.text.length > 0);
 
   const verses = {
     book: bookId,
     chapter: chapter,
     version: versionId,
-    verses: parsedVerses.length > 0 ? parsedVerses : [{ verse_number: "1", text: contentHtml.replace(/<[^>]*>?/gm, '').trim() }],
+    verses: parsedVerses.length > 0
+      ? parsedVerses
+      : [{ verse_number: '1', text: contentHtml.replace(/<[^>]*>?/gm, '').trim() }],
   };
 
   cache.set(cacheKey, verses, 3600); // 1 hour
@@ -153,8 +165,8 @@ const getVersions = async () => {
     });
   }
   const activeVersions = settings.versions.filter(v => v.isActive);
-  
-  // Fetch books for each version
+
+  // Fetch books for each active version
   const versionsWithBooks = await Promise.all(activeVersions.map(async (v) => {
     try {
       const books = await getBooks(v.id);
@@ -194,31 +206,27 @@ const updateAdminSettings = async (payload: { defaultVersionId?: number; version
 };
 
 const searchBible = async (versionId: number, query: string) => {
-  // Fallback search mechanism since /search might not exist in v1 the same way.
   try {
-     const data = await fetchYouVersion(`/search?query=${encodeURIComponent(query)}&version_id=${versionId}`, true);
-     const stripHtml = (html: string) => {
-        if (!html) return '';
-        return html.replace(/<[^>]*>?/gm, '').trim();
-     };
-     const resultsList = Array.isArray(data.data) ? data.data : (data.data?.results || []);
-     return {
-        results: resultsList.map((item: any) => ({
-           book: item.book?.id || item.book || '',
-           chapter: item.chapter?.number || item.chapter || '',
-           verse: item.verse?.number || item.verse || item.reference || '',
-           text: stripHtml(item.text || item.content),
-        })),
-     };
-  } catch(e) {
-     return { results: [] };
+    const response = await fetchYouVersion(`/search?query=${encodeURIComponent(query)}&version_id=${versionId}`, true);
+    const resultsList = response.data || [];
+    return {
+      results: resultsList.map((item: any) => ({
+        book: item.book?.id || item.book || '',
+        chapter: item.chapter?.number || item.chapter || '',
+        verse: item.verse?.number || item.verse || item.reference || '',
+        text: (item.text || item.content || '').replace(/<[^>]*>?/gm, '').trim(),
+      })),
+    };
+  } catch (e) {
+    return { results: [] };
   }
 };
 
 const checkHealth = async () => {
   try {
-    const data = await fetchYouVersion('/bibles?language_ranges[]=eng');
-    return { status: 'Connected', versionsCount: Array.isArray(data.data) ? data.data.length : 0 };
+    const response = await fetchYouVersion('/bibles?language_ranges[]=eng');
+    const versions = response.data || [];
+    return { status: 'Connected', versionsCount: versions.length };
   } catch (error: any) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Disconnected: ${error.message}`);
   }
@@ -234,7 +242,7 @@ const getCacheStats = async () => {
     books: booksCached,
     chapters: chaptersCached,
     verses: versesCached,
-    total: keys.length
+    total: keys.length,
   };
 };
 

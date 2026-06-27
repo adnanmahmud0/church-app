@@ -5,7 +5,7 @@ import sendResponse from '../../../shared/sendResponse';
 import { BibleService } from './bible.service';
 
 const getBooks = catchAsync(async (req: Request, res: Response) => {
-  const versionId = parseInt(req.query.version as string, 10) || 1;
+  const versionId = parseInt(req.query.version as string, 10) || 12;
   const result = await BibleService.getBooks(versionId);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -16,7 +16,7 @@ const getBooks = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getChapters = catchAsync(async (req: Request, res: Response) => {
-  const versionId = parseInt(req.query.version as string, 10) || 1;
+  const versionId = parseInt(req.query.version as string, 10) || 12;
   const { bookId } = req.params;
   const result = await BibleService.getChapters(versionId, bookId);
   sendResponse(res, {
@@ -28,7 +28,7 @@ const getChapters = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getVerses = catchAsync(async (req: Request, res: Response) => {
-  const versionId = parseInt(req.query.version as string, 10) || 1;
+  const versionId = parseInt(req.query.version as string, 10) || 12;
   const { bookId, chapter } = req.params;
   const result = await BibleService.getVerses(versionId, bookId, chapter);
   sendResponse(res, {
@@ -50,7 +50,7 @@ const getVersions = catchAsync(async (req: Request, res: Response) => {
 });
 
 const searchBible = catchAsync(async (req: Request, res: Response) => {
-  const versionId = parseInt(req.query.version as string, 10) || 1;
+  const versionId = parseInt(req.query.version as string, 10) || 12;
   const query = req.query.q as string;
   const result = await BibleService.searchBible(versionId, query);
   sendResponse(res, {
