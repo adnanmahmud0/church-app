@@ -16,10 +16,15 @@ import { WatchLiveRoutes } from '../app/modules/watchLive/watchLive.route';
 import { ChurchInfoRoutes } from '../app/modules/churchInfo/churchInfo.route';
 import { NotificationRoutes } from '../app/modules/notification/notification.route';
 import { LegalRoutes } from '../app/modules/legal/legal.route';
+import { FeedbackRoutes } from '../app/modules/feedback/feedback.route';
 
 const router = express.Router();
 
 const apiRoutes = [
+  {
+    path: '/feedback',
+    route: FeedbackRoutes,
+  },
   {
     path: '/notifications',
     route: NotificationRoutes,

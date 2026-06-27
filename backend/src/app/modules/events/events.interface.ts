@@ -15,6 +15,7 @@ export interface IEvent {
   time: string;
   location: string;
   description: string;
+  image?: string;
   isDraft: boolean;
   sent_reminders?: string[];
   createdAt?: Date;

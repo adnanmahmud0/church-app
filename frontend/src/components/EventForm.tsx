@@ -10,7 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { apiFetch } from "@/lib/api"
-import { CalendarIcon, Clock, MapPinIcon, Loader2 } from "lucide-react"
+import { CalendarIcon, Clock, MapPinIcon, Loader2, ImageIcon } from "lucide-react"
+import { MediaPicker } from "@/components/media-picker"
 
 export default function EventForm({ initialData = null, categories = [] }: { initialData?: any, categories?: any[] }) {
   const router = useRouter()
@@ -37,7 +38,8 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
   const [previewTime, setPreviewTime] = useState(getInitialTime())
   const [previewLocation, setPreviewLocation] = useState(initialData?.location || "")
   const [previewDescription, setPreviewDescription] = useState(initialData?.description || "")
-  
+  const [previewImage, setPreviewImage] = useState(initialData?.image || "")
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false)
   const selectedCategory = categories.find(c => c.id === previewCategoryId || c._id === previewCategoryId)
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -56,6 +58,7 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
       time: formData.get("time") as string,
       location: formData.get("location") as string,
       description: formData.get("description") as string,
+      image: previewImage,
       isDraft: formData.get("isDraft") === "on",
     }
 
@@ -172,6 +175,30 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
             />
           </div>
           
+          <div className="space-y-2">
+            <Label>Event Cover Image (Optional)</Label>
+            <div className="mt-2 flex items-center gap-4">
+              {previewImage && (
+                <div className="relative w-24 h-24 rounded-lg overflow-hidden border">
+                  <img src={previewImage.startsWith('http') ? previewImage : `http://localhost:5000${previewImage}`} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="flex-1">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsMediaPickerOpen(true)}
+                  className="w-full sm:w-auto"
+                >
+                  <ImageIcon className="size-4 mr-2" /> Select or Upload Image
+                </Button>
+                <p className="text-xs text-zinc-500 mt-2">
+                  Choose a cover image from your media library or upload a new one.
+                </p>
+              </div>
+            </div>
+          </div>
+          
           <div className="flex items-center space-x-2 pt-2 pb-4">
             <Checkbox id="isDraft" name="isDraft" defaultChecked={initialData?.isDraft || false} />
             <Label htmlFor="isDraft">Save as Draft (Hide from users)</Label>
@@ -216,8 +243,11 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
             
             {/* Category Color Block */}
             <div 
-              className="h-[180px] w-full shrink-0 flex flex-col items-center justify-center gap-3 transition-colors duration-500 ease-in-out" 
-              style={{ backgroundColor: selectedCategory?.color || '#FF9F1C' }}
+              className="h-[180px] w-full shrink-0 flex flex-col items-center justify-center gap-3 transition-colors duration-500 ease-in-out bg-cover bg-center" 
+              style={{ 
+                backgroundColor: selectedCategory?.color || '#FF9F1C',
+                backgroundImage: previewImage ? `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url(${previewImage})` : 'none'
+              }}
             >
               <div className="size-16 rounded-full bg-white/20 flex items-center justify-center">
                 <CalendarIcon className="size-8 text-white" />
@@ -328,6 +358,16 @@ export default function EventForm({ initialData = null, categories = [] }: { ini
 
         </div>
       </div>
+      
+      <MediaPicker 
+        open={isMediaPickerOpen} 
+        onOpenChange={setIsMediaPickerOpen}
+        onSelect={(url) => {
+          setPreviewImage(url);
+          setIsMediaPickerOpen(false);
+        }}
+        allowedTypes={["image"]}
+      />
     </div>
   )
 }

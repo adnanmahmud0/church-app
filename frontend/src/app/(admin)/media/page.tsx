@@ -62,8 +62,7 @@ export default function MediaPage() {
 
     setIsLoading(true);
     const formData = new FormData();
-    const fieldName = activeTab === 'image' ? 'image' : 'doc';
-    formData.append(fieldName, file);
+    formData.append('file', file);
     formData.append("type", activeTab);
 
     try {

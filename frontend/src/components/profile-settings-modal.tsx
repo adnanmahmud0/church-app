@@ -71,7 +71,7 @@ export function ProfileSettingsModal({ open, onOpenChange, user }: ProfileSettin
 
     setUploading(true);
     const form = new FormData();
-    form.append("image", file);
+    form.append("file", file);
     form.append("type", "image");
 
     try {

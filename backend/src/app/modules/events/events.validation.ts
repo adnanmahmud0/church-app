@@ -24,6 +24,7 @@ const createEventZodSchema = z.object({
     time: z.string({ required_error: 'Time is required' }),
     location: z.string({ required_error: 'Location is required' }),
     description: z.string({ required_error: 'Description is required' }),
+    image: z.string().optional(),
     isDraft: z.boolean().optional(),
   }),
 });
@@ -36,6 +37,7 @@ const updateEventZodSchema = z.object({
     time: z.string().optional(),
     location: z.string().optional(),
     description: z.string().optional(),
+    image: z.string().optional(),
     isDraft: z.boolean().optional(),
   }),
 });

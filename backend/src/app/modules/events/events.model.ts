@@ -20,6 +20,7 @@ const EventSchema = new Schema<IEvent>(
     time: { type: String, required: true },
     location: { type: String, required: true },
     description: { type: String, required: true },
+    image: { type: String },
     isDraft: { type: Boolean, default: false },
     sent_reminders: { type: [String], default: [] },
   },

@@ -101,3 +101,5 @@ church-app/
 | POST | `/api/v1/auth/resend-verify-email` | Resend verification email |
 | POST | `/api/v1/auth/reset-password` | Reset password with token |
 | POST | `/api/v1/auth/change-password` | Change password (auth required) |
+| POST | `/api/v1/feedback` | Submit user feedback |
+| GET | `/api/v1/feedback` | Get all feedback (admin only) |

@@ -32,7 +32,8 @@ import {
   Bell,
   Clock,
   Phone,
-  FileText
+  FileText,
+  MessageSquare
 } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
@@ -99,6 +100,11 @@ const data = {
       title: "Bible",
       url: "/bible",
       icon: <Book />,
+    },
+    {
+      title: "Feedback",
+      url: "/feedback",
+      icon: <MessageSquare />,
     },
     {
       title: "Watch Live",
