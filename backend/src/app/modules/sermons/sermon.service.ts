@@ -112,7 +112,7 @@ const getLatestSermons = async (limit: number = 3) => {
   const result = await Sermon.find({})
     .populate('category', 'id name')
     .select('title speaker date duration_seconds thumbnail_url category')
-    .sort({ date: -1 })
+    .sort({ createdAt: -1 })
     .limit(limit);
   
   return result;

@@ -38,12 +38,18 @@ const fetchYouVersion = async (endpoint: string, fallbackToPublic = false): Prom
   if (!response.ok) {
     // If access is denied (e.g. for KJV without permissions), and we allow fallback, try again with public domain WEBUS
     if (response.status === 401 || response.status === 403 || response.status === 404) {
-       if (fallbackToPublic && endpoint.includes('/bibles/')) {
-         const newEndpoint = endpoint.replace(/\/bibles\/\d+/, `/bibles/${FALLBACK_BIBLE_ID}`);
-         if (newEndpoint !== endpoint) {
-            return fetchYouVersion(newEndpoint, false); // Don't infinite loop
-         }
-       }
+      if (fallbackToPublic) {
+        let newEndpoint = endpoint;
+        if (endpoint.includes('/bibles/')) {
+          newEndpoint = endpoint.replace(/\/bibles\/\d+/, `/bibles/${FALLBACK_BIBLE_ID}`);
+        } else if (endpoint.includes('version_id=')) {
+          newEndpoint = endpoint.replace(/version_id=\d+/, `version_id=${FALLBACK_BIBLE_ID}`);
+        }
+        
+        if (newEndpoint !== endpoint) {
+          return fetchYouVersion(newEndpoint, false); // Don't infinite loop
+        }
+      }
     }
     const errorBody = await response.text();
     throw new ApiError(StatusCodes.BAD_GATEWAY, `YouVersion API Error: ${response.status} - ${errorBody}`);
