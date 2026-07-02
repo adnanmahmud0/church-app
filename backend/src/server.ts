@@ -1,3 +1,4 @@
+import dns from 'dns';
 import mongoose from 'mongoose';
 import { Server as IOServer } from 'socket.io';
 import { Server as HttpServer } from 'http';
@@ -9,6 +10,9 @@ import { startSundayServiceCron } from './app/cron/sundayServiceCron';
 import { startEventReminderCron } from './app/cron/eventReminderCron';
 import { startDevotionalCron } from './app/cron/devotionalCron';
 import { User } from './app/modules/user/user.model';
+
+// Set DNS resolution order to prefer IPv4 to avoid ECONNREFUSED/querySrv errors with MongoDB Atlas
+dns.setDefaultResultOrder('ipv4first');
 
 //uncaught exception
 process.on('uncaughtException', () => {

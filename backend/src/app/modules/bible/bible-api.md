@@ -42,15 +42,10 @@ Returns a list of all active Bible versions supported by the church app.
       "name": "King James Version", 
       "abbreviation": "KJV", 
       "isActive": true,
-      "books": [
-        {
-          "id": "GEN",
-          "name": "Genesis",
-          "abbreviation": "Gen",
-          "testament": "OT",
-          "chapters_count": 50
-        }
-      ]
+      "copyright": null,
+      "publisher_url": null,
+      "language_tag": "en",
+      "youversion_deep_link": "https://www.bible.com/versions/1"
     }
   ]
 }
@@ -73,13 +68,27 @@ Returns a list of all Old and New Testament books for a given version.
   "success": true,
   "statusCode": 200,
   "message": "Books retrieved successfully",
+  "meta": {
+    "version": {
+      "id": 1588,
+      "name": "Amplified Bible",
+      "abbreviation": "AMP",
+      "isActive": true,
+      "copyright": null,
+      "publisher_url": null,
+      "language_tag": "en",
+      "youversion_deep_link": "https://www.bible.com/versions/1588"
+    }
+  },
   "data": [
     {
       "id": "GEN",
       "name": "Genesis",
+      "full_title": "Genesis",
       "abbreviation": "Gen",
       "testament": "OT",
-      "chapters_count": 50
+      "chapters_count": 50,
+      "intro": null
     }
   ]
 }
@@ -102,6 +111,9 @@ Returns a list of chapters for a specific book.
   "success": true,
   "statusCode": 200,
   "message": "Chapters retrieved successfully",
+  "meta": {
+    "version": 1588
+  },
   "data": [
     { "chapter_number": "1" },
     { "chapter_number": "2" }
@@ -127,6 +139,9 @@ Returns the plain text verses for a specific chapter, ready to be rendered in na
   "success": true,
   "statusCode": 200,
   "message": "Verses retrieved successfully",
+  "meta": {
+    "version": 1
+  },
   "data": {
     "book": "GEN",
     "chapter": "1",
@@ -163,6 +178,9 @@ Searches the text of the Bible for a specific keyword or phrase.
   "success": true,
   "statusCode": 200,
   "message": "Search completed successfully",
+  "meta": {
+    "version": 1
+  },
   "data": {
     "results": [
       {

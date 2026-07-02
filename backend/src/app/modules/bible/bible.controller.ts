@@ -6,35 +6,41 @@ import { BibleService } from './bible.service';
 
 const getBooks = catchAsync(async (req: Request, res: Response) => {
   const versionId = parseInt(req.query.version as string, 10) || 12;
+  const versionMeta = await BibleService.getVersionMetadata(versionId);
   const result = await BibleService.getBooks(versionId);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Books retrieved successfully',
+    meta: { version: versionMeta },
     data: result,
   });
 });
 
 const getChapters = catchAsync(async (req: Request, res: Response) => {
   const versionId = parseInt(req.query.version as string, 10) || 12;
+  const versionMeta = await BibleService.getVersionMetadata(versionId);
   const { bookId } = req.params;
   const result = await BibleService.getChapters(versionId, bookId);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Chapters retrieved successfully',
+    meta: { version: versionMeta },
     data: result,
   });
 });
 
 const getVerses = catchAsync(async (req: Request, res: Response) => {
   const versionId = parseInt(req.query.version as string, 10) || 12;
+  const versionMeta = await BibleService.getVersionMetadata(versionId);
   const { bookId, chapter } = req.params;
   const result = await BibleService.getVerses(versionId, bookId, chapter);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Verses retrieved successfully',
+    meta: { version: versionMeta },
     data: result,
   });
 });
@@ -51,12 +57,14 @@ const getVersions = catchAsync(async (req: Request, res: Response) => {
 
 const searchBible = catchAsync(async (req: Request, res: Response) => {
   const versionId = parseInt(req.query.version as string, 10) || 12;
+  const versionMeta = await BibleService.getVersionMetadata(versionId);
   const query = req.query.q as string;
   const result = await BibleService.searchBible(versionId, query);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Search completed successfully',
+    meta: { version: versionMeta },
     data: result,
   });
 });

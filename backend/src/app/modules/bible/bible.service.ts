@@ -58,6 +58,18 @@ const fetchYouVersion = async (endpoint: string, fallbackToPublic = false): Prom
   return response.json();
 };
 
+const STANDARD_ABBREVIATIONS: Record<string, string> = {
+  GEN: 'Gen', EXO: 'Exo', LEV: 'Lev', NUM: 'Num', DEU: 'Deut', JOS: 'Josh', JDG: 'Judg', RUT: 'Ruth',
+  '1SA': '1 Sam', '2SA': '2 Sam', '1KI': '1 Kgs', '2KI': '2 Kgs', '1CH': '1 Chr', '2CH': '2 Chr',
+  EZR: 'Ezra', NEH: 'Neh', EST: 'Esth', JOB: 'Job', PSA: 'Ps', PRO: 'Prov', ECC: 'Eccl', SNG: 'Song',
+  ISA: 'Isa', JER: 'Jer', LAM: 'Lam', EZK: 'Ezek', DAN: 'Dan', HOS: 'Hos', JOL: 'Joel', AMO: 'Amos',
+  OBA: 'Obad', JON: 'Jonah', MIC: 'Mic', NAM: 'Nah', HAB: 'Hab', ZEP: 'Zeph', HAG: 'Hag', ZEC: 'Zech',
+  MAL: 'Mal', MAT: 'Matt', MRK: 'Mark', LUK: 'Luke', JHN: 'John', ACT: 'Acts', ROM: 'Rom', '1CO': '1 Cor',
+  '2CO': '2 Cor', GAL: 'Gal', EPH: 'Eph', PHP: 'Phil', COL: 'Col', '1TH': '1 Thes', '2TH': '2 Thes',
+  '1TI': '1 Tim', '2TI': '2 Tim', TIT: 'Titus', PHM: 'Phlm', HEB: 'Heb', JAS: 'Jas', '1PE': '1 Pet',
+  '2PE': '2 Pet', '1JN': '1 John', '2JN': '2 John', '3JN': '3 John', JUD: 'Jude', REV: 'Rev'
+};
+
 const getBooks = async (versionId: number) => {
   const cacheKey = `books_${versionId}`;
   const cached = cache.get(cacheKey);
@@ -70,9 +82,11 @@ const getBooks = async (versionId: number) => {
   const books = booksData.map((book: any) => ({
     id: book.id,               // e.g. "GEN"
     name: book.title,          // e.g. "Genesis"
-    abbreviation: book.abbreviation, // e.g. "Gen."
+    full_title: book.full_title || book.title || '',
+    abbreviation: book.abbreviation || STANDARD_ABBREVIATIONS[book.id] || book.id,
     testament: book.canon === 'old_testament' ? 'OT' : 'NT',
     chapters_count: book.chapters ? book.chapters.length : 0,
+    intro: book.intro || null,
   }));
 
   cache.set(cacheKey, books, 86400); // 24 hours
@@ -172,17 +186,44 @@ const getVersions = async () => {
   }
   const activeVersions = settings.versions.filter(v => v.isActive);
 
-  // Fetch books for each active version
-  const versionsWithBooks = await Promise.all(activeVersions.map(async (v) => {
-    try {
-      const books = await getBooks(v.id);
-      return { ...(v as any).toObject?.() || v, books };
-    } catch (error) {
-      return { ...(v as any).toObject?.() || v, books: [] };
+  // Fetch YouVersion bibles metadata to enrich the versions list
+  let yvBibles: any[] = [];
+  try {
+    const cacheKey = 'yv_bibles_metadata';
+    let cached = cache.get(cacheKey) as any[];
+    if (!cached) {
+      const response = await fetchYouVersion('/bibles?language_ranges[]=eng');
+      cached = response.data || [];
+      cache.set(cacheKey, cached, 86400); // 24 hours
     }
-  }));
+    yvBibles = cached;
+  } catch (error) {
+    console.error('Failed to fetch YouVersion bibles metadata:', error);
+  }
 
-  return versionsWithBooks;
+  const versionsWithMetadata = activeVersions.map((v) => {
+    const vObj = typeof (v as any).toObject === 'function' ? (v as any).toObject() : v;
+    const metadata = yvBibles.find((item: any) => Number(item.id) === Number(v.id));
+    return {
+      id: vObj.id,
+      name: vObj.name,
+      abbreviation: vObj.abbreviation,
+      isActive: vObj.isActive,
+      _id: vObj._id,
+      copyright: metadata?.copyright || null,
+      publisher_url: metadata?.publisher_url || null,
+      language_tag: metadata?.language_tag || 'en',
+      youversion_deep_link: metadata?.youversion_deep_link || `https://www.bible.com/versions/${v.id}`,
+    };
+  });
+
+  return versionsWithMetadata;
+};
+
+const getVersionMetadata = async (versionId: number) => {
+  const versions = await getVersions();
+  const version = versions.find(v => Number(v.id) === Number(versionId));
+  return version || { id: versionId };
 };
 
 const getAdminSettings = async () => {
@@ -262,6 +303,7 @@ export const BibleService = {
   getChapters,
   getVerses,
   getVersions,
+  getVersionMetadata,
   searchBible,
   checkHealth,
   getAdminSettings,
