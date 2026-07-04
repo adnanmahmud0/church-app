@@ -20,6 +20,7 @@ export default function BibleAdminPage() {
   const [testingConnection, setTestingConnection] = useState(false)
   const [clearingCache, setClearingCache] = useState(false)
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false)
+  const [accessStatus, setAccessStatus] = useState<Record<number, 'loading' | true | false | null>>({})
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
 
@@ -99,6 +100,20 @@ export default function BibleAdminPage() {
       }
     } catch (err) {
       toast.error('Failed to update version status')
+    }
+  }
+
+  const handleCheckAccess = async (versionId: number) => {
+    setAccessStatus(prev => ({ ...prev, [versionId]: 'loading' }))
+    try {
+      const res = await fetch(`${apiUrl}/bible/versions/${versionId}/access`).then(r => r.json())
+      if (res.success && res.data) {
+        setAccessStatus(prev => ({ ...prev, [versionId]: res.data.hasAccess }))
+      } else {
+        setAccessStatus(prev => ({ ...prev, [versionId]: false }))
+      }
+    } catch (error) {
+      setAccessStatus(prev => ({ ...prev, [versionId]: false }))
     }
   }
 
@@ -216,9 +231,8 @@ export default function BibleAdminPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Section 2: Supported Versions */}
-        <Card className="col-span-1">
+      {/* Section 2: Supported Versions */}
+      <Card className="w-full mb-4">
           <CardHeader>
             <CardTitle>Supported Bible Versions</CardTitle>
             <CardDescription>Manage available translations for the mobile app</CardDescription>
@@ -231,6 +245,7 @@ export default function BibleAdminPage() {
                   <TableHead>Abbr</TableHead>
                   <TableHead>ID</TableHead>
                   <TableHead>Active</TableHead>
+                  <TableHead>Access</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -245,6 +260,19 @@ export default function BibleAdminPage() {
                         onCheckedChange={(checked) => handleVersionToggle(version.id, !!checked)}
                       />
                     </TableCell>
+                    <TableCell>
+                      {accessStatus[version.id] === 'loading' ? (
+                        <Badge variant="outline" className="text-muted-foreground animate-pulse">Testing...</Badge>
+                      ) : accessStatus[version.id] === true ? (
+                        <Badge className="bg-green-500">Has Access</Badge>
+                      ) : accessStatus[version.id] === false ? (
+                        <Badge variant="destructive">No Access</Badge>
+                      ) : (
+                        <Button variant="outline" size="sm" onClick={() => handleCheckAccess(version.id)}>
+                          Test
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -252,8 +280,8 @@ export default function BibleAdminPage() {
           </CardContent>
         </Card>
 
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Section 3 & 6: App Default & Dev Info */}
-        <div className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Default Version Setting</CardTitle>
@@ -309,7 +337,6 @@ export default function BibleAdminPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
       </div>
 
       <Dialog open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>

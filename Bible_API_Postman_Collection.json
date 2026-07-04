@@ -1,0 +1,204 @@
+{
+  "info": {
+    "name": "Bible API (YouVersion)",
+    "description": "REST API endpoints available for the Church App's native Bible Reader module.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Get Supported Versions",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/versions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "versions"
+          ]
+        },
+        "description": "Returns a list of all active Bible versions supported by the church app."
+      }
+    },
+    {
+      "name": "2. Get Books",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/books?version={{versionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books"
+          ],
+          "query": [
+            {
+              "key": "version",
+              "value": "{{versionId}}",
+              "description": "The translation ID (e.g. 1 for KJV)"
+            }
+          ]
+        },
+        "description": "Returns a list of all Old and New Testament books for a given version."
+      }
+    },
+    {
+      "name": "3. Get Chapters",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/books/:bookId/chapters?version={{versionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books",
+            ":bookId",
+            "chapters"
+          ],
+          "query": [
+            {
+              "key": "version",
+              "value": "{{versionId}}",
+              "description": "The translation ID (e.g. 1 for KJV)"
+            }
+          ],
+          "variable": [
+            {
+              "key": "bookId",
+              "value": "GEN",
+              "description": "The 3-letter book ID"
+            }
+          ]
+        },
+        "description": "Returns a list of chapters for a specific book."
+      }
+    },
+    {
+      "name": "4. Get Verses",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/books/:bookId/chapters/:chapter/verses?version={{versionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books",
+            ":bookId",
+            "chapters",
+            ":chapter",
+            "verses"
+          ],
+          "query": [
+            {
+              "key": "version",
+              "value": "{{versionId}}",
+              "description": "The translation ID (e.g. 1 for KJV)"
+            }
+          ],
+          "variable": [
+            {
+              "key": "bookId",
+              "value": "GEN",
+              "description": "The 3-letter book ID"
+            },
+            {
+              "key": "chapter",
+              "value": "1",
+              "description": "The chapter number"
+            }
+          ]
+        },
+        "description": "Returns the plain text verses for a specific chapter."
+      }
+    },
+    {
+      "name": "5. Search Bible",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/search?q={{searchQuery}}&version={{versionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "search"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "{{searchQuery}}",
+              "description": "The search query (e.g. love)"
+            },
+            {
+              "key": "version",
+              "value": "{{versionId}}",
+              "description": "The translation ID (e.g. 1 for KJV)"
+            }
+          ]
+        },
+        "description": "Searches the text of the Bible for a specific keyword or phrase."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1/bible",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "your_auth_token_here",
+      "type": "string"
+    },
+    {
+      "key": "versionId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "searchQuery",
+      "value": "love",
+      "type": "string"
+    }
+  ]
+}

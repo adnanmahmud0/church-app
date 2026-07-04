@@ -5,7 +5,7 @@ import sendResponse from '../../../shared/sendResponse';
 import { BibleService } from './bible.service';
 
 const getBooks = catchAsync(async (req: Request, res: Response) => {
-  const versionId = parseInt(req.query.version as string, 10) || 12;
+  const versionId = parseInt(req.query.version as string, 10) || 1;
   const versionMeta = await BibleService.getVersionMetadata(versionId);
   const result = await BibleService.getBooks(versionId);
   sendResponse(res, {
@@ -18,7 +18,7 @@ const getBooks = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getChapters = catchAsync(async (req: Request, res: Response) => {
-  const versionId = parseInt(req.query.version as string, 10) || 12;
+  const versionId = parseInt(req.query.version as string, 10) || 1;
   const versionMeta = await BibleService.getVersionMetadata(versionId);
   const { bookId } = req.params;
   const result = await BibleService.getChapters(versionId, bookId);
@@ -32,7 +32,7 @@ const getChapters = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getVerses = catchAsync(async (req: Request, res: Response) => {
-  const versionId = parseInt(req.query.version as string, 10) || 12;
+  const versionId = parseInt(req.query.version as string, 10) || 1;
   const versionMeta = await BibleService.getVersionMetadata(versionId);
   const { bookId, chapter } = req.params;
   const result = await BibleService.getVerses(versionId, bookId, chapter);
@@ -56,7 +56,7 @@ const getVersions = catchAsync(async (req: Request, res: Response) => {
 });
 
 const searchBible = catchAsync(async (req: Request, res: Response) => {
-  const versionId = parseInt(req.query.version as string, 10) || 12;
+  const versionId = parseInt(req.query.version as string, 10) || 1;
   const versionMeta = await BibleService.getVersionMetadata(versionId);
   const query = req.query.q as string;
   const result = await BibleService.searchBible(versionId, query);
@@ -120,6 +120,17 @@ const clearCache = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const testVersionAccess = catchAsync(async (req: Request, res: Response) => {
+  const versionId = parseInt(req.params.versionId as string, 10);
+  const result = await BibleService.testVersionAccess(versionId);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Version access check completed',
+    data: result,
+  });
+});
+
 export const BibleController = {
   getBooks,
   getChapters,
@@ -131,4 +142,5 @@ export const BibleController = {
   updateAdminSettings,
   getCacheStats,
   clearCache,
+  testVersionAccess,
 };

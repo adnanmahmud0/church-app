@@ -14,20 +14,30 @@ const DEFAULT_VERSIONS: IBibleVersion[] = [
   { id: 116, name: 'New Living Translation', abbreviation: 'NLT', isActive: true },
   { id: 1588, name: 'Amplified Bible', abbreviation: 'AMP', isActive: true },
   { id: 111, name: 'New International Version', abbreviation: 'NIV', isActive: true },
-  { id: 97, name: 'The Message', abbreviation: 'MSG', isActive: true }
+  { id: 97, name: 'The Message', abbreviation: 'MSG', isActive: true },
+  { id: 12, name: 'American Standard Version', abbreviation: 'ASV', isActive: true },
+  { id: 42, name: 'Catholic Public Domain Version', abbreviation: 'CPDV', isActive: true },
+  { id: 2163, name: 'Geneva Bible', abbreviation: 'enggnv', isActive: true },
+  { id: 130, name: 'The Orthodox Jewish Bible', abbreviation: 'TOJB2011', isActive: true },
+  { id: 2660, name: 'Literal Standard Version', abbreviation: 'LSV', isActive: true },
+  { id: 3034, name: 'Berean Standard Bible', abbreviation: 'BSB', isActive: true },
+  { id: 1207, name: 'World Messianic Bible British Edition', abbreviation: 'WMBBE', isActive: true },
+  { id: 1209, name: 'World Messianic Bible', abbreviation: 'WMB', isActive: true },
+  { id: 3427, name: 'The Text-Critical English New Testament', abbreviation: 'TCENT', isActive: true },
+  { id: 1932, name: 'Free Bible Version', abbreviation: 'FBV', isActive: true },
+  { id: 206, name: 'World English Bible', abbreviation: 'engWEBUS', isActive: true }
 ];
-
-const FALLBACK_BIBLE_ID = 206; // WEBUS - public domain fallback if KJV/NIV access is denied
 
 const YOUVERSION_BASE_URL = 'https://api.youversion.com/v1';
 
-const fetchYouVersion = async (endpoint: string, fallbackToPublic = false): Promise<any> => {
+const fetchYouVersion = async (endpoint: string): Promise<any> => {
   const YOUVERSION_API_KEY = config.youversion_api_key;
   if (!YOUVERSION_API_KEY) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'YouVersion API key is not configured');
   }
 
   const url = `${YOUVERSION_BASE_URL}${endpoint}`;
+  console.log(`[Bible] Fetching: ${url}`);
   const response = await fetch(url, {
     headers: {
       'X-YVP-App-Key': YOUVERSION_API_KEY,
@@ -36,23 +46,37 @@ const fetchYouVersion = async (endpoint: string, fallbackToPublic = false): Prom
   });
 
   if (!response.ok) {
-    // If access is denied (e.g. for KJV without permissions), and we allow fallback, try again with public domain WEBUS
-    if (response.status === 401 || response.status === 403 || response.status === 404) {
-      if (fallbackToPublic) {
-        let newEndpoint = endpoint;
-        if (endpoint.includes('/bibles/')) {
-          newEndpoint = endpoint.replace(/\/bibles\/\d+/, `/bibles/${FALLBACK_BIBLE_ID}`);
-        } else if (endpoint.includes('version_id=')) {
-          newEndpoint = endpoint.replace(/version_id=\d+/, `version_id=${FALLBACK_BIBLE_ID}`);
-        }
-        
-        if (newEndpoint !== endpoint) {
-          return fetchYouVersion(newEndpoint, false); // Don't infinite loop
+    const errorBody = await response.text();
+    console.error(`[Bible] API Error: ${response.status} for ${url} — ${errorBody}`);
+    
+    let errorMessage = 'YouVersion API Error';
+    try {
+      const parsed = JSON.parse(errorBody);
+      if (parsed.message) {
+        errorMessage = parsed.message;
+      }
+    } catch (e) {
+      errorMessage = errorBody || `HTTP ${response.status}`;
+    }
+
+    if (errorMessage.includes('Access denied for')) {
+      const match = errorMessage.match(/Access denied for (\d+)/);
+      if (match) {
+        const id = parseInt(match[1], 10);
+        try {
+          const settings = await BibleSettings.findOne();
+          const version = settings?.versions.find((v: any) => v.id === id) || DEFAULT_VERSIONS.find((v) => v.id === id);
+          if (version) {
+            errorMessage = `Access denied for ${version.name} (${version.abbreviation})`;
+          }
+        } catch (dbError) {
+          // Fallback if DB fetch fails
         }
       }
     }
-    const errorBody = await response.text();
-    throw new ApiError(StatusCodes.BAD_GATEWAY, `YouVersion API Error: ${response.status} - ${errorBody}`);
+
+    const statusCode = (response.status === 403 || response.status === 401) ? 403 : 502;
+    throw new ApiError(statusCode, errorMessage);
   }
 
   return response.json();
@@ -76,7 +100,7 @@ const getBooks = async (versionId: number) => {
   if (cached) return cached;
 
   // API returns: { data: [{ id: "GEN", title: "Genesis", abbreviation: "Gen.", canon: "old_testament", chapters: [...] }] }
-  const response = await fetchYouVersion(`/bibles/${versionId}/books`, true);
+  const response = await fetchYouVersion(`/bibles/${versionId}/books`);
   const booksData = response.data || [];
 
   const books = booksData.map((book: any) => ({
@@ -99,7 +123,7 @@ const getChapters = async (versionId: number, bookId: string) => {
   if (cached) return cached;
 
   // API returns books with chapters embedded. We need to fetch books and find the specific one.
-  const response = await fetchYouVersion(`/bibles/${versionId}/books`, true);
+  const response = await fetchYouVersion(`/bibles/${versionId}/books`);
   const booksData = response.data || [];
 
   const book = booksData.find((b: any) => b.id === bookId);
@@ -123,7 +147,7 @@ const getVerses = async (versionId: number, bookId: string, chapter: string) => 
 
   // API endpoint: /bibles/{id}/passages/{BOOK}.{CHAPTER}?format=html
   const passageId = `${bookId}.${chapter}`;
-  const response = await fetchYouVersion(`/bibles/${versionId}/passages/${passageId}?format=html`, true);
+  const response = await fetchYouVersion(`/bibles/${versionId}/passages/${passageId}?format=html`);
 
   // Response: { id: "GEN.1", content: "<div>...<span class=\"yv-v\" v=\"1\"></span><span class=\"yv-vlbl\">1</span>In the beginning..." }
   const contentHtml = response.content || '';
@@ -254,7 +278,7 @@ const updateAdminSettings = async (payload: { defaultVersionId?: number; version
 
 const searchBible = async (versionId: number, query: string) => {
   try {
-    const response = await fetchYouVersion(`/search?query=${encodeURIComponent(query)}&version_id=${versionId}`, true);
+    const response = await fetchYouVersion(`/search?query=${encodeURIComponent(query)}&version_id=${versionId}`);
     const resultsList = response.data || [];
     return {
       results: resultsList.map((item: any) => ({
@@ -266,6 +290,15 @@ const searchBible = async (versionId: number, query: string) => {
     };
   } catch (e) {
     return { results: [] };
+  }
+};
+
+const testVersionAccess = async (versionId: number) => {
+  try {
+    await fetchYouVersion(`/bibles/${versionId}/passages/GEN.1?format=html`);
+    return { hasAccess: true, versionId };
+  } catch (error: any) {
+    return { hasAccess: false, versionId, error: error.message };
   }
 };
 
@@ -305,6 +338,7 @@ export const BibleService = {
   getVersions,
   getVersionMetadata,
   searchBible,
+  testVersionAccess,
   checkHealth,
   getAdminSettings,
   updateAdminSettings,

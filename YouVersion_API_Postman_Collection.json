@@ -1,0 +1,178 @@
+{
+  "info": {
+    "name": "YouVersion API",
+    "description": "Direct requests to the official YouVersion API (v1).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Get Bibles",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-YVP-App-Key",
+            "value": "{{youversionApiKey}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bibles?language_ranges[]=eng",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bibles"
+          ],
+          "query": [
+            {
+              "key": "language_ranges[]",
+              "value": "eng"
+            }
+          ]
+        },
+        "description": "Returns a list of all active Bible versions from YouVersion."
+      }
+    },
+    {
+      "name": "2. Get Books & Chapters",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-YVP-App-Key",
+            "value": "{{youversionApiKey}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bibles/{{versionId}}/books",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bibles",
+            "{{versionId}}",
+            "books"
+          ]
+        },
+        "description": "Returns a list of all books and their embedded chapters for a given version."
+      }
+    },
+    {
+      "name": "3. Get Passages / Verses",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-YVP-App-Key",
+            "value": "{{youversionApiKey}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/bibles/{{versionId}}/passages/{{passageId}}?format=html",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "bibles",
+            "{{versionId}}",
+            "passages",
+            "{{passageId}}"
+          ],
+          "query": [
+            {
+              "key": "format",
+              "value": "html",
+              "description": "Response format (e.g., html)"
+            }
+          ]
+        },
+        "description": "Returns the HTML formatted content for a specific passage/chapter."
+      }
+    },
+    {
+      "name": "4. Search Bible",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-YVP-App-Key",
+            "value": "{{youversionApiKey}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/search?query={{searchQuery}}&version_id={{versionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "search"
+          ],
+          "query": [
+            {
+              "key": "query",
+              "value": "{{searchQuery}}",
+              "description": "The search query"
+            },
+            {
+              "key": "version_id",
+              "value": "{{versionId}}",
+              "description": "The translation ID"
+            }
+          ]
+        },
+        "description": "Searches the text of the Bible."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.youversion.com/v1",
+      "type": "string"
+    },
+    {
+      "key": "youversionApiKey",
+      "value": "GgLoe54zfh8mmpKQJnRiWWMFGM7SiShWPAXdcClU2JeiGy1R",
+      "type": "string"
+    },
+    {
+      "key": "versionId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "passageId",
+      "value": "GEN.1",
+      "type": "string"
+    },
+    {
+      "key": "searchQuery",
+      "value": "love",
+      "type": "string"
+    }
+  ]
+}

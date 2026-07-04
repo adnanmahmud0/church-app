@@ -14,6 +14,7 @@ router.get('/search', BibleController.searchBible);
 // Admin routes (would typically be protected by admin middleware)
 router.get('/settings', BibleController.getAdminSettings);
 router.patch('/settings', BibleController.updateAdminSettings);
+router.get('/versions/:versionId/access', BibleController.testVersionAccess);
 router.get('/cache-stats', BibleController.getCacheStats);
 router.post('/clear-cache', BibleController.clearCache);
 
