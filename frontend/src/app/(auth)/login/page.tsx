@@ -21,9 +21,9 @@ export default function LoginPage() {
       </div>
       <div className="relative hidden bg-muted lg:block">
         <img
-          src="/placeholder.svg"
-          alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          src="/church_auth_bg.png"
+          alt="Church Auth Background"
+          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.4]"
         />
       </div>
     </div>
