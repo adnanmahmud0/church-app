@@ -49,6 +49,10 @@ const sermonSchema = new Schema<ISermon, SermonModel>(
 );
 
 
+sermonSchema.index({ title: 'text', speaker: 'text', tags: 'text' });
+sermonSchema.index({ category: 1 });
+sermonSchema.index({ date: -1 });
+
 sermonSchema.virtual('share_url').get(function () {
   const baseUrl = process.env.CORS_ORIGIN || 'https://church-app.com';
   // Fallback to avoid 'localhost' in production if misconfigured, though CORS_ORIGIN is best guess

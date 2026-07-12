@@ -304,9 +304,14 @@ const testVersionAccess = async (versionId: number) => {
 
 const checkHealth = async () => {
   try {
-    const response = await fetchYouVersion('/bibles?language_ranges[]=eng');
-    const versions = response.data || [];
-    return { status: 'Connected', versionsCount: versions.length };
+    const cacheKey = 'yv_bibles_metadata';
+    let cached = cache.get(cacheKey) as any[];
+    if (!cached) {
+      const response = await fetchYouVersion('/bibles?language_ranges[]=eng');
+      cached = response.data || [];
+      cache.set(cacheKey, cached, 86400); // 24 hours
+    }
+    return { status: 'Connected', versionsCount: cached.length };
   } catch (error: any) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Disconnected: ${error.message}`);
   }
