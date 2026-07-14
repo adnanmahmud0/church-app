@@ -49,10 +49,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             });
           }
         } catch (error) {
-          Cookies.remove("token");
-          Cookies.remove("refreshToken");
-          if (!isPublicRoute) {
-            router.push("/login");
+          // If the token was actually cleared (e.g., due to a 401 auth error or failed refresh), redirect to login.
+          // Otherwise, it was just a network error or 500 error, so don't forcefully log the user out.
+          if (!Cookies.get("token")) {
+            if (!isPublicRoute) {
+              router.push("/login");
+            }
           }
         }
       } else {

@@ -74,6 +74,10 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
       } catch (err) {
         // Ignore or handle refresh network error
       }
+    } else {
+      // No refresh token available, logout immediately
+      Cookies.remove('token');
+      Cookies.remove('refreshToken');
     }
   }
 
