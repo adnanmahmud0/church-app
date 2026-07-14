@@ -4,6 +4,7 @@ import { useEffect, useState, FormEvent } from "react";
 import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { PageSkeleton } from "@/components/page-skeleton"
 
 interface IChurchInfo {
   contact_address?: string;
@@ -99,11 +100,7 @@ export default function ContactMissionPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
-      </div>
-    );
+    return <PageSkeleton />
   }
 
   return (

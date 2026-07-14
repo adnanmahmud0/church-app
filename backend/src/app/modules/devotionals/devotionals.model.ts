@@ -20,6 +20,9 @@ const DevotionalSchema = new Schema<IDevotional>(
   }
 );
 
+DevotionalSchema.index({ isDraft: 1 });
+DevotionalSchema.index({ assignedDateString: 1 });
+
 const DevotionalReadSchema = new Schema<IDevotionalRead>(
   {
     devotionalId: { type: Schema.Types.ObjectId, ref: 'Devotional', required: true },
@@ -34,6 +37,7 @@ const DevotionalReadSchema = new Schema<IDevotionalRead>(
 
 // Ensure unique read per user per devotional
 DevotionalReadSchema.index({ devotionalId: 1, userId: 1 }, { unique: true });
+DevotionalReadSchema.index({ readAt: 1 });
 
 export const Devotional = model<IDevotional>('Devotional', DevotionalSchema);
 export const DevotionalRead = model<IDevotionalRead>('DevotionalRead', DevotionalReadSchema);

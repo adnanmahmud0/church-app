@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react"
 import { apiFetch } from "@/lib/api"
 import DevotionalForm from "../../components/DevotionalForm"
 import { toast } from "sonner"
+import { PageSkeleton } from "@/components/page-skeleton"
 
 export default function EditDevotionalPage({ params }: { params: Promise<{ id: string }> }) {
   const [data, setData] = useState<any>(null)
@@ -32,7 +33,7 @@ export default function EditDevotionalPage({ params }: { params: Promise<{ id: s
   }, [id])
 
   if (isLoading) {
-    return <div className="p-8">Loading...</div>
+    return <PageSkeleton />
   }
 
   if (!data) {

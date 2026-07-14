@@ -24,6 +24,7 @@ import { DevotionalsMobilePreview } from "@/components/devotionals-mobile-previe
 import { apiFetch } from "@/lib/api"
 import { toast } from "sonner"
 import { BookIcon, PencilIcon, TrashIcon, PlusIcon, UsersIcon, BarChart3Icon, CalendarIcon, SmartphoneIcon, SettingsIcon } from "lucide-react"
+import { PageSkeleton } from "@/components/page-skeleton"
 
 export default function DevotionalsDashboard() {
   const [stats, setStats] = useState<any>(null)
@@ -89,7 +90,7 @@ export default function DevotionalsDashboard() {
   }
 
   if (isLoading) {
-    return <div className="p-8">Loading...</div>
+    return <PageSkeleton />
   }
 
   return (

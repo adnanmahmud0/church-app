@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { PageSkeleton } from "@/components/page-skeleton"
 
 interface IChurchInfo {
   event_reminder_enabled?: boolean;
@@ -96,11 +97,7 @@ export default function EventSettingsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
-      </div>
-    );
+    return <PageSkeleton />
   }
 
   return (

@@ -38,6 +38,8 @@ const prayerRequestSchema = new Schema<IPrayerRequest, PrayerRequestModel>(
   { timestamps: true }
 );
 
+prayerRequestSchema.index({ status: 1 });
+
 const prayerInteractionSchema = new Schema<IPrayerInteraction, PrayerInteractionModel>(
   {
     prayer_request_id: {

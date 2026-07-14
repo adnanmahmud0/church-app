@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
 import { ArrowLeftIcon, CalendarIcon, UserIcon, HashIcon, AlignLeftIcon, BookOpenIcon, ClockIcon, VideoIcon } from "lucide-react";
+import { PageSkeleton } from "@/components/page-skeleton"
 
 const BACKEND_URL = "http://localhost:5000";
 
@@ -59,13 +60,7 @@ export default function SermonDetailPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">Loading Sermon...</h2>
-        </div>
-      </div>
-    );
+    return <PageSkeleton />
   }
 
   if (!sermon) {

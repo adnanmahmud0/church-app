@@ -314,9 +314,10 @@ const getStats = async () => {
   const avgReadsPerDay = activeDaysCount > 0 ? Math.round(totalReads / activeDaysCount) : 0;
 
   // Recent 14 days chart data
-  const chartData = [];
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date();
+  const startOfToday = new Date();
+  const chartDataPromises = Array.from({ length: 14 }).map(async (_, index) => {
+    const i = 13 - index;
+    const d = new Date(startOfToday);
     d.setUTCDate(d.getUTCDate() - i);
     const dateIso = d.toISOString().split('T')[0];
     
@@ -328,8 +329,10 @@ const getStats = async () => {
       readAt: { $gte: startOfDay, $lte: endOfDay }
     });
     
-    chartData.push({ date: dateIso, reads: count });
-  }
+    return { date: dateIso, reads: count };
+  });
+
+  const chartData = await Promise.all(chartDataPromises);
 
   // Top 5 devotionals
   const topIds = Object.keys(readCounts).sort((a, b) => readCounts[b] - readCounts[a]).slice(0, 5);

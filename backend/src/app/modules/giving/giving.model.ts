@@ -31,6 +31,9 @@ const GivingTransactionSchema = new Schema<IGivingTransaction>(
   }
 );
 
+GivingTransactionSchema.index({ createdAt: -1 });
+GivingTransactionSchema.index({ status: 1 });
+
 const BankDetailsSchema = new Schema<IBankDetails>(
   {
     accountName: { type: String, required: true },

@@ -15,6 +15,7 @@ const ReactQuill = dynamic(() => import("react-quill-new"), {
   loading: () => <div className="h-64 flex items-center justify-center bg-zinc-50 border border-zinc-200 rounded-md"><Loader2 className="animate-spin text-zinc-400" /></div>,
 });
 import "react-quill-new/dist/quill.snow.css";
+import { PageSkeleton } from "@/components/page-skeleton"
 
 interface IChurchInfo {
   content: string;
@@ -105,11 +106,7 @@ export default function HistoryPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
-      </div>
-    );
+    return <PageSkeleton />
   }
 
   return (

@@ -32,6 +32,7 @@ import { apiFetch } from "@/lib/api"
 import { toast } from "sonner"
 import { HeartIcon, PencilIcon, TrashIcon, PlusIcon, LandmarkIcon, SmartphoneIcon } from "lucide-react"
 import { GivingMobilePreview } from "@/components/giving-mobile-preview"
+import { PageSkeleton } from "@/components/page-skeleton"
 
 export default function GivingDashboard() {
   const [summary, setSummary] = useState<any>(null)
@@ -139,7 +140,7 @@ export default function GivingDashboard() {
   }
 
   if (isLoading) {
-    return <div className="p-8">Loading...</div>
+    return <PageSkeleton />
   }
 
   return (

@@ -27,6 +27,10 @@ const EventSchema = new Schema<IEvent>(
   { timestamps: true }
 );
 
+EventSchema.index({ date: 1 });
+EventSchema.index({ isDraft: 1 });
+EventSchema.index({ categoryId: 1 });
+
 export const Event = model<IEvent>('Event', EventSchema);
 
 const EventRSVPSchema = new Schema<IEventRSVP>(

@@ -45,4 +45,6 @@ const CommunityGroupSchema = new Schema<ICommunityGroup, CommunityGroupModel>(
   }
 );
 
+CommunityGroupSchema.index({ isActive: 1 });
+
 export const CommunityGroup = model<ICommunityGroup, CommunityGroupModel>('CommunityGroup', CommunityGroupSchema);

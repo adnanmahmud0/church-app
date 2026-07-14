@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { apiFetch } from "@/lib/api"
 import { toast } from "sonner"
 import { Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react"
+import { PageSkeleton } from "@/components/page-skeleton"
 
 export function SettingsCard() {
   const [isLoading, setIsLoading] = useState(true)
@@ -93,17 +94,17 @@ export function SettingsCard() {
     }
   }
 
-  if (isLoading) return <div>Loading settings...</div>
+  if (isLoading) {
+    return <PageSkeleton />
+  }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Global Configuration</CardTitle>
-        <CardDescription>Configure YouTube integration and static service information.</CardDescription>
+        <CardTitle>Watch Live Settings</CardTitle>
+        <CardDescription>Configure your live stream and service info.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        
-        {/* YouTube Config */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium">YouTube Integration</h3>
           

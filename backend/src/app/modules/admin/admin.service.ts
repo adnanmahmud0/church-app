@@ -173,18 +173,21 @@ const getDashboard = async () => {
   const givingTotalMonth = givingThisMonth.reduce((sum: number, t: any) => sum + t.amount, 0);
 
   // User registration chart (last 30 days)
-  const registrationChart = [];
+  const registrationChartPromises = [];
   for (let i = 29; i >= 0; i--) {
     const d = new Date();
     d.setUTCDate(d.getUTCDate() - i);
     const dayStart = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
     const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000 - 1);
-    const count = await User.countDocuments({ role: USER_ROLES.USER, createdAt: { $gte: dayStart, $lte: dayEnd } });
-    registrationChart.push({
-      date: dayStart.toISOString().split('T')[0],
-      count,
-    });
+    
+    registrationChartPromises.push(
+      User.countDocuments({ role: USER_ROLES.USER, createdAt: { $gte: dayStart, $lte: dayEnd } }).then(count => ({
+        date: dayStart.toISOString().split('T')[0],
+        count,
+      }))
+    );
   }
+  const registrationChart = await Promise.all(registrationChartPromises);
 
   return {
     users: {
