@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       const token = Cookies.get("token");
-      const isPublicRoute = pathname?.includes("/login") || pathname?.includes("/forgot-password") || pathname?.includes("/reset-password");
+      const isPublicRoute = pathname?.includes("/login") || pathname?.includes("/forgot-password") || pathname?.includes("/reset-password") || pathname?.includes("/share/legal") || pathname?.includes("/delete-account");
 
       if (token) {
         try {
