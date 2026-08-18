@@ -11,6 +11,7 @@ const legalSchema = new Schema<ILegal, LegalModel>(
         'cookie-policy',
         'disclaimer',
         'refund-and-returns-policy',
+        'delete-account',
       ],
       required: true,
       unique: true,
