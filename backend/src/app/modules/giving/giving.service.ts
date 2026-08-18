@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { GivingFund, GivingTransaction, BankDetails } from './giving.model';
 import { IGivingFund, IGivingTransaction, IBankDetails } from './giving.interface';
+import { User } from '../user/user.model';
 import { JwtPayload } from 'jsonwebtoken';
 
 const seedFundsIfEmpty = async () => {
@@ -141,14 +142,26 @@ const getSummary = async () => {
     return { fund: fName, total: byFundMap[fid].total, count: byFundMap[fid].count };
   });
 
-  const recentTransactions = allTxns.map((t: any) => ({
-    id: t._id,
-    fund: t.fundId?.name || 'Unknown Fund',
-    amount: t.amount,
-    currency: t.currency,
-    status: t.status,
-    date: new Date(t.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    donor: t.userId || 'Anonymous',
+  const recentTransactions = await Promise.all(allTxns.map(async (t: any) => {
+    let donorName = 'Anonymous';
+    if (t.userId) {
+      const user = await User.findById(t.userId).lean();
+      if (user) {
+        donorName = user.name || user.email || t.userId;
+      } else {
+        donorName = t.userId;
+      }
+    }
+    
+    return {
+      id: t._id,
+      fund: t.fundId?.name || 'Unknown Fund',
+      amount: t.amount,
+      currency: t.currency,
+      status: t.status,
+      date: new Date(t.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      donor: donorName,
+    };
   }));
 
   return {
@@ -275,6 +288,12 @@ const getTotalThisYear = async (userId: string) => {
   return { totalThisYear: total };
 };
 
+const deleteTransaction = async (id: string) => {
+  const deleted = await GivingTransaction.findByIdAndDelete(id);
+  if (!deleted) throw new ApiError(StatusCodes.NOT_FOUND, 'Transaction not found');
+  return deleted;
+};
+
 export const GivingService = {
   getFunds,
   createFund,
@@ -288,4 +307,5 @@ export const GivingService = {
   getProfileGivingSummary,
   getUserGivingHistory,
   getTotalThisYear,
+  deleteTransaction,
 };

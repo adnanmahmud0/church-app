@@ -61,6 +61,12 @@ router.delete(
   GivingController.deleteFund
 );
 
+router.delete(
+  '/transactions/:id',
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
+  GivingController.deleteTransaction
+);
+
 router.patch(
   '/bank-details',
   auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),

@@ -162,6 +162,17 @@ const getProfileGivingSummary = catchAsync(async (req: Request, res: Response) =
   });
 });
 
+const deleteTransaction = catchAsync(async (req: Request, res: Response) => {
+  const result = await GivingService.deleteTransaction(req.params.id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Transaction deleted successfully',
+    data: result,
+  });
+});
+
 export const GivingController = {
   getFunds,
   createFund,
@@ -174,4 +185,5 @@ export const GivingController = {
   getSummary,
   getTotalThisYear,
   getProfileGivingSummary,
+  deleteTransaction,
 };

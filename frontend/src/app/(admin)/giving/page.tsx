@@ -112,6 +112,17 @@ export default function GivingDashboard() {
     }
   }
 
+  const handleDeleteTransaction = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this transaction?")) return
+    try {
+      await apiFetch(`/giving/transactions/${id}`, { method: "DELETE" })
+      toast.success("Transaction deleted")
+      fetchData()
+    } catch (error) {
+      toast.error("Failed to delete transaction")
+    }
+  }
+
   const handleSaveBankDetails = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
@@ -220,6 +231,7 @@ export default function GivingDashboard() {
                   <TableHead>Date</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead className="text-right">Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -234,11 +246,16 @@ export default function GivingDashboard() {
                         {txn.status}
                       </Badge>
                     </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteTransaction(txn.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {summary?.recentTransactions?.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
                       No recent transactions
                     </TableCell>
                   </TableRow>
