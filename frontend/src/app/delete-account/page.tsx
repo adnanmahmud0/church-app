@@ -13,7 +13,7 @@ export default function DeleteAccountPage() {
             If you wish to delete your account and associated data from the <strong>COP UK- PIWC Stoneyburn</strong> app, you can:
           </p>
           <ul className="list-disc pl-6 mb-4">
-            <li>Delete directly from the mobile app via <strong>Settings &gt; Account &gt; Delete Account</strong>.</li>
+            <li>Delete directly from the mobile app via <strong>More &gt; My Profile &gt; Delete Account</strong>.</li>
             <li>Or request account deletion by emailing us at <a href="mailto:info@piwcstoneyburn.org" className="text-blue-600 dark:text-blue-400 hover:underline">info@piwcstoneyburn.org</a> with your registered email address.</li>
           </ul>
           <p>
