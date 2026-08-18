@@ -18,6 +18,7 @@ const legalTypes = [
   { id: "cookie-policy", label: "Cookie Policy" },
   { id: "disclaimer", label: "Disclaimer" },
   { id: "refund-and-returns-policy", label: "Refund and Returns Policy" },
+  { id: "delete-account", label: "Account Deletion Policy" },
 ];
 
 export default function LegalAdminPage() {

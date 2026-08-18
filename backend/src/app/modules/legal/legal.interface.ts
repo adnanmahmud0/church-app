@@ -5,7 +5,8 @@ export type LegalDocumentType =
   | 'privacy-policy'
   | 'cookie-policy'
   | 'disclaimer'
-  | 'refund-and-returns-policy';
+  | 'refund-and-returns-policy'
+  | 'delete-account';
 
 export interface ILegal {
   type: LegalDocumentType;

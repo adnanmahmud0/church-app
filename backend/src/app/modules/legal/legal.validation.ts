@@ -6,6 +6,7 @@ const LegalDocumentTypes = [
   'cookie-policy',
   'disclaimer',
   'refund-and-returns-policy',
+  'delete-account',
 ] as const;
 
 const upsertLegalZodSchema = z.object({
